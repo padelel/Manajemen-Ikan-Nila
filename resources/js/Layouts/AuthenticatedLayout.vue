@@ -30,14 +30,26 @@ const showingNavigationDropdown = ref(false);
                             </div>
 
                             <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
+                                </NavLink>
+
+                                <NavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kolam.index')" :active="route().current('kolam.*')">
+                                    Data Kolam
+                                </NavLink>
+                                <NavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.index')" :active="route().current('inventory.*')">
+                                    Gudang Pakan
+                                </NavLink>
+
+                                <NavLink :href="route('parameter.index')" :active="route().current('parameter.*')">
+                                    Kualitas Air
+                                </NavLink>
+                                <NavLink :href="route('feedlog.index')" :active="route().current('feedlog.*')">
+                                    Beri Makan Ikan
+                                </NavLink>
+                                <NavLink :href="route('kematian.index')" :active="route().current('kematian.*')">
+                                    Mortalitas
                                 </NavLink>
                             </div>
                         </div>
@@ -139,12 +151,24 @@ const showingNavigationDropdown = ref(false);
                     }"
                     class="sm:hidden"
                 >
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
+                    <div class="pt-2 pb-3 space-y-1">
+                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kolam.index')" :active="route().current('kolam.*')">
+                            Data Kolam
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.index')" :active="route().current('inventory.*')">
+                            Gudang Pakan
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('parameter.index')" :active="route().current('parameter.*')">
+                            Kualitas Air
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('feedlog.index')" :active="route().current('feedlog.*')">
+                            Beri Makan Ikan
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kematian.index')" :active="route().current('kematian.*')">
+                            Mortalitas
                         </ResponsiveNavLink>
                     </div>
 

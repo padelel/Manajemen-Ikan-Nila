@@ -5,17 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FeedLog extends Model
+class MortalityLog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'kolam_id', 'rule_id', 'inventory_id', 'user_id', 
-        'tanggal_pakan', 'rekomendasi_sistem', 'pakan_aktual'
+        'kolam_id', 'user_id', 'tanggal_kematian', 'jumlah_mati', 'catatan'
     ];
 
     public function kolam() { return $this->belongsTo(Kolam::class); }
-    public function rule() { return $this->belongsTo(Rule::class); }
-    public function inventory() { return $this->belongsTo(Inventory::class); }
     public function user() { return $this->belongsTo(User::class); }
 }

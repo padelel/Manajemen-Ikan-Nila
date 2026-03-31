@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('daily_parameters', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('kolam_id')->constrained('kolams')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // Siapa yang ngecek air
+            
             $table->date('tanggal_cek');
             $table->float('suhu')->nullable();
             $table->float('ph')->nullable();

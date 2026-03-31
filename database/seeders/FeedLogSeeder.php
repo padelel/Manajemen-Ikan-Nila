@@ -1,30 +1,21 @@
 <?php
-
 namespace Database\Seeders;
-
 use Illuminate\Database\Seeder;
-use App\Models\FeedLog;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class FeedLogSeeder extends Seeder
 {
     public function run(): void
     {
-        // Mulai dari 1 Oktober sampai 31 Desember
-        $startDate = Carbon::create(2025, 10, 1);
-        $endDate = Carbon::create(2025, 12, 31);
-
-        while ($startDate <= $endDate) {
-            // Simulasi pakan harian berkisar antara 12 Kg - 15 Kg
-            $pakanHarian = rand(120, 150) / 10; 
-
-            FeedLog::create([
-                'tanggal_pakan' => $startDate->toDateString(),
-                'rekomendasi_sistem' => $pakanHarian,
-                'pakan_aktual' => $pakanHarian,
-            ]);
-
-            $startDate->addDay();
-        }
+        DB::table('feed_logs')->insert([
+            'kolam_id' => 1,
+            'rule_id' => 1,
+            'inventory_id' => 1,
+            'user_id' => 2,
+            'tanggal_pakan' => Carbon::now(),
+            'rekomendasi_sistem' => 22.5, // Misal hasil hitung 3% biomassa
+            'pakan_aktual' => 22.5,
+        ]);
     }
 }

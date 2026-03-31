@@ -1,19 +1,17 @@
 <?php
-
 namespace Database\Seeders;
-
 use Illuminate\Database\Seeder;
-use App\Models\Inventory;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class InventorySeeder extends Seeder
 {
     public function run(): void
     {
-        Inventory::create([
-            'nama_pakan' => 'Pelet Nila (Hi-Pro-Vite)',
-            'total_stok_kg' => 150, // Simulasi stok 150 Kg
-            'terakhir_update' => Carbon::now()->toDateString(),
+        DB::table('inventories')->insert([
+            'nama_pakan' => 'Hi-Pro-Vite 781',
+            'total_stok_kg' => 500,
+            'terakhir_update' => Carbon::now(),
         ]);
     }
 }

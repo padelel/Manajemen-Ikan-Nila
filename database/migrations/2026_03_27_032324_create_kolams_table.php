@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('feed_logs', function (Blueprint $table) {
+        Schema::create('kolams', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal_pakan');
-            $table->float('rekomendasi_sistem');
-            $table->float('pakan_aktual');
+            $table->string('nama_kolam');
+            $table->string('dimensi');
+            $table->integer('jumlah_ikan');
+            $table->float('berat_rata_gram')->default(0); // Penambahan krusial
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('feed_logs');
+        Schema::dropIfExists('kolams');
     }
 };
