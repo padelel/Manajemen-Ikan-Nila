@@ -10,7 +10,7 @@ class DailyParameter extends Model
     use HasFactory;
 
     protected $fillable = [
-        'kolam_id', 'user_id', 'tanggal_cek', 'suhu', 'ph', 'kondisi_visual'
+        'kolam_id', 'user_id', 'tanggal_cek', 'suhu', 'ph', 'kondisi_visual','berat_sample'
     ];
 
     // Relasi untuk mengambil nama kolam

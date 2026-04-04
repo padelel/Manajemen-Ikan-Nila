@@ -7,16 +7,16 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 // Mendaftarkan elemen Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
+// Menerima data dari Controller yang sudah dikelompokkan
 const props = defineProps({
-    totalKolam: Number,
-    totalIkan: Number,
-    stokPakan: Number,
-    namaPakan: String,
+    ringkasan: Object,
+    inventory: Object,
     sma: Object,
-    chartData: Object
+    chartPakan: Object,
+    chartBerat: Object
 });
 
-// Konfigurasi Visual Grafik
+// Konfigurasi Visual Umum (digunakan untuk kedua grafik)
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -24,7 +24,7 @@ const chartOptions = {
         legend: { display: false } // Sembunyikan legenda karena judul sudah jelas
     },
     scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'Jumlah Pakan (Kg)' } },
+        y: { beginAtZero: true },
         x: { grid: { display: false } }
     },
     elements: {
@@ -32,20 +32,34 @@ const chartOptions = {
     }
 };
 
-const chartConfig = {
-    labels: props.chartData.labels,
-    datasets: [
-        {
-            label: 'Total Pakan Diberikan',
-            borderColor: '#3b82f6', // Warna biru Tailwind
-            backgroundColor: 'rgba(59, 130, 246, 0.1)', // Warna biru transparan untuk fill bawah garis
-            borderWidth: 3,
-            pointBackgroundColor: '#2563eb',
-            pointRadius: 4,
-            fill: true,
-            data: props.chartData.data,
-        }
-    ]
+// 1. Konfigurasi Grafik Tren Pakan (Biru)
+const chartPakanConfig = {
+    labels: props.chartPakan.labels,
+    datasets: [{
+        label: 'Total Pakan Diberikan (Kg)',
+        borderColor: '#3b82f6', // Warna biru Tailwind
+        backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+        borderWidth: 3,
+        pointBackgroundColor: '#2563eb',
+        pointRadius: 4,
+        fill: true,
+        data: props.chartPakan.data,
+    }]
+};
+
+// 2. Konfigurasi Grafik Pertumbuhan Berat Ikan (Hijau)
+const chartBeratConfig = {
+    labels: props.chartBerat.labels,
+    datasets: [{
+        label: 'Berat Rata-rata Ikan (gram)',
+        borderColor: '#10b981', // Warna Emerald Tailwind
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 3,
+        pointBackgroundColor: '#059669',
+        pointRadius: 4,
+        fill: true,
+        data: props.chartBerat.berat,
+    }]
 };
 </script>
 
@@ -60,18 +74,25 @@ const chartConfig = {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
                         <p class="text-sm font-medium text-gray-500 uppercase">Total Kolam Aktif</p>
-                        <p class="mt-2 text-3xl font-black text-gray-800">{{ totalKolam }} <span class="text-lg font-normal text-gray-500">Unit</span></p>
+                        <p class="mt-2 text-3xl font-black text-gray-800">{{ ringkasan.totalKolam }} <span class="text-lg font-normal text-gray-500">Unit</span></p>
                     </div>
+                    
                     <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-teal-500">
                         <p class="text-sm font-medium text-gray-500 uppercase">Total Populasi Ikan</p>
-                        <p class="mt-2 text-3xl font-black text-gray-800">{{ totalIkan.toLocaleString('id-ID') }} <span class="text-lg font-normal text-gray-500">Ekor</span></p>
+                        <p class="mt-2 text-3xl font-black text-gray-800">{{ ringkasan.totalIkan.toLocaleString('id-ID') }} <span class="text-lg font-normal text-gray-500">Ekor</span></p>
                     </div>
+
+                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-indigo-500">
+                        <p class="text-sm font-medium text-gray-500 uppercase">Estimasi Biomassa</p>
+                        <p class="mt-2 text-3xl font-black text-gray-800">{{ ringkasan.totalBiomassaKg.toLocaleString('id-ID') }} <span class="text-lg font-normal text-gray-500">Kg</span></p>
+                    </div>
+
                     <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-yellow-500">
-                        <p class="text-sm font-medium text-gray-500 uppercase">Stok Gudang ({{ namaPakan }})</p>
-                        <p class="mt-2 text-3xl font-black text-gray-800">{{ stokPakan }} <span class="text-lg font-normal text-gray-500">Kg</span></p>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Stok ({{ inventory.namaPakan }})</p>
+                        <p class="mt-2 text-3xl font-black text-gray-800">{{ inventory.stokPakan }} <span class="text-lg font-normal text-gray-500">Kg</span></p>
                     </div>
                 </div>
 
@@ -80,7 +101,7 @@ const chartConfig = {
                     <div class="bg-white shadow-sm sm:rounded-lg p-6 border border-gray-100 flex flex-col">
                         <h3 class="text-lg font-bold text-gray-800 border-b pb-3 mb-4">Tren Konsumsi Pakan (7 Hari)</h3>
                         <div class="flex-grow relative h-64 w-full">
-                            <Line :data="chartConfig" :options="chartOptions" />
+                            <Line :data="chartPakanConfig" :options="chartOptions" />
                         </div>
                     </div>
 
@@ -114,7 +135,13 @@ const chartConfig = {
                             <Link href="/inventory" class="flex-1 text-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded shadow-sm hover:bg-gray-50 font-medium">Restock</Link>
                         </div>
                     </div>
+                </div>
 
+                <div class="bg-white shadow-sm sm:rounded-lg p-6 border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 border-b pb-3 mb-4">Grafik Pertumbuhan Ikan (Berdasarkan Sample)</h3>
+                    <div class="relative h-80 w-full">
+                        <Line :data="chartBeratConfig" :options="chartOptions" />
+                    </div>
                 </div>
 
             </div>

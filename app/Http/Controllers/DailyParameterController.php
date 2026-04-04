@@ -35,13 +35,24 @@ class DailyParameterController extends Controller
             'tanggal_cek' => 'required|date',
             'suhu' => 'required|numeric',
             'ph' => 'required|numeric',
-            'kondisi_visual' => 'required|in:Jernih,Keruh,Berbusa',
+            'kondisi_visual' => 'required|string',
+            'berat_sample' => 'required|numeric|min:0', 
         ]);
 
-        // Otomatis mencatat ID user yang sedang login
-        $validated['user_id'] = Auth::id();
+        // Jika tabel daily_parameters Anda memiliki kolom user_id, tambahkan baris ini:
+        $validated['user_id'] = Auth::id(); 
 
+        // 1. Simpan Pengecekan (GANTI Parameter MENJADI DailyParameter)
         DailyParameter::create($validated);
-        return redirect()->route('parameter.index');
+
+        // 2. Auto-Update berat_rata_gram di tabel kolams
+        $kolam = Kolam::find($request->kolam_id);
+        if ($kolam) {
+            $kolam->update([
+                'berat_rata_gram' => $request->berat_sample
+            ]);
+        }
+
+        return redirect()->route('parameter.index')->with('message', 'Data berhasil disimpan!');
     }
 }
