@@ -16,8 +16,8 @@ class FeedLogController extends Controller
     public function index()
     {
         // Menampilkan riwayat pemberian pakan
-        $logs = FeedLog::with(['kolam', 'rule', 'inventory', 'user'])->latest()->get();
-        return Inertia::render('FeedLog/Index', ['logs' => $logs]);
+        $logs = FeedLog::with(['kolam', 'details.inventory'])->latest()->get();
+        return Inertia::render('FeedLog/Index', ['feedLogs' => $logs]);
     }
 
     public function create()
@@ -85,25 +85,50 @@ class FeedLogController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'kolam_id' => 'required|exists:kolams,id',
-            'rule_id' => 'required|exists:rules,id',
-            'inventory_id' => 'required|exists:inventories,id',
+            'rule_id' => 'required',
             'tanggal_pakan' => 'required|date',
             'rekomendasi_sistem' => 'required|numeric',
-            'pakan_aktual' => 'required|numeric|min:0',
+            'pakan_aktual' => 'required|numeric|min:0.1',
+            'feeds' => 'required|array|min:1',
+            'feeds.*.inventory_id' => 'required|exists:inventories,id',
+            'feeds.*.rasio' => 'required|integer|min:1',
         ]);
 
-        $validated['user_id'] = Auth::id();
+        // 1. Simpan header FeedLog
+        $feedLog = FeedLog::create([
+            'user_id' => Auth::id(),
+            'kolam_id' => $request->kolam_id,
+            'rule_id' => $request->rule_id,
+            'tanggal_pakan' => $request->tanggal_pakan,
+            'rekomendasi_sistem' => $request->rekomendasi_sistem,
+            'pakan_aktual' => $request->pakan_aktual,
+        ]);
 
-        // 1. Simpan Riwayat Pakan
-        FeedLog::create($validated);
+        // 2. Hitung total rasio
+        $totalRasio = collect($request->feeds)->sum('rasio');
 
-        // 2. Potong Stok di Gudang secara otomatis
-        $inventory = Inventory::find($request->inventory_id);
-        $inventory->total_stok_kg -= $request->pakan_aktual;
-        $inventory->save();
+        // 3. Looping untuk membagi pakan dan memotong stok
+        foreach ($request->feeds as $feed) {
+            $jumlahKg = ($feed['rasio'] / $totalRasio) * $request->pakan_aktual;
 
-        return redirect()->route('feedlog.index');
+            // Simpan ke FeedLogDetail
+            $feedLog->details()->create([
+                'inventory_id' => $feed['inventory_id'],
+                'rasio' => $feed['rasio'],
+                'jumlah_kg' => round($jumlahKg, 2),
+            ]);
+
+            // PERBAIKAN: Potong stok inventory dengan pembulatan 2 desimal yang tegas
+            $inventory = Inventory::find($feed['inventory_id']);
+            $sisaStok = $inventory->total_stok_kg - $jumlahKg;
+            
+            $inventory->update([
+                'total_stok_kg' => round($sisaStok, 2)
+            ]);
+        }
+
+        return redirect()->route('feedlog.index')->with('message', 'Pemberian pakan berhasil dicatat!');
     }
 }

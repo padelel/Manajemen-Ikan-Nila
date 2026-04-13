@@ -11,7 +11,10 @@ defineProps({ logs: Array });
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">Riwayat Kematian (Mortalitas)</h2>
-                <Link href="/kematian/create" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-medium">+ Lapor Kematian</Link>
+                <div class="flex gap-3">
+                    <a href="/laporan/cetak" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900 font-medium">Cetak PDF</a>
+                    <Link href="/kematian/create" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-medium">+ Lapor Kematian</Link>
+                </div>
             </div>
         </template>
         <div class="py-12"><div class="max-w-7xl mx-auto sm:px-6 lg:px-8"><div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

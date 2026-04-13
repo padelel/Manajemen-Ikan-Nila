@@ -8,6 +8,7 @@ use App\Http\Controllers\FeedLogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MortalityLogController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\DailyOperationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -86,6 +87,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/kematian', [MortalityLogController::class, 'index'])->name('kematian.index');
     Route::get('/kematian/create', [MortalityLogController::class, 'create'])->name('kematian.create');
     Route::post('/kematian', [MortalityLogController::class, 'store'])->name('kematian.store');
+
+    // Rute Operasi Harian Terpadu
+    Route::get('/operasi-harian', [DailyOperationController::class, 'create'])->name('operasi.create');
+    Route::post('/operasi-harian', [DailyOperationController::class, 'store'])->name('operasi.store');
 });
 
 require __DIR__.'/auth.php';

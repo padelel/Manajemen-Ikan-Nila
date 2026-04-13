@@ -51,6 +51,9 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink :href="route('kematian.index')" :active="route().current('kematian.*')">
                                     Mortalitas
                                 </NavLink>
+                                <NavLink :href="route('operasi.create')" :active="route().current('operasi.create')">
+                                    Pengisian Data Harian
+                                </NavLink>
                             </div>
                         </div>
 
@@ -169,6 +172,9 @@ const showingNavigationDropdown = ref(false);
                         </ResponsiveNavLink>
                         <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kematian.index')" :active="route().current('kematian.*')">
                             Mortalitas
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('operasi.create')" :active="route().current('operasi.create')">
+                            Operasi Harian
                         </ResponsiveNavLink>
                     </div>
 

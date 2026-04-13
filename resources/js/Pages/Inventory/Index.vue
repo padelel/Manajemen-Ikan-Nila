@@ -45,7 +45,7 @@ const hapusInventory = (id, nama) => {
                                     <td class="p-4 font-bold text-gray-900">{{ item.nama_pakan }}</td>
                                     <td class="p-4">
                                         <span :class="item.total_stok_kg < 50 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'" class="py-1 px-3 rounded-full text-xs font-semibold">
-                                            {{ item.total_stok_kg }} Kg
+                                            {{ Number(item.total_stok_kg).toFixed(2) }} Kg
                                         </span>
                                     </td>
                                     <td class="p-4">{{ item.terakhir_update }}</td>

@@ -11,7 +11,8 @@ defineProps({ parameters: Array });
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">Pemantauan Kualitas Air Harian</h2>
-                <Link href="/parameter/create" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium">+ Input Data Air</Link>
+                <a href="/laporan/cetak" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900 font-medium">Cetak PDF</a>
+                <!-- <Link href="/parameter/create" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium">+ Input Data Air</Link> -->
             </div>
         </template>
         <div class="py-12"><div class="max-w-7xl mx-auto sm:px-6 lg:px-8"><div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

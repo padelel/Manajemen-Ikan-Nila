@@ -131,7 +131,7 @@ const chartBeratConfig = {
                         </div>
 
                         <div class="mt-6 flex gap-3 pt-4 border-t border-gray-100">
-                            <Link href="/feedlog/create" class="flex-1 text-center bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-medium">Beri Pakan</Link>
+                            <Link href="/operasi-harian" class="flex-1 text-center bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-medium">Beri Pakan</Link>
                             <Link href="/inventory" class="flex-1 text-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded shadow-sm hover:bg-gray-50 font-medium">Restock</Link>
                         </div>
                     </div>
