@@ -26,20 +26,27 @@ class KolamController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi input agar tidak ada data kosong atau salah format
+        // Jika bundar, paksa nilai lebar sama dengan panjang/diameter
+        if ($request->bentuk_kolam === 'Bundar') {
+            $request->merge(['lebar_m' => $request->panjang_m]);
+        }
+
         $validated = $request->validate([
             'nama_kolam' => 'required|string|max:255',
-            'dimensi' => 'required|string|max:255',
-            'jumlah_ikan' => 'required|integer|min:0',
-            'berat_rata_gram' => 'required|numeric|min:0',
-            'deskripsi' => 'nullable|string',
+            'lokasi' => 'required|string|max:255',
+            'bentuk_kolam' => 'required|in:Bundar,Persegi',
+            'panjang_m' => 'required|numeric',
+            'lebar_m' => 'required|numeric',
+            'kedalaman_m' => 'required|numeric',
+            'tanggal_tebar' => 'required|date',
+            'jumlah_ikan' => 'required|integer',
+            'berat_rata_gram' => 'required|numeric',
         ]);
 
-        // 2. Simpan ke database
+        $validated['status_kolam'] = 'Aktif'; // Default status
         Kolam::create($validated);
 
-        // 3. Alihkan kembali ke halaman utama tabel
-        return redirect()->route('kolam.index');
+        return redirect()->route('kolam.index')->with('message', 'Kolam berhasil ditambahkan!');
     }
 
     public function edit(Kolam $kolam)
@@ -50,18 +57,32 @@ class KolamController extends Controller
         ]);
     }
 
-    public function update(Request $request, Kolam $kolam)
+    public function update(Request $request, $id)
     {
+        $kolam = Kolam::findOrFail($id);
+
+        // 1. Logika Penyesuaian Dimensi (Otomatis samakan lebar dengan panjang jika Bundar)
+        if ($request->bentuk_kolam === 'Bundar') {
+            $request->merge(['lebar_m' => $request->panjang_m]);
+        }
+
+        // 2. Validasi struktur kolom yang baru
         $validated = $request->validate([
             'nama_kolam' => 'required|string|max:255',
-            'dimensi' => 'required|string|max:255',
-            'jumlah_ikan' => 'required|integer|min:0',
-            'berat_rata_gram' => 'required|numeric|min:0',
-            'deskripsi' => 'nullable|string',
+            'lokasi' => 'required|string|max:255',
+            'bentuk_kolam' => 'required|in:Bundar,Persegi',
+            'panjang_m' => 'required|numeric',
+            'lebar_m' => 'required|numeric',
+            'kedalaman_m' => 'required|numeric',
+            'tanggal_tebar' => 'required|date',
+            'jumlah_ikan' => 'required|integer',
+            'berat_rata_gram' => 'required|numeric',
         ]);
 
+        // 3. Update data (Tidak perlu mengubah status_kolam agar tidak mereset kolam yang sedang 'Kosong'/'Panen')
         $kolam->update($validated);
-        return redirect()->route('kolam.index');
+
+        return redirect()->route('kolam.index')->with('message', 'Data Kolam berhasil diperbarui!');
     }
 
     public function destroy(Kolam $kolam)

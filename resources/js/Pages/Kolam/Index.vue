@@ -46,7 +46,15 @@ const hapusKolam = (id, nama) => {
                             <tbody class="text-gray-700">
                                 <tr v-for="kolam in kolams" :key="kolam.id" class="border-b hover:bg-gray-50 transition">
                                     <td class="p-4 font-bold text-gray-900">{{ kolam.nama_kolam }}</td>
-                                    <td class="p-4">{{ kolam.dimensi }}</td>
+                                    <td class="p-4">
+                                        <span v-if="kolam.bentuk_kolam === 'Bundar'" class="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-200">
+                                            ⚪ ⌀ {{ kolam.panjang_m }}m | Kedalaman: {{ kolam.kedalaman_m }}m
+                                        </span>
+                                        
+                                        <span v-else class="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-bold border border-green-200">
+                                            🟦 {{ kolam.panjang_m }}m &times; {{ kolam.lebar_m }}m | Kedalaman: {{ kolam.kedalaman_m }}m
+                                        </span>
+                                    </td>
                                     <td class="p-4">
                                         <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-semibold">
                                             {{ kolam.jumlah_ikan.toLocaleString('id-ID') }}

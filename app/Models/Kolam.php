@@ -11,10 +11,8 @@ class Kolam extends Model
 
     // Izinkan kolom-kolom ini diisi melalui form
     protected $fillable = [
-        'nama_kolam', 
-        'dimensi', 
-        'jumlah_ikan', 
-        'berat_rata_gram', 
-        'deskripsi'
+    'nama_kolam', 'lokasi', 'bentuk_kolam', 'status_kolam', 
+    'panjang_m', 'lebar_m', 'kedalaman_m', 
+    'tanggal_tebar', 'jumlah_ikan', 'berat_rata_gram'
     ];
 }
