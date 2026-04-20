@@ -7,222 +7,164 @@ import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 
+// State untuk sidebar (lebar atau ciut)
+const isExpanded = ref(true);
 const showingNavigationDropdown = ref(false);
+
+const toggleSidebar = () => {
+    isExpanded.value = !isExpanded.value;
+};
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen bg-gray-100">
-            <nav
-                class="border-b border-gray-100 bg-white"
-            >
-                <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
-                            <!-- Logo -->
-                            <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
-                                </Link>
-                            </div>
+    <div class="min-h-screen bg-slate-50/50 flex">
+        <aside 
+            :class="[isExpanded ? 'w-64' : 'w-20']"
+            class="fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out hidden md:flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
+        >
+            <div class="h-16 flex items-center px-6 border-b border-slate-100 flex-shrink-0">
+                <Link :href="route('dashboard')" class="flex items-center gap-3 overflow-hidden">
+                    <ApplicationLogo class="h-8 w-8 shrink-0 text-slate-900" />
+                    <span v-show="isExpanded" class="font-bold text-slate-900 truncate tracking-tight text-lg">
+                        NilaManager
+                    </span>
+                </Link>
+            </div>
 
-                            <!-- Navigation Links -->
-                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
-                                </NavLink>
-
-                                <NavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kolam.index')" :active="route().current('kolam.*')">
-                                    Data Kolam
-                                </NavLink>
-                                <NavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.index')" :active="route().current('inventory.*')">
-                                    Gudang Pakan
-                                </NavLink>
-
-                                <NavLink :href="route('parameter.index')" :active="route().current('parameter.*')">
-                                    Kualitas Air
-                                </NavLink>
-                                <NavLink :href="route('feedlog.index')" :active="route().current('feedlog.*')">
-                                    Beri Makan Ikan
-                                </NavLink>
-                                <NavLink :href="route('kematian.index')" :active="route().current('kematian.*')">
-                                    Mortalitas
-                                </NavLink>
-                                <NavLink :href="route('operasi.create')" :active="route().current('operasi.create')">
-                                    Pengisian Data Harian
-                                </NavLink>
-                            </div>
-                        </div>
-
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {{ $page.props.auth.user.name }}
-
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Responsive Navigation Menu -->
-                <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden"
-                >
-                    <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kolam.index')" :active="route().current('kolam.*')">
-                            Data Kolam
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.index')" :active="route().current('inventory.*')">
-                            Gudang Pakan
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('parameter.index')" :active="route().current('parameter.*')">
-                            Kualitas Air
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('feedlog.index')" :active="route().current('feedlog.*')">
-                            Beri Makan Ikan
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kematian.index')" :active="route().current('kematian.*')">
-                            Mortalitas
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('operasi.create')" :active="route().current('operasi.create')">
-                            Operasi Harian
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <!-- Responsive Settings Options -->
-                    <div
-                        class="border-t border-gray-200 pb-1 pt-4"
+            <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1 custom-scrollbar">
+                <div class="space-y-1">
+                    <div 
+                        :class="[isExpanded ? 'opacity-100 max-h-10 mb-2' : 'opacity-0 max-h-0 mb-0']"
+                        class="transition-all duration-300 ease-in-out overflow-hidden"
                     >
-                        <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800"
-                            >
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-gray-500">
-                                {{ $page.props.auth.user.email }}
-                            </div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
+                        <p class="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            Menu Utama
+                        </p>
                     </div>
+                    
+                    <Link :href="route('dashboard')" 
+                        :class="[route().current('dashboard') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                        class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        <span v-show="isExpanded" class="font-medium">Ringkasan</span>
+                    </Link>
+
+                    <Link v-if="$page.props.auth.user.role === 'admin'" :href="route('kolam.index')" 
+                        :class="[route().current('kolam.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                        class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                        <span v-show="isExpanded" class="font-medium">Kolam</span>
+                    </Link>
+
+                    <Link v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.index')" 
+                        :class="[route().current('inventory.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                        class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        <span v-show="isExpanded" class="font-medium">Gudang</span>
+                    </Link>
+
+                    <Link :href="route('parameter.index')" 
+                        :class="[route().current('parameter.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                        class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.613.306a4 4 0 01-2.574.344l-2.484-.497a2 2 0 00-1.032.05L3 16.382V5.562l2.484-.828a2 2 0 011.032-.05l2.484.497a4 4 0 002.574-.344l.613-.306a6 6 0 013.86-.517l2.387.477a2 2 0 011.022.547V15.428z" /></svg>
+                        <span v-show="isExpanded" class="font-medium">Kualitas Air</span>
+                    </Link>
+
+                    <Link :href="route('feedlog.index')" 
+                        :class="[route().current('feedlog.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                        class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span v-show="isExpanded" class="font-medium">Aktivitas</span>
+                    </Link>
+
+                    <Link :href="route('kematian.index')" 
+                        :class="[route().current('kematian.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                        class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <span v-show="isExpanded" class="font-medium">Mortalitas</span>
+                    </Link>
                 </div>
             </nav>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-white shadow"
-                v-if="$slots.header"
-            >
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
+            <div class="p-4 border-t border-slate-100">
+                <button @click="toggleSidebar" class="w-full flex items-center justify-center p-2 rounded-xl bg-slate-50 text-slate-500 hover:text-slate-900 transition-colors">
+                    <svg :class="{'rotate-180': !isExpanded}" class="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <div :class="[isExpanded ? 'md:ml-64' : 'md:ml-20']" class="flex-1 transition-all duration-300 ease-in-out flex flex-col">
+            <header class="sticky top-0 z-40 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-6 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button @click="showingNavigationDropdown = !showingNavigationDropdown" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </button>
+                    <div class="hidden md:flex items-center gap-2 text-xs font-medium text-slate-400">
+                        <span>Aplikasi</span>
+                        <span>/</span>
+                        <span class="text-slate-900 capitalize">{{ $page.component.split('/')[0] }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <Link :href="route('operasi.create')" 
+                        class="hidden sm:block text-xs font-bold uppercase tracking-wider bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition shadow-md shadow-slate-200">
+                        + Input Harian
+                    </Link>
+
+                    <Dropdown align="right" width="48">
+                        <template #trigger>
+                            <button class="flex items-center gap-3 group">
+                                <div class="text-right hidden sm:block">
+                                    <p class="text-xs font-bold text-slate-900">{{ $page.props.auth.user.name }}</p>
+                                    <p class="text-[10px] text-slate-400 uppercase tracking-tighter">{{ $page.props.auth.user.role }}</p>
+                                </div>
+                                <div class="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-200 transition font-bold border border-slate-200">
+                                    {{ $page.props.auth.user.name.charAt(0) }}
+                                </div>
+                            </button>
+                        </template>
+                        <template #content>
+                            <DropdownLink :href="route('profile.edit')"> Profile </DropdownLink>
+                            <DropdownLink :href="route('logout')" method="post" as="button"> Log Out </DropdownLink>
+                        </template>
+                    </Dropdown>
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <main>
+            <div :class="{'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown}" class="md:hidden border-b border-slate-200 bg-white">
+                <div class="space-y-1 pb-3 pt-2">
+                    <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')"> Ringkasan </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('kolam.index')" :active="route().current('kolam.*')"> Kolam </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.index')" :active="route().current('inventory.*')"> Gudang </ResponsiveNavLink>
+                    <ResponsiveNavLink :href="route('parameter.index')" :active="route().current('parameter.*')"> Kualitas Air </ResponsiveNavLink>
+                    <ResponsiveNavLink :href="route('feedlog.index')" :active="route().current('feedlog.*')"> Aktivitas </ResponsiveNavLink>
+                    <ResponsiveNavLink :href="route('kematian.index')" :active="route().current('kematian.*')"> Mortalitas </ResponsiveNavLink>
+                    <ResponsiveNavLink :href="route('operasi.create')" :active="route().current('operasi.create')"> + Input Harian </ResponsiveNavLink>
+                </div>
+            </div>
+
+            <main class="p-6 md:p-10 flex-1">
+                <div v-if="$slots.header" class="mb-8">
+                    <slot name="header" />
+                </div>
                 <slot />
             </main>
         </div>
     </div>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+}
+</style>
