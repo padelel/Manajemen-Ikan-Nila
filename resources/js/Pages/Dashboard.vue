@@ -7,7 +7,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 // Mendaftarkan elemen Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-// Menerima data dari Controller yang sudah dikelompokkan
+// Menerima data dari Controller
 const props = defineProps({
     ringkasan: Object,
     inventory: Object,
@@ -16,47 +16,64 @@ const props = defineProps({
     chartBerat: Object
 });
 
-// Konfigurasi Visual Umum (digunakan untuk kedua grafik)
+// Konfigurasi Visual Umum
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-        legend: { display: false } // Sembunyikan legenda karena judul sudah jelas
+        legend: { display: false },
+        tooltip: {
+            backgroundColor: '#0f172a',
+            padding: 12,
+            titleFont: { size: 13, family: 'Inter, sans-serif' },
+            bodyFont: { size: 14, font: 'Inter, sans-serif', weight: 'bold' },
+            displayColors: false,
+            cornerRadius: 8,
+        }
     },
     scales: {
-        y: { beginAtZero: true },
-        x: { grid: { display: false } }
+        y: { 
+            beginAtZero: true,
+            border: { display: false },
+            grid: { color: '#f1f5f9' },
+            ticks: { color: '#94a3b8', font: { size: 11 } }
+        },
+        x: { 
+            grid: { display: false },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 11 } }
+        }
     },
     elements: {
-        line: { tension: 0.4 } // Membuat garisnya melengkung halus (curved)
-    }
+        line: { tension: 0.4 },
+        point: { radius: 0, hitRadius: 10, hoverRadius: 6 } // Sembunyikan titik kecuali di-hover
+    },
+    interaction: { mode: 'index', intersect: false }
 };
 
-// 1. Konfigurasi Grafik Tren Pakan (Biru)
+// 1. Grafik Tren Pakan (Biru - Indigo)
 const chartPakanConfig = {
     labels: props.chartPakan.labels,
     datasets: [{
-        label: 'Total Pakan Diberikan (Kg)',
-        borderColor: '#3b82f6', // Warna biru Tailwind
-        backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+        label: 'Total Pakan (Kg)',
+        borderColor: '#6366f1', // Indigo-500
+        backgroundColor: 'rgba(99, 102, 241, 0.05)', 
         borderWidth: 3,
-        pointBackgroundColor: '#2563eb',
-        pointRadius: 4,
+        pointBackgroundColor: '#4f46e5',
         fill: true,
         data: props.chartPakan.data,
     }]
 };
 
-// 2. Konfigurasi Grafik Pertumbuhan Berat Ikan (Hijau)
+// 2. Grafik Pertumbuhan Berat Ikan (Hijau - Emerald)
 const chartBeratConfig = {
     labels: props.chartBerat.labels,
     datasets: [{
-        label: 'Berat Rata-rata Ikan (gram)',
-        borderColor: '#10b981', // Warna Emerald Tailwind
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        label: 'Berat Rata-rata (gram)',
+        borderColor: '#10b981', // Emerald-500
+        backgroundColor: 'rgba(16, 185, 129, 0.05)',
         borderWidth: 3,
         pointBackgroundColor: '#059669',
-        pointRadius: 4,
         fill: true,
         data: props.chartBerat.berat,
     }]
@@ -68,77 +85,118 @@ const chartBeratConfig = {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Sistem Cerdas Manajemen Tambak</h2>
+            <div class="flex flex-col">
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Ringkasan Tambak</h2>
+                <p class="text-sm text-slate-500 mt-1">Pantau performa kolam, stok pakan, dan analisis cerdas sistem.</p>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="py-8">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
-                        <p class="text-sm font-medium text-gray-500 uppercase">Total Kolam Aktif</p>
-                        <p class="mt-2 text-3xl font-black text-gray-800">{{ ringkasan.totalKolam }} <span class="text-lg font-normal text-gray-500">Unit</span></p>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-500">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                            </span>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kolam Aktif</p>
+                        </div>
+                        <p class="text-3xl font-black text-slate-900">{{ ringkasan.totalKolam }} <span class="text-sm font-semibold text-slate-400">Unit</span></p>
                     </div>
                     
-                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-teal-500">
-                        <p class="text-sm font-medium text-gray-500 uppercase">Total Populasi Ikan</p>
-                        <p class="mt-2 text-3xl font-black text-gray-800">{{ ringkasan.totalIkan.toLocaleString('id-ID') }} <span class="text-lg font-normal text-gray-500">Ekor</span></p>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-500">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" /></svg>
+                            </span>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Populasi</p>
+                        </div>
+                        <p class="text-3xl font-black text-slate-900">{{ ringkasan.totalIkan.toLocaleString('id-ID') }} <span class="text-sm font-semibold text-slate-400">Ekor</span></p>
                     </div>
 
-                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-indigo-500">
-                        <p class="text-sm font-medium text-gray-500 uppercase">Estimasi Biomassa</p>
-                        <p class="mt-2 text-3xl font-black text-gray-800">{{ ringkasan.totalBiomassaKg.toLocaleString('id-ID') }} <span class="text-lg font-normal text-gray-500">Kg</span></p>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-purple-50 text-purple-500">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg>
+                            </span>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Est. Biomassa</p>
+                        </div>
+                        <p class="text-3xl font-black text-slate-900">{{ ringkasan.totalBiomassaKg.toLocaleString('id-ID') }} <span class="text-sm font-semibold text-slate-400">Kg</span></p>
                     </div>
 
-                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-yellow-500">
-                        <p class="text-sm font-medium text-gray-500 uppercase">Stok ({{ inventory.namaPakan }})</p>
-                        <p class="mt-2 text-3xl font-black text-gray-800">{{ inventory.stokPakan }} <span class="text-lg font-normal text-gray-500">Kg</span></p>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-500">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                            </span>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest overflow-hidden text-ellipsis whitespace-nowrap">Stok ({{ inventory.namaPakan }})</p>
+                        </div>
+                        <p class="text-3xl font-black text-slate-900">{{ inventory.stokPakan }} <span class="text-sm font-semibold text-slate-400">Kg</span></p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border border-gray-100 flex flex-col">
-                        <h3 class="text-lg font-bold text-gray-800 border-b pb-3 mb-4">Tren Konsumsi Pakan (7 Hari)</h3>
-                        <div class="flex-grow relative h-64 w-full">
+                    <div class="lg:col-span-2 bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-slate-900">Tren Konsumsi Pakan</h3>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-lg">7 Hari Terakhir</span>
+                        </div>
+                        <div class="flex-grow relative h-72 w-full">
                             <Line :data="chartPakanConfig" :options="chartOptions" />
                         </div>
                     </div>
 
-                    <div class="bg-white shadow-sm sm:rounded-lg p-6 border border-gray-100 flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800 border-b pb-3 mb-4">Prediksi SMA & SPK</h3>
-                            <div class="flex justify-between items-center mb-6">
-                                <span class="text-gray-600">Laju Rata-rata Konsumsi:</span>
-                                <span class="text-xl font-bold text-gray-900">{{ sma.rata_rata_harian }} Kg/Hari</span>
+                    <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.2)] flex flex-col justify-between relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
+                        
+                        <div class="relative z-10">
+                            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                Prediksi Cerdas
+                            </h3>
+                            
+                            <div class="mb-6">
+                                <p class="text-slate-400 text-sm mb-1">Laju Konsumsi Pakan</p>
+                                <p class="text-2xl font-light"><span class="font-bold text-white">{{ sma.rata_rata_harian }}</span> Kg/Hari</p>
                             </div>
                             
-                            <div class="p-6 rounded-xl text-center"
+                            <div class="p-5 rounded-2xl border"
                                 :class="{
-                                    'bg-green-100 text-green-800': sma.status === 'Aman',
-                                    'bg-yellow-100 text-yellow-800': sma.status === 'Waspada',
-                                    'bg-red-100 text-red-800 animate-pulse': sma.status === 'Kritis' || sma.status === 'Habis'
+                                    'bg-emerald-500/10 border-emerald-500/20 text-emerald-100': sma.status === 'Aman',
+                                    'bg-amber-500/10 border-amber-500/20 text-amber-100': sma.status === 'Waspada',
+                                    'bg-red-500/10 border-red-500/30 text-red-100 animate-pulse': sma.status === 'Kritis' || sma.status === 'Habis'
                                 }">
-                                <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-2">Estimasi Stok Habis Dalam</p>
-                                <p v-if="sma.rata_rata_harian > 0" class="text-5xl font-black mb-2">{{ sma.estimasi_hari }} <span class="text-2xl opacity-75">Hari</span></p>
-                                <p v-else class="text-xl font-bold mb-2 py-2">Menunggu Data</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Estimasi Stok Habis</p>
+                                <p v-if="sma.rata_rata_harian > 0" class="text-5xl font-black mb-1">
+                                    {{ sma.estimasi_hari }} <span class="text-xl font-medium opacity-60">Hari</span>
+                                </p>
+                                <p v-else class="text-lg font-medium mb-1">Menunggu Data...</p>
                                 
-                                <p v-if="sma.status === 'Aman'" class="text-sm font-medium">Status Aman. Stok mencukupi.</p>
-                                <p v-if="sma.status === 'Waspada'" class="text-sm font-medium">Peringatan: Stok menipis. Persiapkan restock.</p>
-                                <p v-if="sma.status === 'Kritis'" class="text-sm font-bold">Kritis! Segera lakukan pemesanan pakan.</p>
-                                <p v-if="sma.status === 'Habis'" class="text-sm font-bold">Gudang Kosong!</p>
+                                <div class="mt-2 text-xs font-medium opacity-80 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full" :class="sma.status === 'Aman' ? 'bg-emerald-400' : (sma.status === 'Waspada' ? 'bg-amber-400' : 'bg-red-400')"></span>
+                                    Status: {{ sma.status }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mt-6 flex gap-3 pt-4 border-t border-gray-100">
-                            <Link href="/operasi-harian" class="flex-1 text-center bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-medium">Beri Pakan</Link>
-                            <Link href="/inventory" class="flex-1 text-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded shadow-sm hover:bg-gray-50 font-medium">Restock</Link>
+                        <div class="mt-8 flex gap-3 relative z-10">
+                            <Link href="/operasi-harian" class="flex-1 text-center bg-blue-500 text-white px-4 py-3 rounded-xl shadow-lg shadow-blue-500/30 hover:bg-blue-400 font-bold transition-all text-sm">
+                                Beri Pakan
+                            </Link>
+                            <Link href="/inventory" class="flex-1 text-center bg-white/10 text-white hover:bg-white/20 px-4 py-3 rounded-xl font-bold transition-all text-sm backdrop-blur-sm">
+                                Restock
+                            </Link>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white shadow-sm sm:rounded-lg p-6 border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-800 border-b pb-3 mb-4">Grafik Pertumbuhan Ikan (Berdasarkan Sample)</h3>
+                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-slate-900">Kurva Pertumbuhan Ikan</h3>
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-lg border border-emerald-100">Berdasarkan Sampling</span>
+                    </div>
                     <div class="relative h-80 w-full">
                         <Line :data="chartBeratConfig" :options="chartOptions" />
                     </div>
