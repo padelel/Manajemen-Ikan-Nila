@@ -9,6 +9,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MortalityLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DailyOperationController;
+use App\Http\Controllers\HarvestLogController;
+use App\Http\Controllers\TebarLogController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -91,6 +93,12 @@ Route::middleware('auth')->group(function () {
     // Rute Operasi Harian Terpadu
     Route::get('/operasi-harian', [DailyOperationController::class, 'create'])->name('operasi.create');
     Route::post('/operasi-harian', [DailyOperationController::class, 'store'])->name('operasi.store');
+
+    // Rute Riwayat Panen
+    Route::resource('panen', HarvestLogController::class)->except(['show', 'edit', 'update', 'destroy']);
+
+    // Rute untuk Fitur Tebar Benih (Hanya butuh index, create, dan store)
+    Route::resource('tebar', TebarLogController::class)->except(['show', 'edit', 'update', 'destroy']);
 });
 
 require __DIR__.'/auth.php';

@@ -117,6 +117,26 @@ const subPageTitle = computed(() => {
                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                             <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Mortalitas</span>
                         </Link>
+
+                        <Link :href="route('panen.index')" 
+                            :class="[route().current('panen.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                            class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group overflow-hidden">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                            </svg>
+                            <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Panen</span>
+                        </Link>
+
+                        <Link :href="route('tebar.index')" 
+                            :class="[route().current('tebar.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                            class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group overflow-hidden">
+                            
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            
+                            <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Tebar Benih</span>
+                        </Link>
                     </div>
                 </div>
             </nav>
