@@ -27,7 +27,7 @@ class DailyOperationController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi Super Ketat
+        // 1. Validasi Super Ketat (Menambahkan frekuensi)
         $request->validate([
             'kolam_id' => 'required|exists:kolams,id',
             'jumlah_mati' => 'required|integer|min:0',
@@ -35,6 +35,7 @@ class DailyOperationController extends Controller
             'ph' => 'required|numeric',
             'kondisi_visual' => 'required|string',
             'berat_sample' => 'required|numeric|min:0.1',
+            'frekuensi' => 'required|integer|min:1', // <--- PERBAIKAN 1: Validasi frekuensi
             'rule_id' => 'required|exists:rules,id',
             'rekomendasi_sistem' => 'required|numeric',
             'pakan_aktual' => 'required|numeric|min:0',
@@ -72,12 +73,13 @@ class DailyOperationController extends Controller
             ]);
             $kolam->update(['berat_rata_gram' => $request->berat_sample]);
 
-            // STEP 3: Simpan Log Pakan Induk
+            // STEP 3: Simpan Log Pakan Induk (Termasuk Frekuensi)
             $feedLog = FeedLog::create([
                 'kolam_id' => $kolam->id,
                 'rule_id' => $request->rule_id,
                 'user_id' => $userId,
                 'tanggal_pakan' => $tanggal,
+                'frekuensi' => $request->frekuensi, // <--- PERBAIKAN 2: Simpan frekuensi ke database
                 'rekomendasi_sistem' => $request->rekomendasi_sistem,
                 'pakan_aktual' => $request->pakan_aktual,
             ]);

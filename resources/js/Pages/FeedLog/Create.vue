@@ -6,13 +6,14 @@ import axios from 'axios';
 
 const props = defineProps({ kolams: Array, inventories: Array });
 
+// PERBAIKAN: Menambahkan 'frekuensi' ke dalam state form
 const form = useForm({
     kolam_id: '',
     rule_id: '',
     tanggal_pakan: new Date().toISOString().split('T')[0],
+    frekuensi: 2, // Default 2 kali sehari
     rekomendasi_sistem: '',
     pakan_aktual: '',
-    // Array dinamis untuk multi-pakan
     feeds: [
         { inventory_id: '', rasio: 1 } 
     ]
@@ -21,11 +22,9 @@ const form = useForm({
 const hasilAnalisis = ref(null);
 const isLoading = ref(false);
 
-// Fungsi Tambah/Hapus Form Pakan
 const addFeed = () => { form.feeds.push({ inventory_id: '', rasio: 1 }); };
 const removeFeed = (index) => { if(form.feeds.length > 1) form.feeds.splice(index, 1); };
 
-// Computed untuk menghitung estimasi Kg per item secara Real-Time di UI
 const totalRasio = computed(() => form.feeds.reduce((sum, item) => sum + Number(item.rasio), 0));
 const hitungEstimasiKg = (rasio) => {
     if (!form.pakan_aktual || totalRasio.value === 0) return 0;
@@ -62,12 +61,12 @@ const submit = () => { form.post(route('feedlog.store')); };
     <AuthenticatedLayout>
         <template #header><h2 class="font-semibold text-xl text-gray-800">Proses Pemberian Pakan (Multi-Pakan)</h2></template>
         
-        <div class="py-12"><div class="max-w-4xl mx-auto sm:px-6 lg:px-8"><div class="bg-white p-8 shadow-sm sm:rounded-lg">
+        <div class="py-12"><div class="max-w-4xl mx-auto sm:px-6 lg:px-8"><div class="bg-white p-8 shadow-sm sm:rounded-lg border border-slate-100">
             <form @submit.prevent="submit" class="space-y-6">
                 
-                <div class="grid grid-cols-2 gap-4 border-b pb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Pilih Kolam (Trigger AI)</label>
+                        <label class="block text-sm font-medium text-gray-700">Pilih Kolam</label>
                         <select v-model="form.kolam_id" @change="cekRekomendasi" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                             <option value="" disabled>-- Pilih Kolam --</option>
                             <option v-for="kolam in kolams" :key="kolam.id" :value="kolam.id">{{ kolam.nama_kolam }}</option>
@@ -76,6 +75,13 @@ const submit = () => { form.post(route('feedlog.store')); };
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Tanggal Pakan</label>
                         <input v-model="form.tanggal_pakan" type="date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Frekuensi Harian</label>
+                        <select v-model="form.frekuensi" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                            <option :value="2">2 Kali (Pagi & Sore)</option>
+                            <option :value="3">3 Kali (Pagi, Siang, Sore)</option>
+                        </select>
                     </div>
                 </div>
 
@@ -110,7 +116,7 @@ const submit = () => { form.post(route('feedlog.store')); };
 
                 <div v-if="hasilAnalisis" class="pt-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Total Pakan Aktual (Kg)</label>
-                    <p class="text-xs text-gray-500 mb-3">*Secara *default* disamakan dengan rekomendasi sistem, ubah jika ada kebijakan lapangan.</p>
+                    <p class="text-xs text-gray-500 mb-3">*Secara *default* disamakan dengan rekomendasi sistem.</p>
                     <input v-model="form.pakan_aktual" type="number" step="0.01" class="mt-1 block w-1/3 border-gray-300 rounded-md shadow-sm text-xl font-bold text-green-700 focus:ring-green-500 focus:border-green-500" required>
                 </div>
 
