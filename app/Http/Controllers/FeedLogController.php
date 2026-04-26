@@ -13,11 +13,34 @@ use Illuminate\Support\Facades\Auth;
 
 class FeedLogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Menampilkan riwayat pemberian pakan
-        $logs = FeedLog::with(['kolam', 'details.inventory'])->latest()->get();
-        return Inertia::render('FeedLog/Index', ['feedLogs' => $logs]);
+        // 1. Siapkan Query Dasar
+        $query = FeedLog::with(['kolam', 'user', 'feedLogDetails.inventory'])->orderBy('tanggal_pakan', 'desc');
+
+        // 2. Terapkan Filter jika ada request
+        if ($request->filled('kolam_id')) {
+            $query->where('kolam_id', $request->kolam_id);
+        }
+        
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_pakan', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_pakan', '<=', $request->end_date);
+        }
+
+        // 3. Ambil Hasil
+        $logs = $query->get();
+        $kolams = Kolam::all(); // Untuk dropdown filter kolam
+
+        // 4. Kirim ke Vue
+        return Inertia::render('FeedLog/Index', [
+            'logs' => $logs,
+            'kolams' => $kolams,
+            'filters' => $request->only(['kolam_id', 'start_date', 'end_date']) // Kirim balik filter agar state terjaga
+        ]);
     }
 
     public function create()
@@ -85,10 +108,14 @@ class FeedLogController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        // =========================================================
+        // 1. RADAR ERROR VALIDASI
+        // =========================================================
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'kolam_id' => 'required|exists:kolams,id',
             'rule_id' => 'required',
             'tanggal_pakan' => 'required|date',
+            'frekuensi' => 'nullable|integer', // Boleh kosong, otomatis diisi 2 nanti
             'rekomendasi_sistem' => 'required|numeric',
             'pakan_aktual' => 'required|numeric|min:0.1',
             'feeds' => 'required|array|min:1',
@@ -96,39 +123,60 @@ class FeedLogController extends Controller
             'feeds.*.rasio' => 'required|integer|min:1',
         ]);
 
-        // 1. Simpan header FeedLog
-        $feedLog = FeedLog::create([
-            'user_id' => Auth::id(),
-            'kolam_id' => $request->kolam_id,
-            'rule_id' => $request->rule_id,
-            'tanggal_pakan' => $request->tanggal_pakan,
-            'rekomendasi_sistem' => $request->rekomendasi_sistem,
-            'pakan_aktual' => $request->pakan_aktual,
-        ]);
-
-        // 2. Hitung total rasio
-        $totalRasio = collect($request->feeds)->sum('rasio');
-
-        // 3. Looping untuk membagi pakan dan memotong stok
-        foreach ($request->feeds as $feed) {
-            $jumlahKg = ($feed['rasio'] / $totalRasio) * $request->pakan_aktual;
-
-            // Simpan ke FeedLogDetail
-            $feedLog->details()->create([
-                'inventory_id' => $feed['inventory_id'],
-                'rasio' => $feed['rasio'],
-                'jumlah_kg' => round($jumlahKg, 2),
-            ]);
-
-            // PERBAIKAN: Potong stok inventory dengan pembulatan 2 desimal yang tegas
-            $inventory = Inventory::find($feed['inventory_id']);
-            $sisaStok = $inventory->total_stok_kg - $jumlahKg;
-            
-            $inventory->update([
-                'total_stok_kg' => round($sisaStok, 2)
-            ]);
+        if ($validator->fails()) {
+            // Jika layar menjadi hitam dan menampilkan ini, berarti ada input Vue yang salah!
+            dd('GAGAL VALIDASI!', $validator->errors()->toArray(), 'DATA DARI VUE:', $request->all());
         }
 
-        return redirect()->route('feedlog.index')->with('message', 'Pemberian pakan berhasil dicatat!');
+        // =========================================================
+        // 2. PROSES PENYIMPANAN DATABASE
+        // =========================================================
+        \DB::beginTransaction();
+        try {
+            $feedLog = FeedLog::create([
+                'user_id' => Auth::id(),
+                'kolam_id' => $request->kolam_id,
+                'rule_id' => $request->rule_id,
+                'tanggal_pakan' => $request->tanggal_pakan,
+                'frekuensi' => $request->frekuensi ?? 2, // Default 2 kali jika UI tidak mengirim frekuensi
+                'rekomendasi_sistem' => $request->rekomendasi_sistem,
+                'pakan_aktual' => $request->pakan_aktual,
+            ]);
+
+            $totalRasio = collect($request->feeds)->sum('rasio');
+
+            foreach ($request->feeds as $feed) {
+                $jumlahKg = ($feed['rasio'] / $totalRasio) * $request->pakan_aktual;
+
+                // Memakai nama fungsi relasi yang ada di model Anda (details)
+                $feedLog->details()->create([
+                    'inventory_id' => $feed['inventory_id'],
+                    'rasio' => $feed['rasio'],
+                    'jumlah_kg' => round($jumlahKg, 2),
+                ]);
+
+                $inventory = Inventory::find($feed['inventory_id']);
+                if ($inventory) {
+                    $sisaStok = $inventory->total_stok_kg - $jumlahKg;
+                    $inventory->update([
+                        'total_stok_kg' => round($sisaStok, 2)
+                    ]);
+                }
+            }
+
+            \DB::commit();
+            
+            // Redirect dikembalikan ke feedlog.index sesuai file asli Anda
+            return redirect()->route('feedlog.index')->with('message', 'Pemberian pakan berhasil dicatat!');
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            
+            // =========================================================
+            // 3. RADAR ERROR DATABASE
+            // =========================================================
+            // Jika layar menjadi hitam dan menampilkan ini, berarti kolom database ada yang salah/belum dimigrasi!
+            dd('GAGAL MENYIMPAN KE DATABASE!', 'PESAN ERROR: ' . $e->getMessage(), 'BARIS: ' . $e->getLine());
+        }
     }
 }
