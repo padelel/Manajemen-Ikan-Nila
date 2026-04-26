@@ -78,15 +78,13 @@ const submit = () => { form.post(route('operasi-harian.store')); }; // PASTIKAN 
                         <input v-model="form.tanggal_pakan" type="date" class="mt-1 block w-full border-slate-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Frekuensi Harian</label>
-                        <div class="flex gap-2 mt-1">
-                            <label v-for="n in [2, 3]" :key="n" class="flex-1 cursor-pointer">
-                                <input type="radio" :value="n" v-model="form.frekuensi" class="hidden peer">
-                                <div class="text-center py-2 rounded-lg border border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 font-bold transition-all text-sm">
-                                    {{ n }} Kali
-                                </div>
-                            </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Frekuensi Harian (Kali/Hari)</label>
+                            <select v-model="form.frekuensi" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <option :value="2">2 Kali (Pagi & Sore)</option>
+                                <option :value="3">3 Kali (Pagi, Siang, Sore)</option>
+                            </select>
                         </div>
                     </div>
                 </div>

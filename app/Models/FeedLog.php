@@ -11,20 +11,14 @@ class FeedLog extends Model
         'rule_id', 
         'user_id',
         'tanggal_pakan', 
-        'frekuensi',
+        'frekuensi', // Tambahkan ini
         'rekomendasi_sistem', 
         'pakan_aktual'
     ];
 
-    public function kolam() { 
-        return $this->belongsTo(Kolam::class); 
-    }
-
-    public function user() { 
-        return $this->belongsTo(User::class); 
-    }
+    public function kolam() { return $this->belongsTo(Kolam::class); }
     
-    public function feedLogDetails() { 
-        return $this->hasMany(FeedLogDetail::class); 
-    }
+    public function user() { return $this->belongsTo(User::class); } // Tambahkan relasi user
+
+    public function details() { return $this->hasMany(FeedLogDetail::class); }
 }

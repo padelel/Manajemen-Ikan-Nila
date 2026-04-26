@@ -95,70 +95,22 @@ const getRoleInitial = (userId) => {
                 <div class="bg-white overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-slate-100">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50/50 border-b border-slate-100">
+                            <thead class="bg-gray-100 border-b">
                                 <tr>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tanggal</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kolam</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Frekuensi</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Total Pakan</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Detail Pakan</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pelapor</th>
+                                    <th class="p-4">Tanggal</th>
+                                    <th class="p-4">Kolam</th>
+                                    <th class="p-4 text-center">Frekuensi</th> <th class="p-4 text-center">Total Pakan (Kg)</th>
+                                    <th class="p-4">Detail Bahan</th>
                                 </tr>
                             </thead>
-                            
-                            <tbody class="text-sm">
-                                <tr v-for="log in logs" :key="log.id" class="border-b border-slate-50 hover:bg-blue-50/30 transition duration-200">
-                                    
-                                    <td class="px-6 py-5 font-medium text-slate-500">{{ log.tanggal_pakan }}</td>
-                                    
-                                    <td class="px-6 py-5">
-                                        <p class="font-bold text-slate-900 text-base">{{ log.kolam?.nama_kolam }}</p>
-                                    </td>
-
-                                    <td class="px-6 py-5 text-center">
-                                        <span class="inline-block bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold border border-indigo-100">
-                                            {{ log.frekuensi || '-' }} Kali / Hari
-                                        </span>
-                                    </td>
-
-                                    <td class="px-6 py-5 text-center">
-                                        <span class="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 font-bold">
-                                            <span class="text-base">{{ log.pakan_aktual }}</span>
-                                            <span class="text-xs font-medium opacity-70">Kg</span>
-                                        </span>
-                                    </td>
-
-                                    <td class="px-6 py-5">
-                                        <ul class="list-disc pl-4 text-xs text-slate-600 space-y-1">
-                                            <li v-for="detail in log.feed_log_details" :key="detail.id">
-                                                <span class="font-bold">{{ detail.inventory?.nama_pakan }}</span> 
-                                                ({{ detail.jumlah_kg }} Kg)
-                                            </li>
-                                        </ul>
-                                    </td>
-
-                                    <td class="px-6 py-5">
-                                        <div class="flex items-center gap-3">
-                                            <div class="rounded-full w-9 h-9 flex items-center justify-center font-bold text-xs uppercase border"
-                                                 :class="log.user_id === 1 ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 'bg-teal-50 text-teal-700 border-teal-100'">
-                                                {{ getRoleInitial(log.user_id) }}
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">{{ getRoleName(log.user_id) }}</span>
-                                                <span class="text-sm text-slate-700 font-medium">{{ log.user?.name }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr v-if="logs.length === 0">
-                                    <td colspan="6" class="px-6 py-16 text-center">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <svg class="w-12 h-12 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                            </svg>
-                                            <p class="text-slate-700 font-bold text-base mb-1">Data Tidak Ditemukan</p>
-                                            <p class="text-slate-500 font-medium text-sm">Tidak ada riwayat pakan yang sesuai dengan filter yang dipilih.</p>
+                            <tbody>
+                                <tr v-for="log in logs" :key="log.id" class="border-b hover:bg-gray-50">
+                                    <td class="p-4">{{ log.tanggal_pakan }}</td>
+                                    <td class="p-4 font-bold">{{ log.kolam?.nama_kolam }}</td>
+                                    <td class="p-4 text-center">{{ log.frekuensi }}x / Hari</td> <td class="p-4 text-center text-blue-600 font-bold">{{ log.pakan_aktual }} Kg</td>
+                                    <td class="p-4 text-xs">
+                                        <div v-for="detail in log.details" :key="detail.id">
+                                            • {{ detail.inventory?.nama_pakan }} ({{ detail.jumlah_kg }} Kg)
                                         </div>
                                     </td>
                                 </tr>
