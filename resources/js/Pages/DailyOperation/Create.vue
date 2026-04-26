@@ -5,7 +5,6 @@ import { ref, watch } from 'vue';
 
 const props = defineProps({ kolams: Array, inventories: Array, rules: Array });
 
-// State Navigasi Wizard
 const step = ref(1);
 
 const form = useForm({
@@ -22,35 +21,30 @@ const form = useForm({
     berat_sample: '',
     
     // Step 3: Pakan
-    frekuensi_pakan: 2, 
+    frekuensi: 2, // PERBAIKAN 1: Ubah nama dari frekuensi_pakan menjadi frekuensi
     rule_id: '',
     rekomendasi_sistem: '',
     pakan_aktual: '',
     feeds: [{ inventory_id: '', rasio: 1 }]
 });
 
-// State untuk menyimpan hasil kalkulasi AI secara Real-Time
 const analisis = ref(null);
 
-// AI REAL-TIME: Memantau perubahan input operator & pilihan frekuensi
-watch([() => form.kolam_id, () => form.jumlah_mati, () => form.suhu, () => form.ph, () => form.kondisi_visual, () => form.berat_sample, () => form.frekuensi_pakan], () => {
+// PERBAIKAN 2: Ubah watcher agar memantau form.frekuensi
+watch([() => form.kolam_id, () => form.jumlah_mati, () => form.suhu, () => form.ph, () => form.kondisi_visual, () => form.berat_sample, () => form.frekuensi], () => {
     if (form.kolam_id && form.suhu && form.ph && form.berat_sample) {
-        // Ambil data kolam
         const kolam = props.kolams.find(k => k.id === form.kolam_id);
         const sisaIkan = kolam.jumlah_ikan - (form.jumlah_mati || 0);
         
-        // 1. Kalkulasi Biomassa
         const biomassaKg = (sisaIkan * form.berat_sample) / 1000;
         
-        // 2. Tentukan Feeding Ratio (FR) Dinamis berdasarkan Berat
-        const feedingRatio = form.berat_sample >= 200 ? 0.025 : 0.05; // 2.5% atau 5%
+        const feedingRatio = form.berat_sample >= 200 ? 0.025 : 0.05; 
         const feedingRatioText = form.berat_sample >= 200 ? '2.5%' : '5%';
 
-        // 3. Hitung Dosis Pakan
         const dosisHarian = (biomassaKg * feedingRatio);
-        const dosisPerSesi = dosisHarian / form.frekuensi_pakan; // Dibagi 2 atau 3
+        // PERBAIKAN 3: Dibagi menggunakan form.frekuensi
+        const dosisPerSesi = dosisHarian / form.frekuensi; 
 
-        // 4. Mesin Inferensi Rule Pakar Kualitas Air
         let kodeTarget = 'R01'; let pct = 100;
         if (form.ph < 6.5 || form.ph > 8.5 || form.kondisi_visual === 'Berbusa') {
             kodeTarget = 'R03'; pct = 0;
@@ -58,32 +52,27 @@ watch([() => form.kolam_id, () => form.jumlah_mati, () => form.suhu, () => form.
             kodeTarget = 'R02'; pct = 50;
         }
 
-        // 5. Rekomendasi Final (Dipotong jika kualitas air buruk)
         const rekomendasiAkhir = dosisPerSesi * (pct / 100);
         
-        // Cari ID Rule yang sesuai dari database
         const matchRule = props.rules.find(r => r.kode_rule === kodeTarget);
         
-        // Update Form Otomatis
         if(matchRule) form.rule_id = matchRule.id;
         form.rekomendasi_sistem = rekomendasiAkhir.toFixed(2);
         form.pakan_aktual = rekomendasiAkhir.toFixed(2);
 
-        // Update UI Visual
         analisis.value = {
             biomassa: biomassaKg.toFixed(2),
-            feedingRatioText: feedingRatioText, // Label FR Dinamis
+            feedingRatioText: feedingRatioText, 
             dosisHarian: dosisHarian.toFixed(2),
             dosisPerSesi: dosisPerSesi.toFixed(2),
             kode_rule: kodeTarget,
             rekomendasi: rekomendasiAkhir.toFixed(2),
-            frekuensi: form.frekuensi_pakan,
-            gap_jam: form.frekuensi_pakan === 2 ? 8 : 6
+            frekuensi: form.frekuensi, // PERBAIKAN 4
+            gap_jam: form.frekuensi === 2 ? 8 : 6 // PERBAIKAN 5
         };
     }
 });
 
-// Fungsi Multi-Pakan
 const addFeed = () => { form.feeds.push({ inventory_id: '', rasio: 1 }); };
 const removeFeed = (index) => { if(form.feeds.length > 1) form.feeds.splice(index, 1); };
 const hitungEstimasiKg = (rasio) => {
@@ -172,7 +161,7 @@ const submit = () => { form.post(route('operasi.store')); };
                             <p class="text-xs text-indigo-700">Mempengaruhi pembagian dosis per sesi dan jadwal pemberian berikutnya.</p>
                         </div>
                         <div class="w-1/3">
-                            <select v-model="form.frekuensi_pakan" class="w-full rounded-md border-indigo-300 text-indigo-800 font-semibold focus:ring-indigo-500 shadow-sm">
+                            <select v-model="form.frekuensi" class="w-full rounded-md border-indigo-300 text-indigo-800 font-semibold focus:ring-indigo-500 shadow-sm">
                                 <option :value="2">2 Kali Sehari (Jeda 8 Jam)</option>
                                 <option :value="3">3 Kali Sehari (Jeda 6 Jam)</option>
                             </select>
