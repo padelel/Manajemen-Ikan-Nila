@@ -16,14 +16,14 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. RINGKASAN DATA ATAS
-        $kolams = Kolam::all();
+        $kolams = Kolam::with('siklusAktif')->get();
         $totalKolam = $kolams->count();
         $totalIkan = $kolams->sum('jumlah_ikan');
         $totalBiomassaKg = $kolams->sum(function ($kolam) {
             return ($kolam->jumlah_ikan * $kolam->berat_rata_gram) / 1000;
         });
 
-        // REVISI: Siapkan data detail tiap kolam untuk popover (hover)
+        // Siapkan data detail tiap kolam untuk popover (hover)
         $kolamList = $kolams->map(function($kolam) {
             return [
                 'id' => $kolam->id,
@@ -116,40 +116,57 @@ class DashboardController extends Controller
             ];
         });
 
-        // 5. GRAFIK PERTUMBUHAN IKAN (PER KOLAM)
-        $dataSample = DailyParameter::whereNotNull('berat_sample')->orderBy('tanggal_cek', 'asc')->get();
-        $uniqueDates = $dataSample->pluck('tanggal_cek')->unique()->values();
-        
-        $chartLabelsBerat = $uniqueDates->map(function($date) {
-            return Carbon::parse($date)->translatedFormat('d M');
-        })->toArray();
-
+        // 5. GRAFIK PERTUMBUHAN IKAN (HANYA SIKLUS AKTIF)
         $datasetsBerat = [];
+        $chartLabelsBerat = [];
         $colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#f43f5e', '#06b6d4', '#84cc16', '#a855f7']; 
         $colorIndex = 0;
 
-        foreach ($kolams as $kolam) {
-            $samples = $dataSample->where('kolam_id', $kolam->id);
-            $dataPoints = [];
-            
-            foreach ($uniqueDates as $date) {
-                $sampleOnDate = $samples->firstWhere('tanggal_cek', $date);
-                $dataPoints[] = $sampleOnDate ? (float) $sampleOnDate->berat_sample : null;
-            }
+        // Ambil kolam yang PUNYA siklus aktif saja
+        $kolamAktif = $kolams->filter(function($k) { return $k->siklusAktif != null; });
 
-            $datasetsBerat[] = [
-                'label' => $kolam->nama_kolam,
-                'borderColor' => $colors[$colorIndex % count($colors)],
-                'backgroundColor' => 'transparent',
-                'borderWidth' => 3,
-                'pointRadius' => 0, 
-                'pointHoverRadius' => 6, 
-                'pointBackgroundColor' => $colors[$colorIndex % count($colors)],
-                'spanGaps' => true, 
-                'tension' => 0.4,
-                'data' => $dataPoints,
-            ];
-            $colorIndex++;
+        if ($kolamAktif->count() > 0) {
+            $kolamAktifIds = $kolamAktif->pluck('id')->toArray();
+
+            // Tarik data sample HANYA dari kolam aktif dan SETELAH tanggal mulai siklus
+            $dataSample = DailyParameter::whereIn('kolam_id', $kolamAktifIds)
+                ->whereNotNull('berat_sample')
+                ->orderBy('tanggal_cek', 'asc')
+                ->get()
+                ->filter(function($sample) use ($kolamAktif) {
+                    $kolam = $kolamAktif->firstWhere('id', $sample->kolam_id);
+                    return $sample->tanggal_cek >= $kolam->siklusAktif->tanggal_mulai;
+                })->values();
+
+            $uniqueDates = $dataSample->pluck('tanggal_cek')->unique()->sort()->values();
+            
+            $chartLabelsBerat = $uniqueDates->map(function($date) {
+                return Carbon::parse($date)->translatedFormat('d M');
+            })->toArray();
+
+            foreach ($kolamAktif as $kolam) {
+                $samples = $dataSample->where('kolam_id', $kolam->id);
+                $dataPoints = [];
+                
+                foreach ($uniqueDates as $date) {
+                    $sampleOnDate = $samples->firstWhere('tanggal_cek', $date);
+                    $dataPoints[] = $sampleOnDate ? (float) $sampleOnDate->berat_sample : null;
+                }
+
+                $datasetsBerat[] = [
+                    'label' => $kolam->nama_kolam,
+                    'borderColor' => $colors[$colorIndex % count($colors)],
+                    'backgroundColor' => 'transparent',
+                    'borderWidth' => 3,
+                    'pointRadius' => 0, 
+                    'pointHoverRadius' => 6, 
+                    'pointBackgroundColor' => $colors[$colorIndex % count($colors)],
+                    'spanGaps' => true, 
+                    'tension' => 0.4,
+                    'data' => $dataPoints,
+                ];
+                $colorIndex++;
+            }
         }
 
         $chartDataBerat = [
@@ -157,14 +174,16 @@ class DashboardController extends Controller
             'datasets' => $datasetsBerat,
         ];
 
-        // 6. RENDER KE VUE
+        // =========================================================================
+        // 6. RENDER KE VUE (BAGIAN INI YANG SEBELUMNYA HILANG)
+        // =========================================================================
         return Inertia::render('Dashboard', [
             'ringkasan' => [
                 'totalKolam' => $totalKolam,
                 'totalIkan' => $totalIkan,
                 'totalBiomassaKg' => round($totalBiomassaKg, 2),
             ],
-            'kolam_list' => $kolamList, // MENGIRIM DATA DETAIL KOLAM KE VUE
+            'kolam_list' => $kolamList, 
             'inventory' => [
                 'stokPakan' => round($stokPakanGlobal, 2), 
                 'namaPakan' => $namaPakanGlobal,

@@ -213,7 +213,7 @@ const chartBeratConfig = {
                     <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-6 gap-4">
                         <div>
                             <h3 class="text-lg font-bold text-slate-900">Kurva Pertumbuhan Ikan</h3>
-                            <span class="inline-block mt-1 px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg uppercase tracking-wider border border-emerald-100">Berdasarkan Kolam</span>
+                            <span class="inline-block mt-1 px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg uppercase tracking-wider border border-emerald-100">Berdasarkan Siklus Berjalan</span>
                         </div>
                         
                         <div class="flex flex-wrap gap-x-4 gap-y-2 justify-end max-w-lg">

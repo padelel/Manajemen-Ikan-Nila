@@ -1,17 +1,44 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
-defineProps({ parameters: Array });
+// PERBAIKAN 1: parameters diubah menjadi Object, dan tambah kolams & filters
+const props = defineProps({ 
+    parameters: Object,
+    kolams: Array,
+    filters: Object
+});
 
-// Fungsi untuk menentukan Jabatan/Role berdasarkan user_id
+// State untuk Filter
+const filterForm = ref({
+    kolam_id: props.filters?.kolam_id || '',
+    start_date: props.filters?.start_date || '',
+    end_date: props.filters?.end_date || '',
+});
+
+// Watcher untuk Filter Otomatis
+watch(filterForm, (value) => {
+    router.get('/parameter', value, { // Pastikan URL ini sesuai dengan route Anda (misal: /parameter atau /kualitas-air)
+        preserveState: true, 
+        replace: true 
+    });
+}, { deep: true });
+
+// Fungsi Reset
+const resetFilter = () => {
+    filterForm.value.kolam_id = '';
+    filterForm.value.start_date = '';
+    filterForm.value.end_date = '';
+};
+
+// Fungsi Role
 const getRoleName = (userId) => {
     if (userId === 1) return 'Pengelola Utama';
     if (userId === 2) return 'Operator Lapangan';
     return 'Sistem Otomatis';
 };
 
-// Fungsi untuk menentukan Inisial Avatar
 const getRoleInitial = (userId) => {
     if (userId === 1) return 'PU';
     if (userId === 2) return 'OL';
@@ -42,9 +69,32 @@ const getRoleInitial = (userId) => {
         </template>
 
         <div class="py-8">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                
+                <div class="bg-white p-5 rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-slate-100 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="w-full md:w-1/3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Filter Kolam</label>
+                        <select v-model="filterForm.kolam_id" class="w-full border-slate-200 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- Semua Kolam --</option>
+                            <option v-for="k in kolams" :key="k.id" :value="k.id">{{ k.nama_kolam }}</option>
+                        </select>
+                    </div>
+                    <div class="w-full md:w-1/4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Dari Tanggal</label>
+                        <input type="date" v-model="filterForm.start_date" class="w-full border-slate-200 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="w-full md:w-1/4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sampai Tanggal</label>
+                        <input type="date" v-model="filterForm.end_date" class="w-full border-slate-200 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <button @click="resetFilter" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold text-sm rounded-xl hover:bg-slate-200 transition-colors">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
                 <div class="bg-white overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-slate-100">
-                    
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50/50 border-b border-slate-100">
@@ -59,21 +109,12 @@ const getRoleInitial = (userId) => {
                             </thead>
                             
                             <tbody class="text-sm">
-                                <tr v-for="param in parameters" :key="param.id" class="border-b border-slate-50 hover:bg-slate-50/80 transition duration-200 group">
-                                    
-                                    <td class="px-6 py-5">
-                                        <p class="font-medium text-slate-500">{{ param.tanggal_cek }}</p>
-                                    </td>
-                                    
-                                    <td class="px-6 py-5">
-                                        <p class="font-bold text-slate-900 text-base">{{ param.kolam.nama_kolam }}</p>
-                                    </td>
+                                <tr v-for="param in parameters.data" :key="param.id" class="border-b border-slate-50 hover:bg-slate-50/80 transition duration-200 group">
+                                    <td class="px-6 py-5"><p class="font-medium text-slate-500">{{ param.tanggal_cek }}</p></td>
+                                    <td class="px-6 py-5"><p class="font-bold text-slate-900 text-base">{{ param.kolam?.nama_kolam }}</p></td>
 
                                     <td class="px-6 py-5 text-center">
-                                        <span 
-                                            :class="(param.suhu >= 25 && param.suhu <= 32) ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'"
-                                            class="inline-flex items-center justify-center gap-0.5 px-3 py-1.5 rounded-lg border font-bold transition-colors"
-                                        >
+                                        <span :class="(param.suhu >= 25 && param.suhu <= 32) ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'" class="inline-flex items-center justify-center gap-0.5 px-3 py-1.5 rounded-lg border font-bold transition-colors">
                                             <span class="text-base">{{ param.suhu }}</span>
                                             <span class="text-xs opacity-70 font-semibold mt-0.5">°C</span>
                                         </span>
@@ -101,30 +142,47 @@ const getRoleInitial = (userId) => {
                                                  }">
                                                 {{ getRoleInitial(param.user_id) }}
                                             </div>
-                                            
                                             <div class="flex flex-col">
-                                                <span class="text-xs font-bold uppercase tracking-wider" 
-                                                      :class="param.user_id === 1 ? 'text-indigo-600' : (param.user_id === 2 ? 'text-teal-600' : 'text-slate-500')">
+                                                <span class="text-xs font-bold uppercase tracking-wider" :class="param.user_id === 1 ? 'text-indigo-600' : (param.user_id === 2 ? 'text-teal-600' : 'text-slate-500')">
                                                     {{ getRoleName(param.user_id) }}
                                                 </span>
                                             </div>
                                         </div>
                                     </td>
-
                                 </tr>
 
-                                <tr v-if="parameters.length === 0">
+                                <tr v-if="parameters.data.length === 0">
                                     <td colspan="6" class="px-6 py-16 text-center">
                                         <div class="flex flex-col items-center justify-center">
-                                            <svg class="w-12 h-12 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.613.306a4 4 0 01-2.574.344l-2.484-.497a2 2 0 00-1.032.05L3 16.382V5.562l2.484-.828a2 2 0 011.032-.05l2.484.497a4 4 0 002.574-.344l.613-.306a6 6 0 013.86-.517l2.387.477a2 2 0 011.022.547V15.428z" />
-                                            </svg>
-                                            <p class="text-slate-500 font-medium text-sm">Belum ada data pengecekan air.</p>
+                                            <p class="text-slate-500 font-medium text-sm mb-2">Pencarian tidak menemukan hasil.</p>
+                                            <button @click="resetFilter" v-if="filterForm.kolam_id || filterForm.start_date" class="text-blue-600 font-bold hover:underline text-sm">Hapus Filter</button>
                                         </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="bg-slate-50 border-t border-slate-100 p-4 flex items-center justify-between" v-if="parameters.links && parameters.links.length > 3">
+                        <div class="text-sm text-slate-500 font-medium">
+                            Menampilkan <span class="font-bold text-slate-800">{{ parameters.from }}</span> - <span class="font-bold text-slate-800">{{ parameters.to }}</span> dari total <span class="font-bold text-slate-800">{{ parameters.total }}</span> data.
+                        </div>
+                        <div class="flex gap-1">
+                            <template v-for="(link, index) in parameters.links" :key="index">
+                                <Link 
+                                    v-if="link.url" 
+                                    :href="link.url" 
+                                    v-html="link.label"
+                                    class="px-3.5 py-2 rounded-lg text-sm font-semibold transition-all border"
+                                    :class="link.active ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'"
+                                />
+                                <span 
+                                    v-else 
+                                    v-html="link.label" 
+                                    class="px-3.5 py-2 rounded-lg text-sm font-semibold text-slate-400 bg-slate-50 border border-slate-100 cursor-not-allowed">
+                                </span>
+                            </template>
+                        </div>
                     </div>
 
                 </div>

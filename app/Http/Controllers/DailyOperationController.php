@@ -103,7 +103,7 @@ class DailyOperationController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('dashboard')->with('message', 'Operasi Harian Terpadu Berhasil Disimpan!');
+            return redirect()->route('feedlog.index')->with('message', 'Operasi Harian Terpadu Berhasil Disimpan!');
 
         } catch (\Exception $e) {
             DB::rollBack();

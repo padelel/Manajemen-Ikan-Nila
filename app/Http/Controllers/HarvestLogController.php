@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\HarvestLog;
 use App\Models\Kolam;
+use App\Models\SiklusBudidaya; // Tambahkan ini agar lebih rapi
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,7 @@ class HarvestLogController extends Controller
     {
         $validated = $request->validate([
             'kolam_id' => 'required|exists:kolams,id',
-            'jenis_panen' => 'required|in:Parsial,Full',
+            'jenis_panen' => 'required|in:Parsial,Full', // <-- Disini pakainya 'Full'
             'tanggal_panen' => 'required|date',
             'jumlah_ikan' => 'required|integer|min:1',
             'berat_total_kg' => 'required|numeric|min:0.1',
@@ -55,12 +56,28 @@ class HarvestLogController extends Controller
             $validated['user_id'] = Auth::id();
             HarvestLog::create($validated);
 
+            // =========================================================
+            // PERBAIKAN: Gunakan 'Full', bukan 'Total'
+            // =========================================================
+            if ($validated['jenis_panen'] === 'Full') {
+                $siklusAktif = SiklusBudidaya::where('kolam_id', $request->kolam_id)
+                                ->where('status_aktif', 'Aktif')
+                                ->first();
+                                
+                if ($siklusAktif) {
+                    $siklusAktif->update([
+                        'status_aktif' => 'Selesai',
+                        'tanggal_selesai' => $request->tanggal_panen
+                    ]);
+                }
+            }
+
             DB::commit();
             return redirect()->route('panen.index')->with('success', 'Data panen berhasil dicatat dan populasi kolam telah diperbarui.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Terjadi kesalahan sistem.']);
+            return back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
         }
     }
 }

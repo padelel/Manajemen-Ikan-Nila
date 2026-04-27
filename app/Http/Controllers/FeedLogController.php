@@ -13,11 +13,34 @@ use Illuminate\Support\Facades\Auth;
 
 class FeedLogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // PERBAIKAN: Menambahkan 'user' ke dalam 'with' agar nama pelapor tidak error
-        $logs = FeedLog::with(['kolam', 'user', 'details.inventory'])->latest()->get();
-        return Inertia::render('FeedLog/Index', ['feedLogs' => $logs]);
+        // 1. Siapkan Query Dasar
+        $query = FeedLog::with(['kolam', 'user', 'details.inventory'])->latest();
+
+        // 2. Filter berdasarkan Kolam
+        if ($request->filled('kolam_id')) {
+            $query->where('kolam_id', $request->kolam_id);
+        }
+
+        // 3. Filter berdasarkan Tanggal Mulai
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_pakan', '>=', $request->start_date);
+        }
+
+        // 4. Filter berdasarkan Tanggal Akhir
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_pakan', '<=', $request->end_date);
+        }
+
+        // 5. Pagination: Tampilkan 10 data per halaman dan simpan parameter filter
+        $logs = $query->paginate(10)->withQueryString();
+
+        return Inertia::render('FeedLog/Index', [
+            'feedLogs' => $logs,
+            'kolams' => Kolam::all(), // Kirim data kolam untuk dropdown filter
+            'filters' => $request->only(['kolam_id', 'start_date', 'end_date'])
+        ]);
     }
 
     public function create()

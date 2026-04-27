@@ -16,7 +16,6 @@ class TebarLogController extends Controller
      */
     public function index()
     {
-        // Mengambil semua data tebar log beserta relasi kolam dan user, diurutkan dari yang terbaru
         $logs = TebarLog::with(['kolam', 'user'])->orderBy('tanggal_tebar', 'desc')->get();
         
         return Inertia::render('TebarLog/Index', [
@@ -29,7 +28,6 @@ class TebarLogController extends Controller
      */
     public function create()
     {
-        // Mengambil semua data kolam untuk ditampilkan di dropdown pilihan kolam
         $kolams = Kolam::all();
         
         return Inertia::render('TebarLog/Create', [
@@ -52,31 +50,43 @@ class TebarLogController extends Controller
             'catatan' => 'nullable|string'
         ]);
 
-        // 2. Gunakan Database Transaction agar aman (Jika salah satu gagal, semua dibatalkan)
+        // 2. Gunakan Database Transaction agar aman
         DB::beginTransaction();
         
         try {
             // A. Simpan log riwayat tebar benih
-            $validated['user_id'] = Auth::id(); // Tambahkan ID user yang sedang login
+            $validated['user_id'] = Auth::id(); 
             TebarLog::create($validated);
 
-            // B. Update jumlah populasi di tabel Kolam (Ditambah/Increment)
+            // B. Cek apakah kolam sudah punya siklus aktif
+            $siklusAktif = \App\Models\SiklusBudidaya::where('kolam_id', $validated['kolam_id'])
+                            ->where('status_aktif', 'Aktif')
+                            ->first();
+
+            if (!$siklusAktif) {
+                // Buka Siklus Baru (PERBAIKAN: Gunakan $validated['jumlah_ikan'])
+                \App\Models\SiklusBudidaya::create([
+                    'kolam_id' => $validated['kolam_id'],
+                    'tanggal_mulai' => $validated['tanggal_tebar'],
+                    'status_aktif' => 'Aktif',
+                    'jumlah_tebar_awal' => $validated['jumlah_ikan'] 
+                ]);
+            } else {
+                // Tebar susulan (Parsial), tambah jumlah bibit saja (PERBAIKAN: Gunakan $validated['jumlah_ikan'])
+                $siklusAktif->increment('jumlah_tebar_awal', $validated['jumlah_ikan']);
+            }
+
+            // C. Update jumlah populasi di tabel Kolam
             $kolam = Kolam::findOrFail($validated['kolam_id']);
             $kolam->increment('jumlah_ikan', $validated['jumlah_ikan']);
             
-            // C. Opsional: Anda juga bisa mengupdate berat_rata_gram di tabel kolam 
-            // jika tebar benih baru ini secara signifikan mengubah rata-rata keseluruhan.
-            // Namun untuk tahap awal, increment jumlah_ikan saja sudah cukup.
-
             DB::commit(); // Simpan permanen
 
-            // Kembali ke halaman index dengan pesan sukses
             return redirect()->route('tebar.index')->with('success', 'Data tebar benih berhasil dicatat dan populasi kolam bertambah.');
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Batalkan semua perubahan database jika terjadi error
+            DB::rollBack(); // Batalkan semua perubahan jika terjadi error
             
-            // Kembali ke form dengan membawa pesan error
             return back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])->withInput();
         }
     }

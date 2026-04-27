@@ -15,4 +15,12 @@ class Kolam extends Model
     'panjang_m', 'lebar_m', 'kedalaman_m', 
     'tanggal_tebar', 'jumlah_ikan', 'berat_rata_gram'
     ];
+    
+    public function riwayatSiklus() {
+        return $this->hasMany(SiklusBudidaya::class);
+    }
+
+    public function siklusAktif() {
+        return $this->hasOne(SiklusBudidaya::class)->where('status_aktif', 'Aktif');
+    }
 }
