@@ -50,9 +50,10 @@ class HarvestLogController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validasi input
         $validated = $request->validate([
             'kolam_id' => 'required|exists:kolams,id',
-            'jenis_panen' => 'required|in:Parsial,Full', // <-- Disini pakainya 'Full'
+            'jenis_panen' => 'required|in:Parsial,Full',
             'tanggal_panen' => 'required|date',
             'jumlah_ikan' => 'required|integer|min:1',
             'berat_total_kg' => 'required|numeric|min:0.1',
@@ -60,48 +61,64 @@ class HarvestLogController extends Controller
         ]);
 
         DB::beginTransaction();
+        
         try {
-            $kolam = Kolam::findOrFail($request->kolam_id);
+            // Ambil data kolam yang akan dipanen
+            $kolam = Kolam::findOrFail($validated['kolam_id']);
 
-            // Validasi agar jumlah panen tidak melebihi sisa ikan di kolam
+            // Validasi: Pastikan jumlah panen tidak melebihi stok yang ada di kolam
             if ($validated['jumlah_ikan'] > $kolam->jumlah_ikan) {
-                return back()->withErrors(['jumlah_ikan' => 'Jumlah ikan dipanen melebihi populasi kolam saat ini (Sisa: ' . $kolam->jumlah_ikan . ' Ekor).']);
+                return back()->withErrors([
+                    'jumlah_ikan' => 'Jumlah ikan yang dipanen ('. $validated['jumlah_ikan'] .') melebihi total populasi kolam saat ini ('. $kolam->jumlah_ikan .').'
+                ])->withInput();
             }
 
-            // Kurangi populasi ikan di kolam
-            if ($validated['jenis_panen'] === 'Full') {
-                $kolam->jumlah_ikan = 0; // Jika panen full, kosongkan kolam
-            } else {
-                $kolam->jumlah_ikan -= $validated['jumlah_ikan']; // Jika parsial, kurangi sebagian
+            // ====================================================================
+            // LOGIKA AUTO-CORRECTION: JIKA PARSIAL TAPI MENGHABISKAN SEMUA IKAN, 
+            // MAKA OTOMATIS UBAH JADI PANEN FULL
+            // ====================================================================
+            if ($validated['jenis_panen'] === 'Parsial' && $validated['jumlah_ikan'] == $kolam->jumlah_ikan) {
+                $validated['jenis_panen'] = 'Full';
+                $validated['catatan'] = ($validated['catatan'] ?? '') . ' (Sistem Otomatis: Diubah menjadi panen Full karena memanen seluruh sisa populasi kolam).';
             }
-            $kolam->save();
 
-            // Simpan riwayat panen
+            // Simpan Log Panen
             $validated['user_id'] = Auth::id();
             HarvestLog::create($validated);
 
-            // =========================================================
-            // PERBAIKAN: Gunakan 'Full', bukan 'Total'
-            // =========================================================
+            // ====================================================================
+            // PROSES PENGURANGAN POPULASI DAN PENUTUPAN SIKLUS
+            // ====================================================================
             if ($validated['jenis_panen'] === 'Full') {
-                $siklusAktif = SiklusBudidaya::where('kolam_id', $request->kolam_id)
+                // Jika Panen Full (atau sudah dikoreksi jadi Full): Kosongkan kolam
+                $kolam->update([
+                    'jumlah_ikan' => 0,
+                    'berat_rata_gram' => 0,
+                ]);
+
+                // Tutup Siklus Budidaya yang sedang berjalan di kolam ini
+                $siklusAktif = \App\Models\SiklusBudidaya::where('kolam_id', $kolam->id)
                                 ->where('status_aktif', 'Aktif')
                                 ->first();
-                                
                 if ($siklusAktif) {
                     $siklusAktif->update([
-                        'status_aktif' => 'Selesai',
-                        'tanggal_selesai' => $request->tanggal_panen
+                        'tanggal_selesai' => $validated['tanggal_panen'],
+                        'status_aktif' => 'Selesai'
                     ]);
                 }
+
+            } else {
+                // Jika Panen Parsial (dan belum habis): Kurangi populasi saja
+                $kolam->decrement('jumlah_ikan', $validated['jumlah_ikan']);
             }
 
             DB::commit();
-            return redirect()->route('panen.index')->with('success', 'Data panen berhasil dicatat dan populasi kolam telah diperbarui.');
+
+            return redirect()->route('panen.index')->with('success', 'Data panen berhasil dicatat.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])->withInput();
         }
     }
 }
