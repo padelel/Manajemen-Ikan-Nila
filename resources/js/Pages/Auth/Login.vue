@@ -31,20 +31,25 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head title="Masuk" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <div class="mb-8 text-center">
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Selamat Datang</h2>
+            <p class="text-sm text-slate-500 mt-2 font-medium">Silakan masuk ke akun Anda untuk melanjutkan</p>
+        </div>
+
+        <div v-if="status" class="mb-6 p-4 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm">
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Alamat Email" class="text-slate-700 font-bold mb-1" />
 
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm transition-colors px-4 py-2.5"
                     v-model="form.email"
                     required
                     autofocus
@@ -54,13 +59,13 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+            <div>
+                <InputLabel for="password" value="Kata Sandi" class="text-slate-700 font-bold mb-1" />
 
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm transition-colors px-4 py-2.5"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
@@ -69,30 +74,34 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
+            <div class="flex items-center justify-between pt-2">
+                <label class="flex items-center cursor-pointer group">
+                    <Checkbox name="remember" v-model:checked="form.remember" class="rounded text-blue-600 focus:ring-blue-500 border-slate-300 group-hover:border-blue-500 transition-colors" />
+                    <span class="ms-2 text-sm text-slate-600 font-medium group-hover:text-slate-900 transition-colors">Ingat Saya</span>
                 </label>
-            </div>
 
-            <div class="mt-4 flex items-center justify-end">
-                <Link
+                <!-- <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="text-sm font-bold text-blue-600 hover:text-blue-500 hover:underline focus:outline-none transition-colors"
                 >
-                    Forgot your password?
-                </Link>
+                    Lupa sandi?
+                </Link> -->
+            </div>
 
+            <div class="pt-4">
                 <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
+                    class="w-full flex justify-center items-center py-3.5 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 rounded-xl font-bold text-sm tracking-widest uppercase shadow-lg shadow-blue-500/30 transition-all duration-200"
+                    :class="{ 'opacity-70 cursor-wait': form.processing }"
                     :disabled="form.processing"
                 >
-                    Log in
+                    <svg v-if="form.processing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    
+                    <span v-if="!form.processing">Masuk Sekarang</span>
+                    <span v-else>Memproses...</span>
                 </PrimaryButton>
             </div>
         </form>
