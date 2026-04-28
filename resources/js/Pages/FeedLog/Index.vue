@@ -143,9 +143,9 @@ const getRoleInitial = (userId) => {
                                                       :class="log.user_id === 1 ? 'text-indigo-600' : (log.user_id === 2 ? 'text-teal-600' : 'text-slate-500')">
                                                     {{ getRoleName(log.user_id) }}
                                                 </span>
-                                                <span v-if="log.user" class="text-sm text-slate-700 font-medium mt-0.5">
+                                                <!-- <span v-if="log.user" class="text-sm text-slate-700 font-medium mt-0.5">
                                                     {{ log.user.name }}
-                                                </span>
+                                                </span> -->
                                             </div>
                                         </div>
                                     </td>

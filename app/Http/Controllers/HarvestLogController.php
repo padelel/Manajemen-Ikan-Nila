@@ -12,10 +12,34 @@ use Illuminate\Support\Facades\DB;
 
 class HarvestLogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $logs = HarvestLog::with(['kolam', 'user'])->orderBy('tanggal_panen', 'desc')->get();
-        return Inertia::render('HarvestLog/Index', ['logs' => $logs]);
+        // 1. Mulai query dasar (tarik relasi kolam dan user)
+        $query = HarvestLog::with(['kolam', 'user']);
+
+        // 2. Terapkan Filter: Jenis Panen (Parsial / Full)
+        if ($request->filled('jenis_panen') && $request->jenis_panen !== 'Semua') {
+            $query->where('jenis_panen', $request->jenis_panen);
+        }
+
+        // 3. Terapkan Filter: Tanggal Mulai
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('tanggal_panen', '>=', $request->tanggal_mulai);
+        }
+
+        // 4. Terapkan Filter: Tanggal Akhir
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('tanggal_panen', '<=', $request->tanggal_akhir);
+        }
+
+        // 5. Eksekusi query (ambil data yang sudah difilter, urutkan dari yang terbaru)
+        $logs = $query->orderBy('tanggal_panen', 'desc')->get();
+
+        // 6. Kirim data ke Vue beserta input filter (agar kotak pencarian tetap terisi setelah halaman refresh)
+        return Inertia::render('HarvestLog/Index', [
+            'logs' => $logs,
+            'filters' => $request->only(['jenis_panen', 'tanggal_mulai', 'tanggal_akhir'])
+        ]);
     }
 
     public function create()
