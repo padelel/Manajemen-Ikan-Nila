@@ -11,6 +11,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DailyOperationController;
 use App\Http\Controllers\HarvestLogController;
 use App\Http\Controllers\TebarLogController;
+use App\Http\Controllers\TransferController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -99,6 +100,10 @@ Route::middleware('auth')->group(function () {
 
     // Rute untuk Fitur Tebar Benih (Hanya butuh index, create, dan store)
     Route::resource('tebar', TebarLogController::class)->except(['show', 'edit', 'update', 'destroy']);
+
+    Route::get('/transfer', [TransferController::class, 'index'])->name('transfer.index');
+    Route::get('/transfer/create', [TransferController::class, 'create'])->name('transfer.create');
+    Route::post('/transfer', [TransferController::class, 'store'])->name('transfer.store');
 });
 
 require __DIR__.'/auth.php';
