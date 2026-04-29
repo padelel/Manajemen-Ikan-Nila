@@ -82,7 +82,10 @@ const getRoleInitial = (userId) => {
                                                 <!-- <span class="text-[10px] font-black uppercase tracking-widest" :class="log.user_id === 1 ? 'text-indigo-600' : 'text-teal-600'">
                                                     {{ getRoleName(log.user_id) }}
                                                 </span> -->
-                                                <span class="text-sm text-slate-800 font-bold mt-0.5">{{ log.user.name }}</span>
+                                                <span class="text-xs font-bold uppercase tracking-wider" 
+                                                      :class="log.user_id === 1 ? 'text-indigo-600' : (log.user_id === 2 ? 'text-teal-600' : 'text-slate-500')">
+                                                    {{ getRoleName(log.user_id) }}
+                                                </span>
                                             </div>
                                         </div>
                                     </td>

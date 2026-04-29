@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue'; // Tambahkan computed
+import { ref, computed } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link, usePage } from '@inertiajs/vue3'; // Tambahkan usePage
+import { Link, usePage } from '@inertiajs/vue3';
 
 const isExpanded = ref(true);
 const showingNavigationDropdown = ref(false);
@@ -17,7 +17,7 @@ const toggleSidebar = () => {
 // Logika pemetaan nama halaman
 const page = usePage();
 const pageTitle = computed(() => {
-    const componentPath = page.component.split('/'); // misal: "Parameter/Index" -> ["Parameter", "Index"]
+    const componentPath = page.component.split('/'); 
     const moduleName = componentPath[0];
 
     const mapping = {
@@ -27,7 +27,10 @@ const pageTitle = computed(() => {
         'Parameter': 'Kualitas Air',
         'FeedLog': 'Aktivitas',
         'Mortality': 'Mortalitas',
-        'DailyOperation': 'Operasi Harian'
+        'DailyOperation': 'Operasi Harian',
+        'Transfer': 'Transfer Ikan',
+        'TebarLog': 'Tebar Benih',
+        'HarvestLog': 'Panen'
     };
 
     return mapping[moduleName] || moduleName;
@@ -36,7 +39,7 @@ const pageTitle = computed(() => {
 // Pemetaan untuk sub-halaman (Create/Edit)
 const subPageTitle = computed(() => {
     const action = page.component.split('/')[1];
-    if (!action || action === 'Index') return null; // Sembunyikan jika Index
+    if (!action || action === 'Index') return null; 
     
     const mapping = {
         'Create': 'Tambah Data',
@@ -44,6 +47,14 @@ const subPageTitle = computed(() => {
     };
     return mapping[action] || action;
 });
+
+// ======================================================================
+// FUNGSI BARU: Mendeteksi Bagian Menu Mana Yang Sedang Aktif
+// ======================================================================
+const isMenuUtamaActive = computed(() => route().current('dashboard') || route().current('kolam.*') || route().current('inventory.*'));
+const isRiwayatActive = computed(() => route().current('parameter.*') || route().current('feedlog.*'));
+const isPopulasiActive = computed(() => route().current('kematian.*') || route().current('panen.*') || route().current('transfer.*') || route().current('tebar.*'));
+
 </script>
 
 <template>
@@ -66,11 +77,14 @@ const subPageTitle = computed(() => {
 
             <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1 custom-scrollbar overflow-x-hidden">
                 <div class="space-y-1">
+                    
                     <div 
                         :class="[isExpanded ? 'opacity-100 max-h-10 mb-2' : 'opacity-0 max-h-0 mb-0']"
                         class="transition-all duration-300 ease-in-out overflow-hidden px-3"
                     >
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 whitespace-nowrap">
+                        <p class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-2 transition-colors duration-300"
+                           :class="[isMenuUtamaActive ? 'text-blue-600' : 'text-slate-400']">
+                            <span v-if="isMenuUtamaActive" class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
                             Menu Utama
                         </p>
                     </div>
@@ -97,6 +111,17 @@ const subPageTitle = computed(() => {
                             <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Gudang</span>
                         </Link>
 
+                        <div 
+                            :class="[isExpanded ? 'opacity-100 max-h-10 mb-2 mt-8' : 'opacity-0 max-h-0 mb-0 mt-0']"
+                            class="transition-all duration-300 ease-in-out overflow-hidden px-3"
+                        >
+                            <p class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-2 transition-colors duration-300"
+                            :class="[isRiwayatActive ? 'text-blue-600' : 'text-slate-400']">
+                                <span v-if="isRiwayatActive" class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+                                Riwayat
+                            </p>
+                        </div>
+
                         <Link :href="route('parameter.index')" 
                             :class="[route().current('parameter.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
                             class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group overflow-hidden">
@@ -110,6 +135,17 @@ const subPageTitle = computed(() => {
                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Aktivitas</span>
                         </Link>
+
+                        <div 
+                            :class="[isExpanded ? 'opacity-100 max-h-10 mb-2 mt-4' : 'opacity-0 max-h-0 mb-0 mt-0']"
+                            class="transition-all duration-300 ease-in-out overflow-hidden px-3"
+                        >
+                            <p class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-2 transition-colors duration-300"
+                               :class="[isPopulasiActive ? 'text-blue-600' : 'text-slate-400']">
+                                <span v-if="isPopulasiActive" class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+                                Pengaturan Populasi
+                            </p>
+                        </div>
 
                         <Link :href="route('kematian.index')" 
                             :class="[route().current('kematian.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"

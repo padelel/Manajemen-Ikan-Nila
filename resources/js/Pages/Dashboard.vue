@@ -8,43 +8,64 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const props = defineProps({
     ringkasan: Object,
-    kolam_list: Array, // Data baru untuk detail populasi kolam
+    kolam_list: Array, 
     inventory: Object, 
     inventory_list: Array, 
     chartPakan: Object,
     chartBerat: Object
 });
 
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false },
-        tooltip: {
-            backgroundColor: '#0f172a',
-            padding: 12,
-            titleFont: { size: 13 },
-            bodyFont: { size: 14, weight: 'bold' },
-            cornerRadius: 8,
-        }
-    },
-    scales: {
-        y: { 
-            beginAtZero: true,
-            grid: { color: '#f1f5f9' },
-            ticks: { color: '#94a3b8', font: { size: 11 } }
+// FUNGSI BARU: Membuat opsi grafik yang dinamis berdasarkan satuannya
+const getChartOptions = (satuan) => {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#0f172a',
+                padding: 12,
+                titleFont: { size: 13 },
+                bodyFont: { size: 14, weight: 'bold' },
+                cornerRadius: 8,
+                // Kustomisasi label tooltip untuk menambahkan satuan
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y !== null) {
+                            // Menambahkan satuan di akhir angka (misal: 10 Kg)
+                            label += context.parsed.y + ' ' + satuan;
+                        }
+                        return label;
+                    }
+                }
+            }
         },
-        x: { 
-            grid: { display: false },
-            ticks: { color: '#94a3b8', font: { size: 11 } }
-        }
-    },
-    elements: {
-        line: { tension: 0.4 },
-        point: { radius: 2, hoverRadius: 6 }
-    },
-    interaction: { mode: 'index', intersect: false }
+        scales: {
+            y: { 
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#94a3b8', font: { size: 11 } }
+            },
+            x: { 
+                grid: { display: false },
+                ticks: { color: '#94a3b8', font: { size: 11 } }
+            }
+        },
+        elements: {
+            line: { tension: 0.4 },
+            point: { radius: 2, hoverRadius: 6 }
+        },
+        interaction: { mode: 'index', intersect: false }
+    };
 };
+
+// Menerapkan fungsi dengan satuan yang berbeda untuk masing-masing grafik
+const chartPakanOptions = getChartOptions('Kg');
+const chartBeratOptions = getChartOptions('Gram');
 
 // 1. Grafik Tren Pakan
 const chartPakanConfig = {
@@ -162,7 +183,7 @@ const chartBeratConfig = {
                             </div>
                         </div>
                         <div class="flex-grow relative h-72 w-full">
-                            <Line :data="chartPakanConfig" :options="chartOptions" />
+                            <Line :data="chartPakanConfig" :options="chartPakanOptions" />
                         </div>
                     </div>
 
@@ -225,7 +246,7 @@ const chartBeratConfig = {
                     </div>
 
                     <div class="relative h-80 w-full">
-                        <Line :data="chartBeratConfig" :options="chartOptions" />
+                        <Line :data="chartBeratConfig" :options="chartBeratOptions" />
                     </div>
                 </div>
 
