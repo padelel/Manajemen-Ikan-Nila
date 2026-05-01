@@ -65,7 +65,7 @@ const getRoleInitial = (userId) => {
                         Cetak Laporan
                     </a>
                     
-                    <Link href="/kematian/create" class="bg-rose-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-rose-200/50 hover:bg-rose-700 text-sm font-semibold transition-all">
+                    <Link v-if="$page.props.auth.user.role === 'operator'" href="/kematian/create" class="bg-rose-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-rose-200/50 hover:bg-rose-700 text-sm font-semibold transition-all">
                         + Lapor Kematian
                     </Link>
                 </div>

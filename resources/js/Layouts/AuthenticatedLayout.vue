@@ -104,7 +104,7 @@ const isPopulasiActive = computed(() => route().current('kematian.*') || route()
                             <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Kolam</span>
                         </Link>
 
-                        <Link v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.index')" 
+                        <Link v-if="$page.props.auth.user.role === 'operator'" :href="route('inventory.index')" 
                             :class="[route().current('inventory.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
                             class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group overflow-hidden">
                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
@@ -136,6 +136,18 @@ const isPopulasiActive = computed(() => route().current('kematian.*') || route()
                             <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Aktivitas</span>
                         </Link>
 
+                        <Link v-if="$page.props.auth.user.role === 'admin'" :href="route('inventory.history')" 
+                            :class="[route().current('inventory.history') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
+                            class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group overflow-hidden">
+                            
+                            <!-- Ikon Clipboard List (Riwayat) -->
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            
+                            <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Riwayat Stok</span>
+                        </Link>
+
                         <div 
                             :class="[isExpanded ? 'opacity-100 max-h-10 mb-2 mt-4' : 'opacity-0 max-h-0 mb-0 mt-0']"
                             class="transition-all duration-300 ease-in-out overflow-hidden px-3"
@@ -162,6 +174,8 @@ const isPopulasiActive = computed(() => route().current('kematian.*') || route()
                             </svg>
                             <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Panen</span>
                         </Link>
+
+                        
 
                         <Link :href="route('transfer.index')" 
                             :class="[route().current('transfer.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
@@ -215,7 +229,7 @@ const isPopulasiActive = computed(() => route().current('kematian.*') || route()
                 </div>
 
                 <div class="flex items-center gap-6">
-                    <Link :href="route('operasi.create')" class="hidden sm:block text-xs font-bold uppercase tracking-wider bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition shadow-md shadow-slate-200">
+                    <Link v-if="$page.props.auth.user.role === 'operator'" :href="route('operasi.create')" class="hidden sm:block text-xs font-bold uppercase tracking-wider bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition shadow-md shadow-slate-200">
                         + Input Harian
                     </Link>
 

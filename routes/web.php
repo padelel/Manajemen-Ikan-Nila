@@ -1,109 +1,83 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KolamController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\DailyParameterController;
 use App\Http\Controllers\FeedLogController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MortalityLogController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\DailyOperationController;
 use App\Http\Controllers\HarvestLogController;
-use App\Http\Controllers\TebarLogController;
 use App\Http\Controllers\TransferController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\TebarLogController;
+use App\Http\Controllers\DailyOperationController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
+// Redirect halaman awal langsung ke Login
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Route::get('/dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-// Rute Dashboard menggunakan Controller baru
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-// Rute yang HANYA BISA DIAKSES ADMIN
-Route::middleware('can:admin')->group(function () {
-
-    // Rute Data Kolam (Admin Only)
-    Route::get('/kolam', [KolamController::class, 'index'])->name('kolam.index');
-    Route::get('/kolam/create', [KolamController::class, 'create'])->name('kolam.create');
-    Route::post('/kolam', [KolamController::class, 'store'])->name('kolam.store');
-    Route::get('/kolam/{kolam}/edit', [KolamController::class, 'edit'])->name('kolam.edit');
-    Route::put('/kolam/{kolam}', [KolamController::class, 'update'])->name('kolam.update');
-    Route::delete('/kolam/{kolam}', [KolamController::class, 'destroy'])->name('kolam.destroy');
-
-    // Rute Gudang Pakan (Admin Only)
-    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
-    Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
-    Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
-    Route::get('/inventory/{inventory}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
-    Route::put('/inventory/{inventory}', [InventoryController::class, 'update'])->name('inventory.update');
-    Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
-});
-
 Route::middleware('auth')->group(function () {
-    Route::get('/laporan/cetak', [ReportController::class, 'cetakPDF'])->name('laporan.cetak');
 
-    // Rute Data Akun Pengguna
+    // ================================================================
+    // 1. RUTE BERSAMA (BISA DIAKSES ADMIN & OPERATOR)
+    // ================================================================
+    // Halaman Ringkasan Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Pengaturan Akun
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rute Data Kolam
-    // Route::get('/kolam', [KolamController::class, 'index'])->name('kolam.index');
-    // Route::get('/kolam/create', [KolamController::class, 'create'])->name('kolam.create');
-    // Route::post('/kolam', [KolamController::class, 'store'])->name('kolam.store');
-    // Route::get('/kolam/{kolam}/edit', [KolamController::class, 'edit'])->name('kolam.edit');
-    // Route::put('/kolam/{kolam}', [KolamController::class, 'update'])->name('kolam.update');
-    // Route::delete('/kolam/{kolam}', [KolamController::class, 'destroy'])->name('kolam.destroy');
-
-    // Rute Gudang Pakan
-    // Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
-    // Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
-    // Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
-    // Route::get('/inventory/{inventory}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
-    // Route::put('/inventory/{inventory}', [InventoryController::class, 'update'])->name('inventory.update');
-    // Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
-
-    // Rute Parameter Air
+    // HALAMAN MONITORING (Semua bisa melihat data/tabel riwayat)
     Route::get('/parameter', [DailyParameterController::class, 'index'])->name('parameter.index');
-    Route::get('/parameter/create', [DailyParameterController::class, 'create'])->name('parameter.create');
-    Route::post('/parameter', [DailyParameterController::class, 'store'])->name('parameter.store');
-
-    // Rute Manajemen Pakan (Forward Chaining)
     Route::get('/feedlog', [FeedLogController::class, 'index'])->name('feedlog.index');
-    Route::get('/feedlog/create', [FeedLogController::class, 'create'])->name('feedlog.create');
-    Route::post('/feedlog', [FeedLogController::class, 'store'])->name('feedlog.store');
-
-    // Rute khusus untuk mengecek rekomendasi sistem secara Real-Time tanpa refresh halaman
-    Route::get('/api/hitung-pakan/{kolam_id}', [FeedLogController::class, 'hitungRekomendasi']);
-
-    // Rute Mortalitas / Kematian Ikan
     Route::get('/kematian', [MortalityLogController::class, 'index'])->name('kematian.index');
-    Route::get('/kematian/create', [MortalityLogController::class, 'create'])->name('kematian.create');
-    Route::post('/kematian', [MortalityLogController::class, 'store'])->name('kematian.store');
-
-    // Rute Operasi Harian Terpadu
-    Route::get('/operasi-harian', [DailyOperationController::class, 'create'])->name('operasi.create');
-    Route::post('/operasi-harian', [DailyOperationController::class, 'store'])->name('operasi.store');
-
-    // Rute Riwayat Panen
-    Route::resource('panen', HarvestLogController::class)->except(['show', 'edit', 'update', 'destroy']);
-
-    // Rute untuk Fitur Tebar Benih (Hanya butuh index, create, dan store)
-    Route::resource('tebar', TebarLogController::class)->except(['show', 'edit', 'update', 'destroy']);
-
+    Route::get('/panen', [HarvestLogController::class, 'index'])->name('panen.index');
     Route::get('/transfer', [TransferController::class, 'index'])->name('transfer.index');
-    Route::get('/transfer/create', [TransferController::class, 'create'])->name('transfer.create');
-    Route::post('/transfer', [TransferController::class, 'store'])->name('transfer.store');
+    Route::get('/tebar', [TebarLogController::class, 'index'])->name('tebar.index');
+
+
+    // ================================================================
+    // 2. KHUSUS ADMIN (PENGELOLA UTAMA)
+    // ================================================================
+    Route::middleware('role:admin')->group(function () {
+
+        // Riwayat Stok Pakan (WAJIB diletakkan sebelum resource 'inventory')
+        Route::get('/inventory/history', [InventoryController::class, 'history'])->name('inventory.history');
+        
+        // Admin memegang penuh kendali Master Data (Tambah/Edit/Hapus Kolam & Gudang)
+        Route::resource('kolam', KolamController::class);
+        Route::resource('inventory', InventoryController::class);
+
+    });
+
+
+    // ================================================================
+    // 3. KHUSUS OPERATOR LAPANGAN (TUGAS INPUT DATA)
+    // ================================================================
+    Route::middleware('role:operator')->group(function () {
+        
+        // Operasi Harian (Input Cepat Multi-Kolam)
+        Route::get('/operasi-harian', [DailyOperationController::class, 'create'])->name('operasi.create');
+        Route::post('/operasi-harian', [DailyOperationController::class, 'store'])->name('operasi.store');
+
+        // Fungsi Input Form (Create, Store, Edit, Update, Destroy)
+        // Kita mengecualikan 'index' dan 'show' karena rute index sudah dideklarasikan di Rute Bersama
+        Route::resource('parameter', DailyParameterController::class)->except(['index', 'show']);
+        Route::resource('feedlog', FeedLogController::class)->except(['index', 'show']);
+        Route::resource('kematian', MortalityLogController::class)->except(['index', 'show']);
+        Route::resource('panen', HarvestLogController::class)->except(['index', 'show']);
+        Route::resource('tebar', TebarLogController::class)->except(['index', 'show']);
+
+        // Transfer Ikan
+        Route::get('/transfer/create', [TransferController::class, 'create'])->name('transfer.create');
+        Route::post('/transfer', [TransferController::class, 'store'])->name('transfer.store');
+
+    });
+
 });
 
 require __DIR__.'/auth.php';

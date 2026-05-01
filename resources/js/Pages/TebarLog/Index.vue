@@ -28,7 +28,7 @@ const getRoleInitial = (userId) => {
                     <p class="text-sm text-slate-500 mt-1">Catatan pemasukan benih baru ke dalam kolam.</p>
                 </div>
                 
-                <Link href="/tebar/create" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-200/50 hover:bg-indigo-700 text-sm font-semibold transition-all">
+                <Link v-if="$page.props.auth.user.role === 'operator'" href="/tebar/create" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-200/50 hover:bg-indigo-700 text-sm font-semibold transition-all">
                     + Tebar Benih Baru
                 </Link>
             </div>

@@ -64,7 +64,7 @@ const getRoleInitial = (userId) => {
                     <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Riwayat Panen</h2>
                     <p class="text-sm text-slate-500 mt-1">Catatan histori panen ikan (parsial & full) beserta total berat.</p>
                 </div>
-                <Link :href="route('panen.create')" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 flex-shrink-0">
+                <Link v-if="$page.props.auth.user.role === 'operator'" :href="route('panen.create')" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 flex-shrink-0">
                     + Catat Panen Baru
                 </Link>
             </div>
