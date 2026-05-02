@@ -24,7 +24,7 @@ const getInitial = (name) => {
         <template #header>
             <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Riwayat Pergerakan Stok</h2>
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Riwayat Pergerakan Stok Pakan</h2>
                     <p class="text-sm text-slate-500 mt-1">Pantau arus masuk (restock) dan keluar (penggunaan) pakan.</p>
                 </div>
                 <Link :href="route('inventory.index')" class="px-5 py-2.5 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200 transition flex-shrink-0">

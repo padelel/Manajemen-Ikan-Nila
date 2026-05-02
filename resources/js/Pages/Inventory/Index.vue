@@ -70,7 +70,7 @@ const hapusInventory = (id, nama) => {
                                             <Link :href="'/inventory/' + item.id + '/edit'" class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
                                                 Edit
                                             </Link>
-                                            <button @click="hapusInventory(item.id, item.nama_pakan)" class="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition">
+                                            <button v-if="$page.props.auth.user.role === 'admin'" @click="hapusInventory(item.id, item.nama_pakan)" class="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition">
                                                 Hapus
                                             </button>
                                         </div>

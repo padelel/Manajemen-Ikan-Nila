@@ -3,6 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import GrowthChart from '@/Components/GrowthChart.vue';
+import PopulationChart from '@/Components/PopulationChart.vue';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -12,71 +14,53 @@ const props = defineProps({
     inventory: Object, 
     inventory_list: Array, 
     chartPakan: Object,
-    chartBerat: Object
+    chartBerat: Object,
+    chartPopulasi: Object
 });
 
-// FUNGSI BARU: Membuat opsi grafik yang dinamis berdasarkan satuannya
-const getChartOptions = (satuan) => {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#0f172a',
-                padding: 12,
-                titleFont: { size: 13 },
-                bodyFont: { size: 14, weight: 'bold' },
-                cornerRadius: 8,
-                // Kustomisasi label tooltip untuk menambahkan satuan
-                callbacks: {
-                    label: function(context) {
-                        let label = context.dataset.label || '';
-                        if (label) {
-                            label += ': ';
-                        }
-                        if (context.parsed.y !== null) {
-                            // Menambahkan satuan di akhir angka (misal: 10 Kg)
-                            label += context.parsed.y + ' ' + satuan;
-                        }
-                        return label;
-                    }
+// Konfigurasi khusus untuk Tren Konsumsi Pakan (tetap di sini)
+const chartPakanOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+        tooltip: {
+            backgroundColor: '#0f172a',
+            padding: 12,
+            titleFont: { size: 13 },
+            bodyFont: { size: 14, weight: 'bold' },
+            cornerRadius: 8,
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (label) label += ': ';
+                    if (context.parsed.y !== null) label += context.parsed.y + ' Kg';
+                    return label;
                 }
             }
+        }
+    },
+    scales: {
+        y: { 
+            beginAtZero: true,
+            grid: { color: '#f1f5f9' },
+            ticks: { color: '#94a3b8', font: { size: 11 } }
         },
-        scales: {
-            y: { 
-                beginAtZero: true,
-                grid: { color: '#f1f5f9' },
-                ticks: { color: '#94a3b8', font: { size: 11 } }
-            },
-            x: { 
-                grid: { display: false },
-                ticks: { color: '#94a3b8', font: { size: 11 } }
-            }
-        },
-        elements: {
-            line: { tension: 0.4 },
-            point: { radius: 2, hoverRadius: 6 }
-        },
-        interaction: { mode: 'index', intersect: false }
-    };
+        x: { 
+            grid: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 11 } }
+        }
+    },
+    elements: {
+        line: { tension: 0.4 },
+        point: { radius: 2, hoverRadius: 6 }
+    },
+    interaction: { mode: 'index', intersect: false }
 };
 
-// Menerapkan fungsi dengan satuan yang berbeda untuk masing-masing grafik
-const chartPakanOptions = getChartOptions('Kg');
-const chartBeratOptions = getChartOptions('Gram');
-
-// 1. Grafik Tren Pakan
 const chartPakanConfig = {
     labels: props.chartPakan.labels,
     datasets: props.chartPakan.datasets
-};
-
-// 2. Grafik Pertumbuhan Berat Ikan
-const chartBeratConfig = {
-    labels: props.chartBerat.labels,
-    datasets: props.chartBerat.datasets
 };
 </script>
 
@@ -94,8 +78,9 @@ const chartBeratConfig = {
         <div class="py-8">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
                 
+                <!-- 4 KOTAK KPI ATAS (TIDAK ADA PERUBAHAN) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    
+                    <!-- Kotak Kolam Aktif -->
                     <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-transform duration-300 cursor-default">
                         <div class="flex items-center gap-3 mb-3">
                             <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-500">
@@ -106,8 +91,8 @@ const chartBeratConfig = {
                         <p class="text-3xl font-black text-slate-900">{{ ringkasan.totalKolam }} <span class="text-sm font-semibold text-slate-400">Unit</span></p>
                     </div>
                     
-                    <div class="group relative z-10 hover:z-50 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-all duration-300 cursor-default">
-                        
+                    <!-- Kotak Total Populasi -->
+                    <div class="group relative z-20 hover:z-50 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-all duration-300 cursor-default">
                         <div class="flex items-center gap-3 mb-3 relative z-10">
                             <span class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-500">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" /></svg>
@@ -115,7 +100,6 @@ const chartBeratConfig = {
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Populasi</p>
                         </div>
                         <p class="text-3xl font-black text-slate-900 relative z-10">{{ ringkasan.totalIkan.toLocaleString('id-ID') }} <span class="text-sm font-semibold text-slate-400">Ekor</span></p>
-
                         <div class="absolute left-0 top-full mt-3 w-full min-w-[220px] bg-slate-900 p-5 rounded-2xl shadow-[0_20px_40px_rgb(0,0,0,0.2)] opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-3 group-hover:translate-y-0 transition-all duration-300 z-50 border border-slate-800">
                             <div class="absolute -top-2 left-8 w-4 h-4 bg-slate-900 rotate-45 border-t border-l border-slate-800"></div>
                             <div class="relative z-10">
@@ -131,6 +115,7 @@ const chartBeratConfig = {
                         </div>
                     </div>
 
+                    <!-- Kotak Est Biomassa -->
                     <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-transform duration-300 cursor-default">
                         <div class="flex items-center gap-3 mb-3">
                             <span class="flex items-center justify-center w-8 h-8 rounded-full bg-purple-50 text-purple-500">
@@ -141,7 +126,8 @@ const chartBeratConfig = {
                         <p class="text-3xl font-black text-slate-900">{{ ringkasan.totalBiomassaKg.toLocaleString('id-ID') }} <span class="text-sm font-semibold text-slate-400">Kg</span></p>
                     </div>
 
-                    <div class="group relative z-10 hover:z-50 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-all duration-300 cursor-default">
+                    <!-- Kotak Total Stok Gudang -->
+                    <div class="group relative z-20 hover:z-50 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:-translate-y-1 transition-all duration-300 cursor-default">
                         <div class="flex items-center gap-3 mb-3 relative z-10">
                             <span class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-500">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
@@ -149,7 +135,6 @@ const chartBeratConfig = {
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Stok Gudang</p>
                         </div>
                         <p class="text-3xl font-black text-slate-900 relative z-10">{{ inventory.stokPakan }} <span class="text-sm font-semibold text-slate-400">Kg</span></p>
-
                         <div class="absolute left-0 top-full mt-3 w-full min-w-[220px] bg-slate-900 p-5 rounded-2xl shadow-[0_20px_40px_rgb(0,0,0,0.2)] opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-3 group-hover:translate-y-0 transition-all duration-300 z-50 border border-slate-800">
                             <div class="absolute -top-2 left-8 w-4 h-4 bg-slate-900 rotate-45 border-t border-l border-slate-800"></div>
                             <div class="relative z-10">
@@ -166,15 +151,16 @@ const chartBeratConfig = {
                     </div>
                 </div>
 
+                <!-- BAGIAN GRAFIK & ANALISIS SISA STOK -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
+                    <!-- Grafik Pakan -->
                     <div class="lg:col-span-2 bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative z-0">
                         <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-6 gap-4">
                             <div>
                                 <h3 class="text-lg font-bold text-slate-900">Tren Konsumsi Pakan</h3>
                                 <span class="inline-block mt-1 px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg uppercase tracking-wider border border-slate-200">7 Hari Terakhir</span>
                             </div>
-                            
                             <div class="flex flex-wrap gap-x-4 gap-y-2 justify-end max-w-lg">
                                 <div v-for="(dataset, idx) in chartPakanConfig.datasets" :key="idx" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                                     <span class="w-2.5 h-2.5 rounded-full shadow-sm" :style="{ backgroundColor: dataset.borderColor }"></span>
@@ -187,6 +173,7 @@ const chartBeratConfig = {
                         </div>
                     </div>
 
+                    <!-- Widget Analisis Sisa Stok -->
                     <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.2)] flex flex-col relative overflow-hidden z-0">
                         <div class="absolute -top-10 -right-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
                         <div class="relative z-10 flex-1 flex flex-col">
@@ -194,7 +181,6 @@ const chartBeratConfig = {
                                 <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                 Analisis Sisa Stok
                             </h3>
-                            
                             <div class="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar max-h-[350px]">
                                 <div v-for="item in inventory_list" :key="item.id" class="p-5 rounded-2xl border border-white/10 bg-white/5 transition-all hover:bg-white/10">
                                     <div class="flex justify-between items-start mb-3">
@@ -220,7 +206,6 @@ const chartBeratConfig = {
                                 </div>
                                 <div v-if="inventory_list.length === 0" class="text-center py-6 text-slate-500 text-sm italic">Belum ada data pakan di gudang.</div>
                             </div>
-
                             <div class="mt-8 pt-6 border-t border-white/10 flex gap-3">
                                 <Link href="/operasi-harian" class="flex-1 text-center bg-blue-500 text-white px-4 py-3 rounded-xl shadow-lg shadow-blue-500/30 hover:bg-blue-400 font-bold transition-all text-sm">Beri Pakan</Link>
                                 <Link href="/inventory" class="flex-1 text-center bg-white/10 text-white hover:bg-white/20 px-4 py-3 rounded-xl font-bold transition-all text-sm backdrop-blur-sm">Gudang</Link>
@@ -229,25 +214,13 @@ const chartBeratConfig = {
                     </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-0 relative">
-                    
-                    <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-6 gap-4">
-                        <div>
-                            <h3 class="text-lg font-bold text-slate-900">Kurva Pertumbuhan Ikan</h3>
-                            <span class="inline-block mt-1 px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg uppercase tracking-wider border border-emerald-100">Berdasarkan Siklus Berjalan</span>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-x-4 gap-y-2 justify-end max-w-lg">
-                            <div v-for="(dataset, idx) in chartBeratConfig.datasets" :key="idx" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                <span class="w-2.5 h-2.5 rounded-full shadow-sm" :style="{ backgroundColor: dataset.borderColor }"></span>
-                                <span class="text-xs font-bold text-slate-700">{{ dataset.label }}</span>
-                            </div>
-                        </div>
-                    </div>
+                <!-- BAGIAN GRAFIK PERTUMBUHAN & POPULASI -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Kurva Pertumbuhan -->
+                    <GrowthChart :chart-berat="chartBerat" />
 
-                    <div class="relative h-80 w-full">
-                        <Line :data="chartBeratConfig" :options="chartBeratOptions" />
-                    </div>
+                    <!-- Kurva Populasi Baru -->
+                    <PopulationChart :chart-populasi="chartPopulasi" />
                 </div>
 
             </div>
