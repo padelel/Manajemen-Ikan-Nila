@@ -1,6 +1,9 @@
 <script setup>
-import { computed } from 'vue';
 import { Line } from 'vue-chartjs';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+
+// INI BAGIAN YANG SEBELUMNYA TERLEWAT:
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const props = defineProps({
     chartBerat: {
@@ -55,7 +58,7 @@ const chartOptions = {
             </div>
             
             <div class="flex flex-wrap gap-x-4 gap-y-2 justify-end max-w-lg">
-                <div v-for="(dataset, idx) in chartBerat.datasets" :key="idx" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                <div v-for="(dataset, idx) in chartBerat?.datasets" :key="idx" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                     <span class="w-2.5 h-2.5 rounded-full shadow-sm" :style="{ backgroundColor: dataset.borderColor }"></span>
                     <span class="text-xs font-bold text-slate-700">{{ dataset.label }}</span>
                 </div>
@@ -63,7 +66,10 @@ const chartOptions = {
         </div>
 
         <div class="relative h-80 w-full">
-            <Line :data="chartBerat" :options="chartOptions" />
+            <Line v-if="chartBerat && chartBerat.datasets" :data="chartBerat" :options="chartOptions" />
+            <div v-else class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-medium">
+                Memuat data pertumbuhan...
+            </div>
         </div>
     </div>
 </template>

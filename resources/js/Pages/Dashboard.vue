@@ -213,16 +213,6 @@ const chartPakanConfig = {
                         </div>
                     </div>
                 </div>
-
-                <!-- BAGIAN GRAFIK PERTUMBUHAN & POPULASI -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Kurva Pertumbuhan -->
-                    <GrowthChart :chart-berat="chartBerat" />
-
-                    <!-- Kurva Populasi Baru -->
-                    <PopulationChart :chart-populasi="chartPopulasi" />
-                </div>
-
             </div>
         </div>
     </AuthenticatedLayout>

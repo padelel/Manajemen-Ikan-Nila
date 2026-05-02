@@ -1,5 +1,9 @@
 <script setup>
 import { Line } from 'vue-chartjs';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+
+// INI BAGIAN YANG SEBELUMNYA TERLEWAT:
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const props = defineProps({
     chartPopulasi: {
@@ -28,7 +32,7 @@ const chartOptions = {
     },
     scales: {
         y: {
-            beginAtZero: false, // Tidak mulai dari 0 agar pergerakan grafik lebih terlihat fluktuatif
+            beginAtZero: false, 
             grid: { color: '#f1f5f9' },
             ticks: { 
                 color: '#94a3b8', 
@@ -44,7 +48,7 @@ const chartOptions = {
         }
     },
     elements: {
-        line: { tension: 0.3 }, // Sedikit melengkung tapi tetap tegas
+        line: { tension: 0.3 }, 
         point: { radius: 3, hoverRadius: 6 }
     },
     interaction: { mode: 'index', intersect: false }
@@ -68,7 +72,6 @@ const chartOptions = {
         </div>
 
         <div class="relative h-80 w-full">
-            <!-- Pengecekan jika data tersedia -->
             <Line v-if="chartPopulasi && chartPopulasi.datasets" :data="chartPopulasi" :options="chartOptions" />
             <div v-else class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-medium">
                 Memuat data populasi...

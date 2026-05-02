@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/panen', [HarvestLogController::class, 'index'])->name('panen.index');
     Route::get('/transfer', [TransferController::class, 'index'])->name('transfer.index');
     Route::get('/tebar', [TebarLogController::class, 'index'])->name('tebar.index');
+    Route::get('/analisis', [\App\Http\Controllers\ReportController::class, 'index'])->name('analisis.index');
 
 
     // ================================================================
