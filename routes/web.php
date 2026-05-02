@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/panen', [HarvestLogController::class, 'index'])->name('panen.index');
     Route::get('/transfer', [TransferController::class, 'index'])->name('transfer.index');
     Route::get('/tebar', [TebarLogController::class, 'index'])->name('tebar.index');
+    Route::resource('inventory', InventoryController::class);
 
 
     // ================================================================
@@ -50,7 +51,7 @@ Route::middleware('auth')->group(function () {
         
         // Admin memegang penuh kendali Master Data (Tambah/Edit/Hapus Kolam & Gudang)
         Route::resource('kolam', KolamController::class);
-        Route::resource('inventory', InventoryController::class);
+        // Route::resource('inventory', InventoryController::class);
 
     });
 
