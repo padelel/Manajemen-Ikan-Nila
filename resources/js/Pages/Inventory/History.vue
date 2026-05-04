@@ -11,9 +11,18 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('id-ID', options);
 };
 
-// Mengambil inisial nama operator
-const getInitial = (name) => {
-    return name ? name.charAt(0).toUpperCase() : '?';
+// Fungsi Penamaan Role
+const getRoleName = (userId) => {
+    if (userId === 1) return 'Pengelola Utama';
+    if (userId === 2) return 'Operator Lapangan';
+    return 'Sistem Otomatis';
+};
+
+// Fungsi Inisial Avatar
+const getRoleInitial = (userId) => {
+    if (userId === 1) return 'PU';
+    if (userId === 2) return 'OL';
+    return 'S';
 };
 </script>
 
@@ -106,14 +115,24 @@ const getInitial = (name) => {
                                         <p class="text-xs text-slate-600 truncate" :title="log.keterangan">{{ log.keterangan || '-' }}</p>
                                     </td>
                                     
+                                    <!-- Kolom Operator yang Diperbarui -->
                                     <td class="px-6 py-5">
                                         <div class="flex items-center gap-3">
-                                            <div class="rounded-full w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-600 border border-slate-200 font-bold text-xs uppercase shadow-sm">
-                                                {{ getInitial(log.user?.name) }}
+                                            <div class="rounded-full w-9 h-9 flex items-center justify-center font-bold text-xs uppercase shadow-sm border bg-white text-slate-700 border-slate-200">
+                                                {{ getRoleInitial(log.user_id) }}
                                             </div>
-                                            <span class="text-xs font-bold text-slate-800">{{ log.user?.name || 'Sistem' }}</span>
+                                            <div class="flex flex-col">
+                                                <span class="font-bold text-slate-900 text-sm">
+                                                    {{ log.user ? log.user.name : 'Sistem' }}
+                                                </span>
+                                                <span class="text-[10px] font-bold uppercase tracking-wider" 
+                                                      :class="getRoleName(log.user_id) === 'Pengelola Utama' ? 'text-indigo-500' : 'text-teal-500'">
+                                                    {{ getRoleName(log.user_id) }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </td>
+
                                 </tr>
 
                                 <tr v-if="logs.length === 0">

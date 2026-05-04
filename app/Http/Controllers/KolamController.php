@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use App\Models\Kolam;
-use Inertia\Inertia; // Wajib dipanggil untuk merender Vue
+use App\Models\KolamLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class KolamController extends Controller
 {
     public function index()
     {
-        // Mengambil semua data dari tabel kolams
-        $kolams = Kolam::all(); 
-        
-        // Mengirim data ke file Vue yang bernama 'Kolam/Index'
         return Inertia::render('Kolam/Index', [
-            'kolams' => $kolams
+            'kolams' => Kolam::all(),
+            // Mengambil 10 log terakhir beserta data user yang mengeksekusinya
+            'logs' => KolamLog::with('user')->latest()->take(10)->get(),
         ]);
     }
 
@@ -26,68 +26,83 @@ class KolamController extends Controller
 
     public function store(Request $request)
     {
-        // Jika bundar, paksa nilai lebar sama dengan panjang/diameter
-        if ($request->bentuk_kolam === 'Bundar') {
-            $request->merge(['lebar_m' => $request->panjang_m]);
-        }
-
+        // 1. Validasi HANYA untuk fisik & status kolam
         $validated = $request->validate([
             'nama_kolam' => 'required|string|max:255',
-            'lokasi' => 'required|string|max:255',
-            'bentuk_kolam' => 'required|in:Bundar,Persegi',
+            'lokasi' => 'nullable|string|max:255',
+            'bentuk_kolam' => 'required|string|max:50',
+            'status_kolam' => 'required|string|max:50',
             'panjang_m' => 'required|numeric',
-            'lebar_m' => 'required|numeric',
+            'lebar_m' => 'nullable|numeric',
             'kedalaman_m' => 'required|numeric',
-            'tanggal_tebar' => 'required|date',
-            'jumlah_ikan' => 'required|integer',
-            'berat_rata_gram' => 'required|numeric',
         ]);
 
-        $validated['status_kolam'] = 'Aktif'; // Default status
-        Kolam::create($validated);
+        // 2. Set default populasi & berat = 0 (Karena baru daftar fisik kolam)
+        $validated['jumlah_ikan'] = 0;
+        $validated['berat_rata_gram'] = 0;
 
-        return redirect()->route('kolam.index')->with('message', 'Kolam berhasil ditambahkan!');
+        $kolam = Kolam::create($validated);
+
+        // 3. CATAT LOG: TAMBAH
+        KolamLog::create([
+            'user_id' => Auth::id(),
+            'aksi' => 'Tambah',
+            'nama_kolam' => $kolam->nama_kolam,
+            'keterangan' => 'Menambahkan data kolam fisik baru ke dalam sistem.'
+        ]);
+
+        return redirect()->route('kolam.index')->with('success', 'Kolam fisik berhasil didaftarkan.');
     }
 
     public function edit(Kolam $kolam)
     {
-        // Mengirim data 1 kolam spesifik ke halaman Edit.vue
         return Inertia::render('Kolam/Edit', [
             'kolam' => $kolam
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Kolam $kolam)
     {
-        $kolam = Kolam::findOrFail($id);
-
-        // 1. Logika Penyesuaian Dimensi (Otomatis samakan lebar dengan panjang jika Bundar)
-        if ($request->bentuk_kolam === 'Bundar') {
-            $request->merge(['lebar_m' => $request->panjang_m]);
-        }
-
-        // 2. Validasi struktur kolom yang baru
+        // 1. Validasi HANYA untuk fisik & status kolam
         $validated = $request->validate([
             'nama_kolam' => 'required|string|max:255',
-            'lokasi' => 'required|string|max:255',
-            'bentuk_kolam' => 'required|in:Bundar,Persegi',
+            'lokasi' => 'nullable|string|max:255',
+            'bentuk_kolam' => 'required|string|max:50',
+            'status_kolam' => 'required|string|max:50',
             'panjang_m' => 'required|numeric',
-            'lebar_m' => 'required|numeric',
+            'lebar_m' => 'nullable|numeric',
             'kedalaman_m' => 'required|numeric',
-            'tanggal_tebar' => 'required|date',
-            'jumlah_ikan' => 'required|integer',
-            'berat_rata_gram' => 'required|numeric',
         ]);
 
-        // 3. Update data (Tidak perlu mengubah status_kolam agar tidak mereset kolam yang sedang 'Kosong'/'Panen')
+        // Catatan: jumlah_ikan & berat_rata_gram tidak di-update di sini 
+        // agar populasi ikan tidak ter-reset saat mengedit status/dimensi kolam.
         $kolam->update($validated);
 
-        return redirect()->route('kolam.index')->with('message', 'Data Kolam berhasil diperbarui!');
+        // 2. CATAT LOG: UPDATE
+        KolamLog::create([
+            'user_id' => Auth::id(),
+            'aksi' => 'Update',
+            'nama_kolam' => $kolam->nama_kolam,
+            'keterangan' => 'Memperbarui spesifikasi fisik / status kolam.'
+        ]);
+
+        return redirect()->route('kolam.index')->with('success', 'Data kolam berhasil diperbarui.');
     }
 
     public function destroy(Kolam $kolam)
     {
+        $namaKolam = $kolam->nama_kolam; // Simpan namanya dulu sebelum record-nya hilang
+        
         $kolam->delete();
-        return redirect()->route('kolam.index');
+
+        // CATAT LOG: HAPUS
+        KolamLog::create([
+            'user_id' => Auth::id(),
+            'aksi' => 'Hapus',
+            'nama_kolam' => $namaKolam,
+            'keterangan' => 'Menghapus data kolam dari database secara permanen.'
+        ]);
+
+        return redirect()->route('kolam.index')->with('success', 'Kolam berhasil dihapus.');
     }
 }

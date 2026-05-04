@@ -97,7 +97,7 @@ const isPopulasiActive = computed(() => route().current('kematian.*') || route()
                             <span :class="[isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4']" class="font-medium transition-all duration-300 whitespace-nowrap">Home</span>
                         </Link>
 
-                        <Link v-if="$page.props.auth.user.role === 'admin'" :href="route('kolam.index')" 
+                        <Link :href="route('kolam.index')" 
                             :class="[route().current('kolam.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-600 hover:bg-slate-50']"
                             class="flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group overflow-hidden">
                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
