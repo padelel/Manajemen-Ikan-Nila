@@ -2,7 +2,6 @@
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 
-// INI BAGIAN YANG SEBELUMNYA TERLEWAT:
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const props = defineProps({
@@ -33,7 +32,8 @@ const chartOptions = {
     scales: {
         y: {
             beginAtZero: true,
-            grid: { color: '#f1f5f9' },
+            // Gunakan RGBA dengan opacity agar grid menyatu dengan warna background terang maupun gelap
+            grid: { color: 'rgba(148, 163, 184, 0.2)' }, 
             ticks: { color: '#94a3b8', font: { size: 11 } }
         },
         x: {
@@ -50,24 +50,24 @@ const chartOptions = {
 </script>
 
 <template>
-    <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-0 relative">
+    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_10px_40px_rgb(0,0,0,0.2)] z-0 relative transition-colors duration-300">
         <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-6 gap-4">
             <div>
-                <h3 class="text-lg font-bold text-slate-900">Kurva Pertumbuhan Ikan</h3>
-                <span class="inline-block mt-1 px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg uppercase tracking-wider border border-emerald-100">Berdasarkan Siklus Berjalan</span>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 transition-colors">Kurva Pertumbuhan Ikan</h3>
+                <span class="inline-block mt-1 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider border border-emerald-100 dark:border-emerald-500/20 transition-colors">Berdasarkan Siklus Berjalan</span>
             </div>
             
             <div class="flex flex-wrap gap-x-4 gap-y-2 justify-end max-w-lg">
-                <div v-for="(dataset, idx) in chartBerat?.datasets" :key="idx" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                <div v-for="(dataset, idx) in chartBerat?.datasets" :key="idx" class="flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-600 transition-colors">
                     <span class="w-2.5 h-2.5 rounded-full shadow-sm" :style="{ backgroundColor: dataset.borderColor }"></span>
-                    <span class="text-xs font-bold text-slate-700">{{ dataset.label }}</span>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors">{{ dataset.label }}</span>
                 </div>
             </div>
         </div>
 
         <div class="relative h-80 w-full">
             <Line v-if="chartBerat && chartBerat.datasets" :data="chartBerat" :options="chartOptions" />
-            <div v-else class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-medium">
+            <div v-else class="absolute inset-0 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm font-medium transition-colors">
                 Memuat data pertumbuhan...
             </div>
         </div>
