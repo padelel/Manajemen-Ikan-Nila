@@ -67,12 +67,29 @@ const subPageTitle = computed(() => {
     return mapping[action] || action;
 });
 
-// ======================================================================
+/// ======================================================================
 // FUNGSI BARU: Mendeteksi Bagian Menu Mana Yang Sedang Aktif
 // ======================================================================
-const isMenuUtamaActive = computed(() => route().current('dashboard') || route().current('kolam.*') || route().current('inventory.*'));
-const isRiwayatActive = computed(() => route().current('parameter.*') || route().current('feedlog.*'));
-const isPopulasiActive = computed(() => route().current('kematian.*') || route().current('panen.*') || route().current('transfer.*') || route().current('tebar.*'));
+const isMenuUtamaActive = computed(() => 
+    route().current('dashboard') || 
+    route().current('kolam.*') || 
+    // Tangkap semua inventory.* KECUALI inventory.history
+    (route().current('inventory.*') && !route().current('inventory.history')) 
+);
+
+const isRiwayatActive = computed(() => 
+    route().current('parameter.*') || 
+    route().current('feedlog.*') || 
+    // Tambahkan inventory.history ke dalam grup Riwayat
+    route().current('inventory.history') 
+);
+
+const isPopulasiActive = computed(() => 
+    route().current('kematian.*') || 
+    route().current('panen.*') || 
+    route().current('transfer.*') || 
+    route().current('tebar.*')
+);
 
 </script>
 
