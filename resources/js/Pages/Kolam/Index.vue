@@ -32,32 +32,32 @@ const formatDate = (dateString) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-end">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight transition-colors">Data Kolam</h2>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors">Kelola data fisik kolam, dimensi, dan jumlah populasi ikan.</p>
                 </div>
-                <Link v-if="isAdmin" href="/kolam/create" class="bg-slate-900 dark:bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-slate-200/50 dark:shadow-none hover:bg-slate-800 dark:hover:bg-indigo-500 text-sm font-semibold transition-all">
+                <Link v-if="isAdmin" href="/kolam/create" class="inline-flex justify-center w-full sm:w-auto bg-slate-900 dark:bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-slate-200/50 dark:shadow-none hover:bg-slate-800 dark:hover:bg-indigo-500 text-sm font-semibold transition-all">
                     + Tambah Kolam
                 </Link>
             </div>
         </template>
 
-        <div class="py-8">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-12">
+        <div class="py-6 sm:py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
                 
                 <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-slate-100 dark:border-slate-700 transition-colors duration-300">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50/50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 transition-colors">
                                 <tr>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest w-48">Kolam</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center">Status</th> 
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center">Bentuk</th> 
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest">Dimensi</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center">Populasi</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center">Berat Rata-rata</th>
-                                    <th v-if="isAdmin" class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-right">Aksi</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest w-48 whitespace-nowrap">Kolam</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center whitespace-nowrap">Status</th> 
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center whitespace-nowrap">Bentuk</th> 
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest whitespace-nowrap">Dimensi</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center whitespace-nowrap">Populasi</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center whitespace-nowrap">Berat Rata-rata</th>
+                                    <th v-if="isAdmin" class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-right whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             
@@ -104,8 +104,8 @@ const formatDate = (dateString) => {
                                         <span class="text-xs text-slate-400 dark:text-slate-500 ml-1 transition-colors">g</span>
                                     </td>
 
-                                    <td v-if="isAdmin" class="px-6 py-5 text-right">
-                                        <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <td v-if="isAdmin" class="px-6 py-5 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-3 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                                             <Link :href="'/kolam/' + kolam.id + '/edit'" class="px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition">
                                                 Edit
                                             </Link>
@@ -150,11 +150,11 @@ const formatDate = (dateString) => {
                             <table class="w-full text-left border-collapse">
                                 <thead class="bg-slate-50/50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 transition-colors">
                                     <tr>
-                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest w-40">Waktu</th>
-                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center w-28">Aksi</th>
-                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest">Entitas Kolam</th>
-                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest">Detail Perubahan</th>
-                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest">Dieksekusi Oleh</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest w-40 whitespace-nowrap">Waktu</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center w-28 whitespace-nowrap">Aksi</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest whitespace-nowrap">Entitas Kolam</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest whitespace-nowrap">Detail Perubahan</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest whitespace-nowrap">Dieksekusi Oleh</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-sm">
@@ -172,7 +172,7 @@ const formatDate = (dateString) => {
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap transition-colors">{{ log.nama_kolam }}</td>
-                                        <td class="px-6 py-4 text-xs text-slate-600 dark:text-slate-400 truncate max-w-sm transition-colors" :title="log.keterangan">{{ log.keterangan }}</td>
+                                        <td class="px-6 py-4 text-xs text-slate-600 dark:text-slate-400 truncate max-w-[200px] sm:max-w-sm transition-colors" :title="log.keterangan">{{ log.keterangan }}</td>
                                         <td class="px-6 py-4 text-xs font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap transition-colors">{{ log.user?.name || 'Administrator' }}</td>
                                     </tr>
 
