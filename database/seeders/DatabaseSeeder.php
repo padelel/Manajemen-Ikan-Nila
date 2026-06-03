@@ -2,27 +2,29 @@
 
 namespace Database\Seeders;
 
+use App\Models\DailyParameter;
+use App\Models\FeedLog;
+use App\Models\HarvestLog;
+use App\Models\Inventory;
+use App\Models\InventoryLog;
+use App\Models\Kolam;
+use App\Models\MortalityLog;
+use App\Models\Rule;
+use App\Models\SiklusBudidaya;
+use App\Models\TebarLog;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Rule;
-use App\Models\Kolam;
-use App\Models\Inventory;
-use App\Models\InventoryLog;
-use App\Models\SiklusBudidaya;
-use App\Models\TebarLog;
-use App\Models\DailyParameter;
-use App\Models\FeedLog;
-use App\Models\MortalityLog;
-use App\Models\HarvestLog;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        // 1. Kosongkan database dengan aman sebelum diisi
+        // =========================================================================
+        // RESET DATABASE
+        // =========================================================================
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         User::truncate();
         Rule::truncate();
@@ -38,12 +40,14 @@ class DatabaseSeeder extends Seeder
         HarvestLog::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // 2. Buat Akun Pengguna
+        // =========================================================================
+        // PENGGUNA
+        // =========================================================================
         $admin = User::create([
             'name' => 'Pengelola Utama',
             'email' => 'admin@nila.com',
             'password' => Hash::make('password123'),
-            'role' => 'admin', 
+            'role' => 'admin',
         ]);
 
         $operator = User::create([
@@ -53,150 +57,405 @@ class DatabaseSeeder extends Seeder
             'role' => 'operator',
         ]);
 
-        // 3. Buat Data Master Rule (Sistem Pakar)
+        // =========================================================================
+        // RULE SISTEM PAKAR
+        // =========================================================================
         $rules = [
             [
-                'kode_rule' => 'R01', 
-                'kondisi_suhu' => '25-32', 
-                'kondisi_ph' => '6.5-8.5', 
-                'kondisi_visual' => 'Jernih', 
-                'rekomendasi_dosis_persen' => 100
+                'kode_rule' => 'R01',
+                'kondisi_suhu' => '25-32',
+                'kondisi_ph' => '6.5-8.5',
+                'kondisi_visual' => 'Jernih',
+                'rekomendasi_dosis_persen' => 100,
             ],
             [
-                'kode_rule' => 'R02', 
-                'kondisi_suhu' => '<25 atau >32', 
-                'kondisi_ph' => 'Normal', 
-                'kondisi_visual' => 'Keruh', 
-                'rekomendasi_dosis_persen' => 50
+                'kode_rule' => 'R02',
+                'kondisi_suhu' => '<25 atau >32',
+                'kondisi_ph' => '6.5-8.5',
+                'kondisi_visual' => 'Keruh',
+                'rekomendasi_dosis_persen' => 50,
             ],
             [
-                'kode_rule' => 'R03', 
-                'kondisi_suhu' => 'Bebas', 
-                'kondisi_ph' => '<6.5 atau >8.5', 
-                'kondisi_visual' => 'Berbusa', 
-                'rekomendasi_dosis_persen' => 0
+                'kode_rule' => 'R03',
+                'kondisi_suhu' => 'Bebas',
+                'kondisi_ph' => '<6.5 atau >8.5',
+                'kondisi_visual' => 'Berbusa',
+                'rekomendasi_dosis_persen' => 0,
             ],
         ];
-        
-        foreach ($rules as $r) { 
-            Rule::create($r); 
+        foreach ($rules as $r) {
+            Rule::create($r);
         }
         $ruleNormal = Rule::where('kode_rule', 'R01')->first();
 
-        // 4. Buat Data Gudang Pakan & Log Awal
-        $pakan1 = Inventory::create(['nama_pakan' => 'Hi-Pro-Vite 781-1 (Starter)', 'total_stok_kg' => 500, 'terakhir_update' => now()]);
-        $pakan2 = Inventory::create(['nama_pakan' => 'Hi-Pro-Vite 781-2 (Grower)', 'total_stok_kg' => 1200, 'terakhir_update' => now()]);
-        $pakan3 = Inventory::create(['nama_pakan' => 'Hi-Pro-Vite 781-3 (Finisher)', 'total_stok_kg' => 800, 'terakhir_update' => now()]);
+        // =========================================================================
+        // GUDANG PAKAN
+        // Stok disesuaikan dengan estimasi pemakaian selama siklus masing-masing kolam.
+        // =========================================================================
+        $pakan1 = Inventory::create([
+            'nama_pakan' => 'Hi-Pro-Vite 781-1 (Starter)',
+            'total_stok_kg' => 450,
+            'terakhir_update' => now(),
+        ]);
+        $pakan2 = Inventory::create([
+            'nama_pakan' => 'Hi-Pro-Vite 781-2 (Grower)',
+            'total_stok_kg' => 980,
+            'terakhir_update' => now(),
+        ]);
+        $pakan3 = Inventory::create([
+            'nama_pakan' => 'Hi-Pro-Vite 781-3 (Finisher)',
+            'total_stok_kg' => 620,
+            'terakhir_update' => now(),
+        ]);
 
-        // Catat masuknya stok ke gudang
         InventoryLog::insert([
-            ['inventory_id' => $pakan1->id, 'user_id' => $admin->id, 'tipe' => 'Masuk', 'jumlah' => 500, 'keterangan' => 'Pembelian Awal Bulan', 'created_at' => now(), 'updated_at' => now()],
-            ['inventory_id' => $pakan2->id, 'user_id' => $admin->id, 'tipe' => 'Masuk', 'jumlah' => 1200, 'keterangan' => 'Pembelian Awal Bulan', 'created_at' => now(), 'updated_at' => now()],
-            ['inventory_id' => $pakan3->id, 'user_id' => $admin->id, 'tipe' => 'Masuk', 'jumlah' => 800, 'keterangan' => 'Pembelian Awal Bulan', 'created_at' => now(), 'updated_at' => now()],
+            [
+                'inventory_id' => $pakan1->id,
+                'user_id' => $admin->id,
+                'tipe' => 'Masuk',
+                'jumlah' => 500,
+                'keterangan' => 'Pembelian stok awal bulan April',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'inventory_id' => $pakan2->id,
+                'user_id' => $admin->id,
+                'tipe' => 'Masuk',
+                'jumlah' => 1200,
+                'keterangan' => 'Pembelian stok awal bulan April',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'inventory_id' => $pakan3->id,
+                'user_id' => $admin->id,
+                'tipe' => 'Masuk',
+                'jumlah' => 800,
+                'keterangan' => 'Pembelian stok awal bulan April',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
         // =========================================================================
-        // SKENARIO 1: KOLAM A (SIKLUS BARU DIMULAI 6 HARI LALU - AKTIF)
+        // KOLAM A — FASE STARTER → GROWER AWAL (85–190 gram)
+        //
+        // Skenario: siklus ke-40 hari. Benih ditebar 40 hari lalu dengan berat
+        // awal 15 gram/ekor. Saat ini berat rata-rata ±140 gram, masih dalam
+        // fase transisi Starter ke Grower. Feed Rate (FR) 5% dari biomassa,
+        // pakan dicampur 40% Starter + 60% Grower.
+        //
+        // Populasi: 1.200 tebar − 50 mati = 1.150 ekor aktif
         // =========================================================================
         $kolamA = Kolam::create([
-            'nama_kolam' => 'Kolam Terpal A (Starter)', 'lokasi' => 'Blok Utara', 'bentuk_kolam' => 'Bundar',
-            'status_kolam' => 'Aktif', 'panjang_m' => 4, 'lebar_m' => 4, 'kedalaman_m' => 1.2,
-            'jumlah_ikan' => 990, 'berat_rata_gram' => 45.0 
+            'nama_kolam' => 'Kolam Terpal A',
+            'lokasi' => 'Blok Utara',
+            'bentuk_kolam' => 'Bundar',
+            'status_kolam' => 'Aktif',
+            'panjang_m' => 4, // diameter untuk kolam bundar
+            'lebar_m' => 4,
+            'kedalaman_m' => 1.2,
+            'jumlah_ikan' => 1150,
+            'berat_rata_gram' => 140.0,
         ]);
 
-        $tanggalTebarA = Carbon::today()->subDays(6); // Dibuat 6 hari lalu agar grafiknya naik di dashboard
-        
-        SiklusBudidaya::create(['kolam_id' => $kolamA->id, 'tanggal_mulai' => $tanggalTebarA, 'status_aktif' => 'Aktif', 'jumlah_tebar_awal' => 1000]);
-        TebarLog::create(['kolam_id' => $kolamA->id, 'user_id' => $admin->id, 'tanggal_tebar' => $tanggalTebarA, 'jumlah_ikan' => 1000, 'berat_rata_gram' => 15, 'sumber_benih' => 'Balai Benih Lokal']);
-        MortalityLog::create(['kolam_id' => $kolamA->id, 'user_id' => $operator->id, 'tanggal_kematian' => Carbon::today()->subDays(3), 'jumlah_mati' => 10, 'catatan' => 'Mati adaptasi awal']);
+        $tanggalTebarA = Carbon::today()->subDays(40);
+        SiklusBudidaya::create([
+            'kolam_id' => $kolamA->id,
+            'tanggal_mulai' => $tanggalTebarA,
+            'status_aktif' => 'Aktif',
+            'jumlah_tebar_awal' => 1200,
+        ]);
+        TebarLog::create([
+            'kolam_id' => $kolamA->id,
+            'user_id' => $admin->id,
+            'tanggal_tebar' => $tanggalTebarA,
+            'jumlah_ikan' => 1200,
+            'berat_rata_gram' => 15,
+            'sumber_benih' => 'Balai Benih Ikan Lokal',
+        ]);
 
-        // Generate grafik harian Kolam A (Hanya 6 hari terakhir)
+        // Kematian: 30 (adaptasi awal) + 20 (alami) = 50 → sisa 1.150 ekor
+        MortalityLog::create([
+            'kolam_id' => $kolamA->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(35),
+            'jumlah_mati' => 30,
+            'catatan' => 'Kematian masa adaptasi awal, kondisi air belum stabil sepenuhnya',
+        ]);
+        MortalityLog::create([
+            'kolam_id' => $kolamA->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(20),
+            'jumlah_mati' => 20,
+            'catatan' => 'Kematian alami, angka masih dalam batas toleransi normal',
+        ]);
+
+        // Data harian 7 hari terakhir
+        // Pertumbuhan: +3 gram/hari → 122 → 125 → 128 → 131 → 134 → 137 → 140 gram
+        // Pakan harian: FR 5% × biomassa = ±7–8 kg/hari (3x pemberian)
+        $beratA = 119.0;
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $berat = 15 + ((6 - $i) * 5); // Pertumbuhan 5 gram/hari
-            
+            $beratA += 3.0;
+            $biomassaA = 1150 * ($beratA / 1000);
+            $pakanA = round($biomassaA * 0.05, 1); // FR 5%
+
+            // Pakan dibagi: 40% Starter (rasio 2) + 60% Grower (rasio 3)
+            $porsi1A = round($pakanA * 0.4, 1);
+            $porsi2A = round($pakanA - $porsi1A, 1);
+
             DailyParameter::create([
-                'kolam_id' => $kolamA->id, 'user_id' => $operator->id, 'tanggal_cek' => $date,
-                'suhu' => rand(27, 29), 'ph' => rand(70, 75) / 10, 'kondisi_visual' => 'Jernih', 'berat_sample' => $berat
+                'kolam_id' => $kolamA->id,
+                'user_id' => $operator->id,
+                'tanggal_cek' => $date,
+                'suhu' => rand(270, 295) / 10,
+                'ph' => rand(69, 75) / 10,
+                'kondisi_visual' => 'Jernih',
+                'berat_sample' => $beratA,
             ]);
 
             $feed = FeedLog::create([
-                'kolam_id' => $kolamA->id, 'rule_id' => $ruleNormal->id, 'user_id' => $operator->id,
-                'tanggal_pakan' => $date, 'frekuensi' => 3, 'rekomendasi_sistem' => 2.5, 'pakan_aktual' => 2.5
+                'kolam_id' => $kolamA->id,
+                'rule_id' => $ruleNormal->id,
+                'user_id' => $operator->id,
+                'tanggal_pakan' => $date,
+                'frekuensi' => 3,
+                'rekomendasi_sistem' => $pakanA,
+                'pakan_aktual' => $pakanA,
             ]);
-            $feed->details()->create(['inventory_id' => $pakan1->id, 'rasio' => 1, 'jumlah_kg' => 2.5]);
+            $feed
+                ->details()
+                ->create([
+                    'inventory_id' => $pakan1->id,
+                    'rasio' => 2,
+                    'jumlah_kg' => $porsi1A,
+                ]);
+            $feed
+                ->details()
+                ->create([
+                    'inventory_id' => $pakan2->id,
+                    'rasio' => 3,
+                    'jumlah_kg' => $porsi2A,
+                ]);
         }
 
         // =========================================================================
-        // SKENARIO 2: KOLAM B (SUDAH LAMA, PERNAH PANEN PARSIAL 4 HARI LALU)
+        // KOLAM B — FASE GROWER (200–240 gram)
+        //
+        // Skenario: siklus ke-72 hari. Benih 20 gram ditebar 72 hari lalu.
+        // Sempat ada serangan jamur Saprolegnia di hari ke-42 namun sudah teratasi.
+        // Berat saat ini ±220 gram, mendekati batas atas fase Grower.
+        // Feed Rate (FR) 3% dari biomassa, 100% pakan Grower.
+        //
+        // Populasi: 1.800 tebar − 120 mati = 1.680 ekor aktif
         // =========================================================================
         $kolamB = Kolam::create([
-            'nama_kolam' => 'Kolam Beton B (Grower)', 'lokasi' => 'Blok Selatan', 'bentuk_kolam' => 'Persegi',
-            'status_kolam' => 'Aktif', 'panjang_m' => 10, 'lebar_m' => 5, 'kedalaman_m' => 1.5,
-            'jumlah_ikan' => 1485, 'berat_rata_gram' => 220 
+            'nama_kolam' => 'Kolam Beton B',
+            'lokasi' => 'Blok Selatan',
+            'bentuk_kolam' => 'Persegi',
+            'status_kolam' => 'Aktif',
+            'panjang_m' => 10,
+            'lebar_m' => 5,
+            'kedalaman_m' => 1.5,
+            'jumlah_ikan' => 1680,
+            'berat_rata_gram' => 220.0,
         ]);
 
-        $tanggalTebarB = Carbon::today()->subDays(45);
-        
-        SiklusBudidaya::create(['kolam_id' => $kolamB->id, 'tanggal_mulai' => $tanggalTebarB, 'status_aktif' => 'Aktif', 'jumlah_tebar_awal' => 2000]);
-        TebarLog::create(['kolam_id' => $kolamB->id, 'user_id' => $admin->id, 'tanggal_tebar' => $tanggalTebarB, 'jumlah_ikan' => 2000, 'berat_rata_gram' => 50, 'sumber_benih' => 'Pendederan A']);
-        
-        MortalityLog::create(['kolam_id' => $kolamB->id, 'user_id' => $operator->id, 'tanggal_kematian' => Carbon::today()->subDays(20), 'jumlah_mati' => 15, 'catatan' => 'Sakit jamur']);
-        // Panen parsial 500 ekor 4 hari yang lalu (Agar kelihatan turun sedikit di chart)
-        HarvestLog::create(['kolam_id' => $kolamB->id, 'user_id' => $admin->id, 'jenis_panen' => 'Parsial', 'tanggal_panen' => Carbon::today()->subDays(4), 'jumlah_ikan' => 500, 'berat_total_kg' => 100, 'catatan' => 'Panen sortir']);
+        $tanggalTebarB = Carbon::today()->subDays(72);
+        SiklusBudidaya::create([
+            'kolam_id' => $kolamB->id,
+            'tanggal_mulai' => $tanggalTebarB,
+            'status_aktif' => 'Aktif',
+            'jumlah_tebar_awal' => 1800,
+        ]);
+        TebarLog::create([
+            'kolam_id' => $kolamB->id,
+            'user_id' => $admin->id,
+            'tanggal_tebar' => $tanggalTebarB,
+            'jumlah_ikan' => 1800,
+            'berat_rata_gram' => 20,
+            'sumber_benih' => 'CV. Nila Jaya',
+        ]);
 
-        // Generate grafik 7 hari terakhir untuk Kolam B
+        // Kematian: 40 (adaptasi) + 50 (jamur) + 30 (pasca obat) = 120 → sisa 1.680 ekor
+        MortalityLog::create([
+            'kolam_id' => $kolamB->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(65),
+            'jumlah_mati' => 40,
+            'catatan' => 'Kematian awal masa adaptasi, kondisi sudah stabil',
+        ]);
+        MortalityLog::create([
+            'kolam_id' => $kolamB->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(30),
+            'jumlah_mati' => 50,
+            'catatan' => 'Serangan jamur Saprolegnia sp., sudah diobati dengan garam dapur dan antijamur',
+        ]);
+        MortalityLog::create([
+            'kolam_id' => $kolamB->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(10),
+            'jumlah_mati' => 30,
+            'catatan' => 'Kematian pasca pengobatan jamur, kondisi kolam sudah kembali normal',
+        ]);
+
+        // Data harian 7 hari terakhir
+        // Pertumbuhan: +3 gram/hari → 202 → 205 → 208 → 211 → 214 → 217 → 220 gram
+        // Pakan harian: FR 3% × biomassa = ±10–11 kg/hari (3x pemberian)
+        $beratB = 199.0;
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $berat = 190 + ((6 - $i) * 5);
-            
+            $beratB += 3.0;
+            $biomassaB = 1680 * ($beratB / 1000);
+            $pakanB = round($biomassaB * 0.03, 1); // FR 3%
+
             DailyParameter::create([
-                'kolam_id' => $kolamB->id, 'user_id' => $operator->id, 'tanggal_cek' => $date,
-                'suhu' => rand(26, 28), 'ph' => 7.2, 'kondisi_visual' => 'Jernih', 'berat_sample' => $berat
+                'kolam_id' => $kolamB->id,
+                'user_id' => $operator->id,
+                'tanggal_cek' => $date,
+                'suhu' => rand(275, 300) / 10,
+                'ph' => rand(70, 76) / 10,
+                'kondisi_visual' => 'Jernih',
+                'berat_sample' => $beratB,
             ]);
 
             $feed = FeedLog::create([
-                'kolam_id' => $kolamB->id, 'rule_id' => $ruleNormal->id, 'user_id' => $operator->id,
-                'tanggal_pakan' => $date, 'frekuensi' => 2, 'rekomendasi_sistem' => 7.0, 'pakan_aktual' => 7.0
+                'kolam_id' => $kolamB->id,
+                'rule_id' => $ruleNormal->id,
+                'user_id' => $operator->id,
+                'tanggal_pakan' => $date,
+                'frekuensi' => 3,
+                'rekomendasi_sistem' => $pakanB,
+                'pakan_aktual' => $pakanB,
             ]);
-            // Simulasi multi-pakan
-            $feed->details()->create(['inventory_id' => $pakan2->id, 'rasio' => 2, 'jumlah_kg' => 4.6]);
-            $feed->details()->create(['inventory_id' => $pakan3->id, 'rasio' => 1, 'jumlah_kg' => 2.4]);
+            $feed
+                ->details()
+                ->create([
+                    'inventory_id' => $pakan2->id,
+                    'rasio' => 1,
+                    'jumlah_kg' => $pakanB,
+                ]);
         }
 
         // =========================================================================
-        // SKENARIO 3: KOLAM C (KOSONG, BARU PANEN FULL 2 HARI LALU)
+        // KOLAM C — FASE FINISHER / MENDEKATI PANEN (250 gram ke atas)
+        //
+        // Skenario: siklus ke-105 hari. Ini kolam terbesar. Pernah ada wabah
+        // bakteri Aeromonas di hari ke-65 namun sudah tertangani. Seminggu lalu
+        // dilakukan panen sortir 60 ekor untuk mengurangi kepadatan. Berat
+        // saat ini ±289.5 gram, siap panen utama dalam 1–2 minggu ke depan.
+        // Feed Rate (FR) 2% dari biomassa, 100% pakan Finisher.
+        //
+        // Populasi: 3.000 tebar − 400 mati − 60 panen parsial = 2.540 ekor aktif
         // =========================================================================
         $kolamC = Kolam::create([
-            'nama_kolam' => 'Kolam Tanah C (Finisher)', 'lokasi' => 'Blok Timur', 'bentuk_kolam' => 'Persegi',
-            'status_kolam' => 'Aktif', 'panjang_m' => 20, 'lebar_m' => 10, 'kedalaman_m' => 1.8,
-            'jumlah_ikan' => 0, 'berat_rata_gram' => 0 // Kosong karena sudah panen full
+            'nama_kolam' => 'Kolam Tanah C',
+            'lokasi' => 'Blok Timur',
+            'bentuk_kolam' => 'Persegi',
+            'status_kolam' => 'Aktif',
+            'panjang_m' => 20,
+            'lebar_m' => 10,
+            'kedalaman_m' => 1.8,
+            'jumlah_ikan' => 2540,
+            'berat_rata_gram' => 289.5,
         ]);
 
-        $tanggalTebarC = Carbon::today()->subDays(120);
-        $tanggalPanenC = Carbon::today()->subDays(2); // Panen 2 hari lalu agar grafik terjun bebas ke 0
-        
-        SiklusBudidaya::create(['kolam_id' => $kolamC->id, 'tanggal_mulai' => $tanggalTebarC, 'tanggal_selesai' => $tanggalPanenC, 'status_aktif' => 'Selesai', 'jumlah_tebar_awal' => 3000]);
+        $tanggalTebarC = Carbon::today()->subDays(105);
+        SiklusBudidaya::create([
+            'kolam_id' => $kolamC->id,
+            'tanggal_mulai' => $tanggalTebarC,
+            'status_aktif' => 'Aktif',
+            'jumlah_tebar_awal' => 3000,
+        ]);
+        TebarLog::create([
+            'kolam_id' => $kolamC->id,
+            'user_id' => $admin->id,
+            'tanggal_tebar' => $tanggalTebarC,
+            'jumlah_ikan' => 3000,
+            'berat_rata_gram' => 20,
+            'sumber_benih' => 'Pendederan Pak Hasan',
+        ]);
 
-        TebarLog::create(['kolam_id' => $kolamC->id, 'user_id' => $admin->id, 'tanggal_tebar' => $tanggalTebarC, 'jumlah_ikan' => 3000, 'berat_rata_gram' => 100, 'sumber_benih' => 'Pendederan B']);
-        MortalityLog::create(['kolam_id' => $kolamC->id, 'user_id' => $operator->id, 'tanggal_kematian' => Carbon::today()->subDays(60), 'jumlah_mati' => 150, 'catatan' => 'Cuaca buruk']);
-        HarvestLog::create(['kolam_id' => $kolamC->id, 'user_id' => $admin->id, 'jenis_panen' => 'Full', 'tanggal_panen' => $tanggalPanenC, 'jumlah_ikan' => 2850, 'berat_total_kg' => 855, 'catatan' => 'Panen raya akhir siklus']);
-        
-        // Generate aktivitas hanya sampai hari panen (7 hingga 3 hari yang lalu)
-        for ($i = 6; $i >= 3; $i--) {
+        // Kematian: 80+130+150+40 = 400 ekor → setelah panen parsial sisa 2.540 ekor
+        MortalityLog::create([
+            'kolam_id' => $kolamC->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(100),
+            'jumlah_mati' => 80,
+            'catatan' => 'Kematian awal siklus, proses adaptasi kolam tanah baru diperbaiki',
+        ]);
+        MortalityLog::create([
+            'kolam_id' => $kolamC->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(70),
+            'jumlah_mati' => 130,
+            'catatan' => 'Cuaca panas ekstrem, kadar oksigen terlarut turun, aerator ditambah',
+        ]);
+        MortalityLog::create([
+            'kolam_id' => $kolamC->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(40),
+            'jumlah_mati' => 150,
+            'catatan' => 'Wabah bakteri Aeromonas hydrophila, ditangani dengan probiotik dan antibiotik',
+        ]);
+        MortalityLog::create([
+            'kolam_id' => $kolamC->id,
+            'user_id' => $operator->id,
+            'tanggal_kematian' => Carbon::today()->subDays(15),
+            'jumlah_mati' => 40,
+            'catatan' => 'Kematian sisa pasca penanganan penyakit, kondisi kolam sudah pulih sepenuhnya',
+        ]);
+
+        // Panen sortir parsial: 60 ekor @±285 gram = ±17 kg
+        HarvestLog::create([
+            'kolam_id' => $kolamC->id,
+            'user_id' => $admin->id,
+            'jenis_panen' => 'Parsial',
+            'tanggal_panen' => Carbon::today()->subDays(7),
+            'jumlah_ikan' => 60,
+            'berat_total_kg' => 17.1,
+            'catatan' => 'Panen sortir ikan ukuran >285 gram untuk mengurangi kepadatan sebelum panen utama',
+        ]);
+
+        // Data harian 7 hari terakhir
+        // Pertumbuhan: +2.5 gram/hari → 274.5 → 277 → 279.5 → 282 → 284.5 → 287 → 289.5 gram
+        // Pakan harian: FR 2% × biomassa = ±14–15 kg/hari (2x pemberian, efisiensi finisher)
+        $beratC = 272.0;
+        for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            
+            $beratC += 2.5;
+            $biomassaC = 2540 * ($beratC / 1000);
+            $pakanC = round($biomassaC * 0.02, 1); // FR 2%
+
             DailyParameter::create([
-                'kolam_id' => $kolamC->id, 'user_id' => $operator->id, 'tanggal_cek' => $date,
-                // UBAH 'Sedikit Keruh' MENJADI 'Keruh' DI SINI:
-                'suhu' => 28, 'ph' => 7.0, 'kondisi_visual' => 'Keruh', 'berat_sample' => 290 + ((6 - $i) * 2)
+                'kolam_id' => $kolamC->id,
+                'user_id' => $operator->id,
+                'tanggal_cek' => $date,
+                'suhu' => rand(270, 290) / 10,
+                'ph' => rand(68, 74) / 10,
+                'kondisi_visual' => 'Jernih',
+                'berat_sample' => $beratC,
             ]);
 
             $feed = FeedLog::create([
-                'kolam_id' => $kolamC->id, 'rule_id' => $ruleNormal->id, 'user_id' => $operator->id,
-                'tanggal_pakan' => $date, 'frekuensi' => 2, 'rekomendasi_sistem' => 12.0, 'pakan_aktual' => 12.0
+                'kolam_id' => $kolamC->id,
+                'rule_id' => $ruleNormal->id,
+                'user_id' => $operator->id,
+                'tanggal_pakan' => $date,
+                'frekuensi' => 2,
+                'rekomendasi_sistem' => $pakanC,
+                'pakan_aktual' => $pakanC,
             ]);
-            $feed->details()->create(['inventory_id' => $pakan3->id, 'rasio' => 1, 'jumlah_kg' => 12.0]);
+            $feed
+                ->details()
+                ->create([
+                    'inventory_id' => $pakan3->id,
+                    'rasio' => 1,
+                    'jumlah_kg' => $pakanC,
+                ]);
         }
     }
 }

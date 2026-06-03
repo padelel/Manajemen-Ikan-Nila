@@ -187,9 +187,10 @@ const chartPakanConfig = {
                                         </div>
                                         
                                         <span :class="{
-                                            'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20': item.status === 'Aman',
-                                            'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20': item.status === 'Waspada',
-                                            'bg-rose-50 dark:bg-red-500/20 text-rose-600 dark:text-red-400 border-rose-200 dark:border-red-500/30 animate-pulse': item.status === 'Kritis' || item.status === 'Habis'
+                                            'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-200': item.status === 'Aman',
+                                            'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-200': item.status === 'Waspada',
+                                            'bg-rose-50 dark:bg-red-500/20 text-rose-600 dark:text-red-400 border-rose-200 animate-pulse': item.status === 'Kritis' || item.status === 'Habis',
+                                            'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300': item.status === 'Kurang Data ML' || item.status === 'Server AI Offline'
                                         }" class="px-2 py-1 rounded-md text-[9px] sm:text-[10px] shrink-0 font-bold uppercase border transition-colors duration-300">
                                             {{ item.status }}
                                         </span>
