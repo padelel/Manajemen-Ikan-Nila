@@ -17,7 +17,8 @@ const form = useForm({
 });
 
 const selectedKolam = computed(() => {
-    return props.kolams.find(k => k.id === form.kolam_id);
+    const selectedId = Number(form.kolam_id);
+    return props.kolams.find(k => k.id === selectedId);
 });
 
 // =====================================================================

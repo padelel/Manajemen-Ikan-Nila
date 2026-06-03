@@ -20,7 +20,8 @@ const sistem_budidaya = ref(80);
 // Mendapatkan data kolam yang sedang dipilih di dropdown
 const selectedKolam = computed(() => {
     if (!form.kolam_id) return null;
-    return props.kolams.find(k => k.id === form.kolam_id);
+    const selectedId = Number(form.kolam_id);
+    return props.kolams.find(k => k.id === selectedId);
 });
 
 // Kalkulator Volume Air Real-Time berdasarkan kolam yang dipilih

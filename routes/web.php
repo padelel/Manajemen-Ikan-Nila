@@ -51,9 +51,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/panen', [HarvestLogController::class, 'index'])->name(
         'panen.index',
     );
-    Route::get('/panen/{panen}', [HarvestLogController::class, 'show'])->name(
-        'panen.show',
-    );
     Route::get('/transfer', [TransferController::class, 'index'])->name(
         'transfer.index',
     );
@@ -144,6 +141,11 @@ Route::middleware('auth')->group(function () {
             'transfer.store',
         );
     });
+
+    // Show route harus diletakkan setelah rute create agar
+    // /panen/create tidak tertangkap oleh /panen/{panen}.
+    Route::get('/panen/{panen}', [HarvestLogController::class, 'show'])
+        ->name('panen.show');
 });
 
 require __DIR__.'/auth.php';

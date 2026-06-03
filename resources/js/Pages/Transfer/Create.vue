@@ -17,11 +17,13 @@ const form = useForm({
 
 // Filter agar kolam tujuan tidak sama dengan kolam asal
 const availableTujuan = computed(() => {
-    return props.kolams.filter(k => k.id !== form.kolam_asal_id);
+    const selectedId = Number(form.kolam_asal_id);
+    return props.kolams.filter(k => k.id !== selectedId);
 });
 
 const selectedAsal = computed(() => {
-    return props.kolams.find(k => k.id === form.kolam_asal_id);
+    const selectedId = Number(form.kolam_asal_id);
+    return props.kolams.find(k => k.id === selectedId);
 });
 
 const submit = () => {

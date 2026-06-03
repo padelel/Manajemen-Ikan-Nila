@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Kolam;
 use App\Models\TransferLog;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class TransferController extends Controller
 {
@@ -22,7 +22,7 @@ class TransferController extends Controller
             ->get();
 
         return Inertia::render('Transfer/Index', [
-            'logs' => $logs
+            'logs' => $logs,
         ]);
     }
 
@@ -34,9 +34,9 @@ class TransferController extends Controller
         // Ambil semua kolam yang memiliki ikan (> 0) untuk pilihan kolam asal
         // Dan semua kolam untuk pilihan tujuan
         $kolams = Kolam::all();
-        
+
         return Inertia::render('Transfer/Create', [
-            'kolams' => $kolams
+            'kolams' => $kolams,
         ]);
     }
 
@@ -47,14 +47,14 @@ class TransferController extends Controller
     {
         // 1. Validasi Input
         $validated = $request->validate([
-            'kolam_asal_id'   => 'required|exists:kolams,id',
+            'kolam_asal_id' => 'required|exists:kolams,id',
             'kolam_tujuan_id' => 'required|exists:kolams,id|different:kolam_asal_id',
-            'jumlah_ikan'     => 'required|integer|min:1',
-            'tanggal_transfer'=> 'required|date',
-            'catatan'         => 'nullable|string|max:255',
+            'jumlah_ikan' => 'required|integer|min:1',
+            'tanggal_transfer' => 'required|date',
+            'catatan' => 'nullable|string|max:255',
         ], [
             'kolam_tujuan_id.different' => 'Kolam tujuan tidak boleh sama dengan kolam asal.',
-            'jumlah_ikan.min'           => 'Minimal jumlah ikan yang dipindah adalah 1 ekor.'
+            'jumlah_ikan.min' => 'Minimal jumlah ikan yang dipindah adalah 1 ekor.',
         ]);
 
         // 2. Mulai Transaksi Database
@@ -67,38 +67,58 @@ class TransferController extends Controller
             // Validasi Ketersediaan: Cek apakah stok di kolam asal mencukupi
             if ($validated['jumlah_ikan'] > $kolamAsal->jumlah_ikan) {
                 return back()->withErrors([
-                    'jumlah_ikan' => 'Jumlah ikan melebihi total populasi di ' . $kolamAsal->nama_kolam . ' (' . $kolamAsal->jumlah_ikan . ' ekor).'
+                    'jumlah_ikan' => 'Jumlah ikan melebihi total populasi di '.$kolamAsal->nama_kolam.' ('.$kolamAsal->jumlah_ikan.' ekor).',
                 ])->withInput();
             }
 
             // 3. Eksekusi Perubahan Data Kolam
+            // Gunakan berat rata-rata asal sebelum jumlah berkurang
+            $asalBeratRataGram = $kolamAsal->berat_rata_gram;
+
             // Kurangi populasi di kolam asal
             $kolamAsal->decrement('jumlah_ikan', $validated['jumlah_ikan']);
-            
-            // Tambah populasi di kolam tujuan
-            $kolamTujuan->increment('jumlah_ikan', $validated['jumlah_ikan']);
+            $kolamAsal->refresh();
+
+            if ($kolamAsal->jumlah_ikan === 0) {
+                $kolamAsal->update(['berat_rata_gram' => 0]);
+            }
+            $tujuanJumlahSebelum = $kolamTujuan->jumlah_ikan;
+            $tujuanBeratSebelum = $kolamTujuan->berat_rata_gram;
+            $totalJumlahTujuan = $tujuanJumlahSebelum + $validated['jumlah_ikan'];
+
+            $kolamTujuan->update([
+                'jumlah_ikan' => $totalJumlahTujuan,
+                'berat_rata_gram' => $totalJumlahTujuan > 0
+                    ? round(
+                        ($tujuanJumlahSebelum * $tujuanBeratSebelum +
+                            $validated['jumlah_ikan'] * $asalBeratRataGram) /
+                            $totalJumlahTujuan,
+                        2,
+                    )
+                    : 0,
+            ]);
 
             // 4. Catat ke dalam TransferLog (Histori)
             TransferLog::create([
-                'kolam_asal_id'   => $validated['kolam_asal_id'],
+                'kolam_asal_id' => $validated['kolam_asal_id'],
                 'kolam_tujuan_id' => $validated['kolam_tujuan_id'],
-                'user_id'         => Auth::id(),
-                'tanggal_transfer'=> $validated['tanggal_transfer'],
-                'jumlah_ikan'     => $validated['jumlah_ikan'],
-                'catatan'         => $validated['catatan'] ?? 'Pemindahan rutin antar kolam.',
+                'user_id' => Auth::id(),
+                'tanggal_transfer' => $validated['tanggal_transfer'],
+                'jumlah_ikan' => $validated['jumlah_ikan'],
+                'catatan' => $validated['catatan'] ?? 'Pemindahan rutin antar kolam.',
             ]);
 
             // Jika semua lancar, simpan permanen
             DB::commit();
 
-            return redirect()->route('transfer.index')->with('success', 'Berhasil memindahkan ' . $validated['jumlah_ikan'] . ' ekor ikan.');
+            return redirect()->route('transfer.index')->with('success', 'Berhasil memindahkan '.$validated['jumlah_ikan'].' ekor ikan.');
 
         } catch (\Exception $e) {
             // Jika ada error (listrik mati, DB error, dll), batalkan semua perubahan
             DB::rollBack();
 
             return back()->withErrors([
-                'error' => 'Gagal memproses pemindahan: ' . $e->getMessage()
+                'error' => 'Gagal memproses pemindahan: '.$e->getMessage(),
             ])->withInput();
         }
     }
