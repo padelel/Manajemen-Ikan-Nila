@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kolam;
-use App\Models\Inventory;
-use App\Models\Rule;
-use App\Models\MortalityLog;
 use App\Models\DailyParameter;
 use App\Models\FeedLog;
+use App\Models\Inventory;
 use App\Models\InventoryLog;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
+use App\Models\Kolam;
+use App\Models\MortalityLog;
+use App\Models\Rule;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class DailyOperationController extends Controller
 {
@@ -22,7 +22,7 @@ class DailyOperationController extends Controller
         return Inertia::render('DailyOperation/Create', [
             'kolams' => Kolam::all(),
             'inventories' => Inventory::where('total_stok_kg', '>', 0)->get(),
-            'rules' => Rule::all(), 
+            'rules' => Rule::all(),
         ]);
     }
 
@@ -55,9 +55,9 @@ class DailyOperationController extends Controller
                 MortalityLog::create([
                     'kolam_id' => $kolam->id,
                     'user_id' => $userId,
-                    'tanggal' => $tanggal, 
-                    'jumlah' => $request->jumlah_mati, 
-                    'catatan' => $request->catatan_kematian ?? 'Kematian harian'
+                    'tanggal_kematian' => $tanggal,
+                    'jumlah_mati' => $request->jumlah_mati,
+                    'catatan' => $request->catatan_kematian ?? 'Kematian harian',
                 ]);
                 $kolam->decrement('jumlah_ikan', $request->jumlah_mati);
             }
@@ -92,7 +92,7 @@ class DailyOperationController extends Controller
                 // Hitung berat riil per jenis pakan berdasarkan rasio campuran
                 $jumlahKg = ($feed['rasio'] / $totalRasio) * $request->pakan_aktual;
                 $jumlahKgBulat = round($jumlahKg, 2);
-                
+
                 if ($jumlahKgBulat > 0) {
                     // 4a. Catat rincian pakan yang terpakai ke detail tabel FeedLog
                     $feedLog->details()->create([
@@ -104,27 +104,29 @@ class DailyOperationController extends Controller
                     // 4b. Potong stok master di tabel Gudang (Inventory)
                     $inventory = Inventory::find($feed['inventory_id']);
                     $inventory->update([
-                        'total_stok_kg' => round($inventory->total_stok_kg - $jumlahKgBulat, 2)
+                        'total_stok_kg' => round($inventory->total_stok_kg - $jumlahKgBulat, 2),
                     ]);
 
                     // 4c. Catat histori pengeluaran ke tabel InventoryLog (Riwayat Gudang Admin)
                     InventoryLog::create([
-                        'inventory_id' => $feed['inventory_id'], 
-                        'user_id'      => $userId, 
-                        'tipe'         => 'Keluar',
-                        'jumlah'       => $jumlahKgBulat, 
-                        'keterangan'   => 'Pemberian pakan harian untuk ' . $kolam->nama_kolam,
+                        'inventory_id' => $feed['inventory_id'],
+                        'user_id' => $userId,
+                        'tipe' => 'Keluar',
+                        'jumlah' => $jumlahKgBulat,
+                        'keterangan' => 'Pemberian pakan harian untuk '.$kolam->nama_kolam,
                     ]);
                 }
             }
 
             // Kunci Transaksi agar semua aksi di atas tersimpan ke database
             DB::commit();
+
             return redirect()->route('feedlog.index')->with('message', 'Operasi Harian Terpadu Berhasil Disimpan!');
 
         } catch (\Exception $e) {
             DB::rollBack(); // Batalkan semua aksi jika ada 1 saja yang error
-            return back()->withErrors(['error' => 'Gagal menyimpan: ' . $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Gagal menyimpan: '.$e->getMessage()]);
         }
     }
 }

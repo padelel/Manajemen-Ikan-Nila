@@ -76,7 +76,7 @@ class DashboardController extends Controller
             // Hanya kirim ke ML jika di hari tersebut ada data pemberian pakan
             if ($pakanHabis > 0) {
                 $riwayat_data[] = [
-                    'populasi' => (int) $totalIkan, // Secara ideal diambil dari log, disederhanakan pakai populasi saat ini
+                    'populasi' => (int) $totalIkan,
                     'berat_rata_rata' => (float) ($param ? $param->berat_sample : $avgBerat),
                     'suhu_air' => (float) ($param ? $param->suhu : 28.0),
                     'ph_air' => (float) ($param ? $param->ph : 7.0),
