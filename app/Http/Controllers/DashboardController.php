@@ -29,7 +29,6 @@ class DashboardController extends Controller
         $kolam_list = [];
 
         foreach ($kolams as $kolam) {
-            // Rumus biomassa: (jumlah ikan * berat rata-rata gram) / 1000 (dikonversi ke Kg)
             $biomassa = ($kolam->jumlah_ikan * $kolam->berat_rata_gram) / 1000;
             $totalBiomassaKg += $biomassa;
 
@@ -46,48 +45,30 @@ class DashboardController extends Controller
         $inventories = Inventory::all();
         $stokPakan = $inventories->sum('total_stok_kg');
 
-        // --- A. Siapkan Kondisi Kolam Hari Ini ---
         $parameterTerbaru = DailyParameter::latest('tanggal_cek')->first();
         $avgBerat = DailyParameter::whereDate('tanggal_cek', Carbon::today())->avg('berat_sample') ?? 100;
 
-        // Mapping Kondisi Visual ke Angka untuk Model ML
         $mapKejernihan = ['normal' => 1, 'agak keruh' => 2, 'keruh' => 3, 'pekat' => 3];
         $kejernihanAngka = $parameterTerbaru ? ($mapKejernihan[strtolower($parameterTerbaru->kondisi_visual)] ?? 1) : 1;
 
-        $kondisi_sekarang = [
-            'populasi' => (int) $totalIkan,
-            'berat_rata_rata' => (float) $avgBerat,
-            'suhu_air' => (float) ($parameterTerbaru ? $parameterTerbaru->suhu : 28.0),
-            'ph_air' => (float) ($parameterTerbaru ? $parameterTerbaru->ph : 7.0),
-            'kejernihan' => $kejernihanAngka,
-        ];
+        // --- OPTIMASI QUERY ML ---
+        // Tarik data historis 30 hari terakhir SEKALIGUS di luar loop (Mencegah Query Berat/Lemot)
+        $param30Days = DailyParameter::whereDate('tanggal_cek', '>=', Carbon::today()->subDays(30))
+            ->orderBy('tanggal_cek', 'desc')
+            ->get()
+            ->groupBy(function($item) {
+                return Carbon::parse($item->tanggal_cek)->format('Y-m-d');
+            });
 
-        // --- B. Siapkan Array Riwayat Pakan 7 Hari Terakhir ---
-        $riwayat_data = [];
-        for ($i = 7; $i >= 1; $i--) {
-            $date = Carbon::today()->subDays($i)->format('Y-m-d');
+        $pakan30Days = DB::table('feed_log_details')
+            ->join('feed_logs', 'feed_log_details.feed_log_id', '=', 'feed_logs.id')
+            ->whereDate('feed_logs.tanggal_pakan', '>=', Carbon::today()->subDays(30))
+            ->select('feed_log_details.inventory_id', 'feed_log_details.jumlah_kg', DB::raw('DATE(feed_logs.tanggal_pakan) as tanggal'))
+            ->get()
+            ->groupBy(['inventory_id', 'tanggal']);
 
-            $param = DailyParameter::whereDate('tanggal_cek', $date)->first();
-            $pakanHabis = DB::table('feed_log_details')
-                ->join('feed_logs', 'feed_log_details.feed_log_id', '=', 'feed_logs.id')
-                ->whereDate('feed_logs.tanggal_pakan', $date)
-                ->sum('feed_log_details.jumlah_kg');
-
-            // Hanya kirim ke ML jika di hari tersebut ada data pemberian pakan
-            if ($pakanHabis > 0) {
-                $riwayat_data[] = [
-                    'populasi' => (int) $totalIkan,
-                    'berat_rata_rata' => (float) ($param ? $param->berat_sample : $avgBerat),
-                    'suhu_air' => (float) ($param ? $param->suhu : 28.0),
-                    'ph_air' => (float) ($param ? $param->ph : 7.0),
-                    'kejernihan' => $param ? ($mapKejernihan[strtolower($param->kondisi_visual)] ?? 1) : 1,
-                    'pakan_habis' => (float) $pakanHabis,
-                ];
-            }
-        }
-
-        // --- C. Loop Setiap Item di Gudang dan Tembak ke API ---
-        $inventory_list = $inventories->map(function ($inv) use ($kondisi_sekarang, $riwayat_data) {
+        // --- Loop Setiap Item di Gudang dan Tembak ke API ---
+        $inventory_list = $inventories->map(function ($inv) use ($totalIkan, $avgBerat, $parameterTerbaru, $mapKejernihan, $kejernihanAngka, $param30Days, $pakan30Days) {
             $lajuHarian = 0;
             $estimasiHari = 0;
             $status = 'Belum Diprediksi';
@@ -104,11 +85,46 @@ class DashboardController extends Controller
                 ];
             }
 
+            // --- A. Susun Riwayat Khusus untuk Pakan Ini (Maksimal 30 Hari) ---
+            $riwayat_data = [];
+            for ($i = 30; $i >= 1; $i--) {
+                $date = Carbon::today()->subDays($i)->format('Y-m-d');
+
+                $pakanHabis = 0;
+                // Pastikan hanya mengambil pemakaian untuk ID Pakan ini saja
+                if (isset($pakan30Days[$inv->id]) && isset($pakan30Days[$inv->id][$date])) {
+                    $pakanHabis = $pakan30Days[$inv->id][$date]->sum('jumlah_kg');
+                }
+
+                if ($pakanHabis > 0) {
+                    $param = isset($param30Days[$date]) ? $param30Days[$date]->first() : null;
+                    
+                    $riwayat_data[] = [
+                        'id_pakan' => (int) $inv->id, // Identitas Pakan untuk ML
+                        'populasi' => (int) $totalIkan,
+                        'berat_rata_rata' => (float) ($param ? $param->berat_sample : $avgBerat),
+                        'suhu_air' => (float) ($param ? $param->suhu : 28.0),
+                        'ph_air' => (float) ($param ? $param->ph : 7.0),
+                        'kejernihan' => $param ? ($mapKejernihan[strtolower($param->kondisi_visual)] ?? 1) : 1,
+                        'pakan_habis' => (float) $pakanHabis,
+                    ];
+                }
+            }
+
+            // --- B. Kondisi Kolam Hari Ini ---
+            $kondisi_sekarang = [
+                'id_pakan' => (int) $inv->id, // Identitas Pakan untuk ML
+                'populasi' => (int) $totalIkan,
+                'berat_rata_rata' => (float) $avgBerat,
+                'suhu_air' => (float) ($parameterTerbaru ? $parameterTerbaru->suhu : 28.0),
+                'ph_air' => (float) ($parameterTerbaru ? $parameterTerbaru->ph : 7.0),
+                'kejernihan' => $kejernihanAngka,
+            ];
+
             try {
-                // Endpoint ML API (Pastikan ML_API_URL sudah ada di .env)
                 $apiUrl = env('ML_API_URL', 'http://127.0.0.1:8000').'/predict-stock';
 
-                // Set timeout singkat (3 detik) agar dashboard tidak loading lama jika server Python mati
+                // Tembak ke Model Python
                 $response = Http::timeout(3)->post($apiUrl, [
                     'riwayat_data' => $riwayat_data,
                     'kondisi_sekarang' => $kondisi_sekarang,
@@ -121,11 +137,9 @@ class DashboardController extends Controller
                     $estimasiHari = $mlResult['estimated_days_left'];
                     $status = $mlResult['status'];
                 } else {
-                    // Terjadi jika jumlah array riwayat_data kurang dari batas minimal yang diminta Python (misal < 5)
                     $status = 'Kurang Data ML';
                 }
             } catch (\Exception $e) {
-                // Tangkap error jika API mati atau menolak koneksi
                 Log::error('ML API Connection Error: '.$e->getMessage());
                 $status = 'Server AI Offline';
             }
