@@ -90,21 +90,23 @@ class DatabaseSeeder extends Seeder
 
         // =========================================================================
         // GUDANG PAKAN
-        // Stok disesuaikan dengan estimasi pemakaian selama siklus masing-masing kolam.
+        // PEMBARUAN: setiap jenis pakan diseragamkan stoknya menjadi 150 kg.
         // =========================================================================
+        $stokSeragamKg = 150;
+
         $pakan1 = Inventory::create([
             'nama_pakan' => 'Hi-Pro-Vite 781-1 (Starter)',
-            'total_stok_kg' => 450,
+            'total_stok_kg' => $stokSeragamKg,
             'terakhir_update' => now(),
         ]);
         $pakan2 = Inventory::create([
             'nama_pakan' => 'Hi-Pro-Vite 781-2 (Grower)',
-            'total_stok_kg' => 980,
+            'total_stok_kg' => $stokSeragamKg,
             'terakhir_update' => now(),
         ]);
         $pakan3 = Inventory::create([
             'nama_pakan' => 'Hi-Pro-Vite 781-3 (Finisher)',
-            'total_stok_kg' => 620,
+            'total_stok_kg' => $stokSeragamKg,
             'terakhir_update' => now(),
         ]);
 
@@ -113,7 +115,7 @@ class DatabaseSeeder extends Seeder
                 'inventory_id' => $pakan1->id,
                 'user_id' => $admin->id,
                 'tipe' => 'Masuk',
-                'jumlah' => 500,
+                'jumlah' => $stokSeragamKg,
                 'keterangan' => 'Pembelian stok awal bulan April',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -122,7 +124,7 @@ class DatabaseSeeder extends Seeder
                 'inventory_id' => $pakan2->id,
                 'user_id' => $admin->id,
                 'tipe' => 'Masuk',
-                'jumlah' => 1200,
+                'jumlah' => $stokSeragamKg,
                 'keterangan' => 'Pembelian stok awal bulan April',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -131,7 +133,7 @@ class DatabaseSeeder extends Seeder
                 'inventory_id' => $pakan3->id,
                 'user_id' => $admin->id,
                 'tipe' => 'Masuk',
-                'jumlah' => 800,
+                'jumlah' => $stokSeragamKg,
                 'keterangan' => 'Pembelian stok awal bulan April',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -139,12 +141,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // =========================================================================
-        // KOLAM A — FASE STARTER → GROWER AWAL (85–190 gram)
+        // KOLAM A — FASE STARTER → GROWER AWAL
         //
-        // Skenario: siklus ke-40 hari. Benih ditebar 40 hari lalu dengan berat
-        // awal 15 gram/ekor. Saat ini berat rata-rata ±140 gram, masih dalam
-        // fase transisi Starter ke Grower. Feed Rate (FR) 5% dari biomassa,
-        // pakan dicampur 40% Starter + 60% Grower.
+        // PEMBARUAN: berat awal tebar 85 gram (seragam), berat saat ini 110 gram.
+        // Siklus tetap 40 hari. Feed Rate (FR) 5% dari biomassa, pakan dicampur
+        // 40% Starter + 60% Grower.
         //
         // Populasi: 1.200 tebar − 50 mati = 1.150 ekor aktif
         // =========================================================================
@@ -157,7 +158,7 @@ class DatabaseSeeder extends Seeder
             'lebar_m' => 4,
             'kedalaman_m' => 1.2,
             'jumlah_ikan' => 1150,
-            'berat_rata_gram' => 140.0,
+            'berat_rata_gram' => 110.0,
         ]);
 
         $tanggalTebarA = Carbon::today()->subDays(40);
@@ -172,7 +173,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $admin->id,
             'tanggal_tebar' => $tanggalTebarA,
             'jumlah_ikan' => 1200,
-            'berat_rata_gram' => 15,
+            'berat_rata_gram' => 85,
             'sumber_benih' => 'Balai Benih Ikan Lokal',
         ]);
 
@@ -193,12 +194,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Data harian 7 hari terakhir
-        // Pertumbuhan: +3 gram/hari → 122 → 125 → 128 → 131 → 134 → 137 → 140 gram
-        // Pakan harian: FR 5% × biomassa = ±7–8 kg/hari (3x pemberian)
-        $beratA = 119.0;
+        // PEMBARUAN: pertumbuhan dihitung ulang agar konsisten dengan
+        // berat awal 85 gram -> berat saat ini 110 gram selama 40 hari.
+        // Laju harian = (110 - 85) / 40 = 0.625 gram/hari.
+        // Berat 7 hari lalu = 110 - (7 x 0.625) = 105.625 gram.
+        // Pakan harian: FR 5% x biomassa (3x pemberian)
+        $lajuPertumbuhanA = (110.0 - 85.0) / 40; // gram/hari
+        $beratA = 110.0 - (7 * $lajuPertumbuhanA);
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $beratA += 3.0;
+            $beratA += $lajuPertumbuhanA;
             $biomassaA = 1150 * ($beratA / 1000);
             $pakanA = round($biomassaA * 0.05, 1); // FR 5%
 
@@ -213,7 +218,7 @@ class DatabaseSeeder extends Seeder
                 'suhu' => rand(270, 295) / 10,
                 'ph' => rand(69, 75) / 10,
                 'kondisi_visual' => 'Jernih',
-                'berat_sample' => $beratA,
+                'berat_sample' => round($beratA, 1),
             ]);
 
             $feed = FeedLog::create([
@@ -242,14 +247,16 @@ class DatabaseSeeder extends Seeder
         }
 
         // =========================================================================
-        // KOLAM B — FASE GROWER (200–240 gram)
+        // KOLAM B — FASE GROWER
         //
-        // Skenario: siklus ke-72 hari. Benih 20 gram ditebar 72 hari lalu.
-        // Sempat ada serangan jamur Saprolegnia di hari ke-42 namun sudah teratasi.
-        // Berat saat ini ±220 gram, mendekati batas atas fase Grower.
-        // Feed Rate (FR) 3% dari biomassa, 100% pakan Grower.
+        // PEMBARUAN: berat saat ini 200 gram (berat awal tebar tetap dicatat
+        // 85 gram secara konseptual untuk konsistensi laju pertumbuhan, namun
+        // TIDAK ada TebarLog yang dibuat untuk kolam ini sesuai permintaan).
+        // Siklus tetap 72 hari. Sempat ada serangan jamur Saprolegnia, sudah
+        // teratasi. Feed Rate (FR) 3% dari biomassa, 100% pakan Grower.
         //
-        // Populasi: 1.800 tebar − 120 mati = 1.680 ekor aktif
+        // Populasi: 1.800 awal − 120 mati = 1.680 ekor aktif
+        // (dicatat di SiklusBudidaya saja, tanpa TebarLog)
         // =========================================================================
         $kolamB = Kolam::create([
             'nama_kolam' => 'Kolam Beton B',
@@ -260,7 +267,7 @@ class DatabaseSeeder extends Seeder
             'lebar_m' => 5,
             'kedalaman_m' => 1.5,
             'jumlah_ikan' => 1680,
-            'berat_rata_gram' => 220.0,
+            'berat_rata_gram' => 200.0,
         ]);
 
         $tanggalTebarB = Carbon::today()->subDays(72);
@@ -270,14 +277,8 @@ class DatabaseSeeder extends Seeder
             'status_aktif' => 'Aktif',
             'jumlah_tebar_awal' => 1800,
         ]);
-        TebarLog::create([
-            'kolam_id' => $kolamB->id,
-            'user_id' => $admin->id,
-            'tanggal_tebar' => $tanggalTebarB,
-            'jumlah_ikan' => 1800,
-            'berat_rata_gram' => 20,
-            'sumber_benih' => 'CV. Nila Jaya',
-        ]);
+        // CATATAN: TebarLog sengaja TIDAK dibuat untuk Kolam B sesuai permintaan.
+        // Populasi awal tetap tercatat lewat SiklusBudidaya->jumlah_tebar_awal di atas.
 
         // Kematian: 40 (adaptasi) + 50 (jamur) + 30 (pasca obat) = 120 → sisa 1.680 ekor
         MortalityLog::create([
@@ -303,12 +304,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Data harian 7 hari terakhir
-        // Pertumbuhan: +3 gram/hari → 202 → 205 → 208 → 211 → 214 → 217 → 220 gram
-        // Pakan harian: FR 3% × biomassa = ±10–11 kg/hari (3x pemberian)
-        $beratB = 199.0;
+        // PEMBARUAN: pertumbuhan dihitung ulang agar konsisten dengan
+        // berat awal konseptual 85 gram -> berat saat ini 200 gram selama 72 hari.
+        // Laju harian = (200 - 85) / 72 = 1.597 gram/hari.
+        // Pakan harian: FR 3% x biomassa (3x pemberian)
+        $lajuPertumbuhanB = (200.0 - 85.0) / 72; // gram/hari
+        $beratB = 200.0 - (7 * $lajuPertumbuhanB);
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $beratB += 3.0;
+            $beratB += $lajuPertumbuhanB;
             $biomassaB = 1680 * ($beratB / 1000);
             $pakanB = round($biomassaB * 0.03, 1); // FR 3%
 
@@ -319,7 +323,7 @@ class DatabaseSeeder extends Seeder
                 'suhu' => rand(275, 300) / 10,
                 'ph' => rand(70, 76) / 10,
                 'kondisi_visual' => 'Jernih',
-                'berat_sample' => $beratB,
+                'berat_sample' => round($beratB, 1),
             ]);
 
             $feed = FeedLog::create([
@@ -341,15 +345,17 @@ class DatabaseSeeder extends Seeder
         }
 
         // =========================================================================
-        // KOLAM C — FASE FINISHER / MENDEKATI PANEN (250 gram ke atas)
+        // KOLAM C — FASE FINISHER / MENDEKATI PANEN
         //
-        // Skenario: siklus ke-105 hari. Ini kolam terbesar. Pernah ada wabah
-        // bakteri Aeromonas di hari ke-65 namun sudah tertangani. Seminggu lalu
-        // dilakukan panen sortir 60 ekor untuk mengurangi kepadatan. Berat
-        // saat ini ±289.5 gram, siap panen utama dalam 1–2 minggu ke depan.
-        // Feed Rate (FR) 2% dari biomassa, 100% pakan Finisher.
+        // PEMBARUAN: berat saat ini 250 gram (berat awal tebar tetap dicatat
+        // 85 gram secara konseptual untuk konsistensi laju pertumbuhan, namun
+        // TIDAK ada TebarLog yang dibuat untuk kolam ini sesuai permintaan).
+        // Siklus tetap 105 hari. Pernah ada wabah Aeromonas, sudah tertangani.
+        // Seminggu lalu dilakukan panen sortir 60 ekor. Feed Rate (FR) 2% dari
+        // biomassa, 100% pakan Finisher.
         //
-        // Populasi: 3.000 tebar − 400 mati − 60 panen parsial = 2.540 ekor aktif
+        // Populasi: 3.000 awal − 400 mati − 60 panen parsial = 2.540 ekor aktif
+        // (dicatat di SiklusBudidaya saja, tanpa TebarLog)
         // =========================================================================
         $kolamC = Kolam::create([
             'nama_kolam' => 'Kolam Tanah C',
@@ -360,7 +366,7 @@ class DatabaseSeeder extends Seeder
             'lebar_m' => 10,
             'kedalaman_m' => 1.8,
             'jumlah_ikan' => 2540,
-            'berat_rata_gram' => 289.5,
+            'berat_rata_gram' => 250.0,
         ]);
 
         $tanggalTebarC = Carbon::today()->subDays(105);
@@ -370,14 +376,8 @@ class DatabaseSeeder extends Seeder
             'status_aktif' => 'Aktif',
             'jumlah_tebar_awal' => 3000,
         ]);
-        TebarLog::create([
-            'kolam_id' => $kolamC->id,
-            'user_id' => $admin->id,
-            'tanggal_tebar' => $tanggalTebarC,
-            'jumlah_ikan' => 3000,
-            'berat_rata_gram' => 20,
-            'sumber_benih' => 'Pendederan Pak Hasan',
-        ]);
+        // CATATAN: TebarLog sengaja TIDAK dibuat untuk Kolam C sesuai permintaan.
+        // Populasi awal tetap tercatat lewat SiklusBudidaya->jumlah_tebar_awal di atas.
 
         // Kematian: 80+130+150+40 = 400 ekor → setelah panen parsial sisa 2.540 ekor
         MortalityLog::create([
@@ -409,24 +409,28 @@ class DatabaseSeeder extends Seeder
             'catatan' => 'Kematian sisa pasca penanganan penyakit, kondisi kolam sudah pulih sepenuhnya',
         ]);
 
-        // Panen sortir parsial: 60 ekor @±285 gram = ±17 kg
+        // Panen sortir parsial: 60 ekor @±245 gram = ±14.7 kg
+        // (disesuaikan dengan berat saat ini 250 gram, bukan 289.5 gram seperti sebelumnya)
         HarvestLog::create([
             'kolam_id' => $kolamC->id,
             'user_id' => $admin->id,
             'jenis_panen' => 'Parsial',
             'tanggal_panen' => Carbon::today()->subDays(7),
             'jumlah_ikan' => 60,
-            'berat_total_kg' => 17.1,
-            'catatan' => 'Panen sortir ikan ukuran >285 gram untuk mengurangi kepadatan sebelum panen utama',
+            'berat_total_kg' => 14.7,
+            'catatan' => 'Panen sortir ikan ukuran besar untuk mengurangi kepadatan sebelum panen utama',
         ]);
 
         // Data harian 7 hari terakhir
-        // Pertumbuhan: +2.5 gram/hari → 274.5 → 277 → 279.5 → 282 → 284.5 → 287 → 289.5 gram
-        // Pakan harian: FR 2% × biomassa = ±14–15 kg/hari (2x pemberian, efisiensi finisher)
-        $beratC = 272.0;
+        // PEMBARUAN: pertumbuhan dihitung ulang agar konsisten dengan
+        // berat awal konseptual 85 gram -> berat saat ini 250 gram selama 105 hari.
+        // Laju harian = (250 - 85) / 105 = 1.571 gram/hari.
+        // Pakan harian: FR 2% x biomassa (2x pemberian, efisiensi finisher)
+        $lajuPertumbuhanC = (250.0 - 85.0) / 105; // gram/hari
+        $beratC = 250.0 - (7 * $lajuPertumbuhanC);
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $beratC += 2.5;
+            $beratC += $lajuPertumbuhanC;
             $biomassaC = 2540 * ($beratC / 1000);
             $pakanC = round($biomassaC * 0.02, 1); // FR 2%
 
@@ -437,7 +441,7 @@ class DatabaseSeeder extends Seeder
                 'suhu' => rand(270, 290) / 10,
                 'ph' => rand(68, 74) / 10,
                 'kondisi_visual' => 'Jernih',
-                'berat_sample' => $beratC,
+                'berat_sample' => round($beratC, 1),
             ]);
 
             $feed = FeedLog::create([
