@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rules', function (Blueprint $table) {
+        Schema::create('operator_kolam', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_rule')->unique();
-            $table->string('kondisi_suhu');
-            $table->string('kondisi_ph');
-            $table->string('kondisi_visual')->nullable();
-            $table->integer('rekomendasi_dosis_persen');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('kolam_id')->constrained('kolams')->onDelete('cascade');
+            $table->date('tanggal_penugasan');
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rules');
+        Schema::dropIfExists('operator_kolam');
     }
 };

@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // database/migrations/xxxx_create_tebar_logs_table.php
         Schema::create('tebar_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kolam_id')->constrained('kolams')->cascadeOnDelete();
+            $table->foreignId('kolam_id')->constrained('kolams')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users');
             $table->date('tanggal_tebar');
             $table->integer('jumlah_ikan');
             $table->decimal('berat_rata_gram', 8, 2);
-            $table->string('sumber_benih')->nullable();
-            $table->text('catatan')->nullable();
-            $table->foreignId('user_id')->constrained('users');
+            $table->string('sumber_benih', 150)->nullable();
             $table->timestamps();
         });
     }

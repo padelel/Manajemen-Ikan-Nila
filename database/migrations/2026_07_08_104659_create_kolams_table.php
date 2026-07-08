@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('kolams', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_kolam');
-            $table->string('dimensi');
-            $table->integer('jumlah_ikan');
-            $table->float('berat_rata_gram')->default(0); // Penambahan krusial
-            $table->text('deskripsi')->nullable();
+            $table->string('nama_kolam', 100);
+            $table->string('lokasi', 150)->nullable();
+            $table->decimal('panjang_m', 8, 2)->nullable();
+            $table->decimal('lebar_m', 8, 2)->nullable();
+            $table->decimal('kedalaman_m', 8, 2)->nullable();
+            $table->enum('status_kolam', ['aktif', 'tidak aktif', 'maintenance'])->default('tidak aktif');
             $table->timestamps();
         });
     }

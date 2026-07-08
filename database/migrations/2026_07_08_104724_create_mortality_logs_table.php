@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventories', function (Blueprint $table) {
+        Schema::create('mortality_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_pakan');
-            $table->float('total_stok_kg');
-            $table->date('terakhir_update');
+            $table->foreignId('kolam_id')->constrained('kolams')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users');
+            $table->date('tanggal_kematian');
+            $table->integer('jumlah_mati');
+            $table->text('catatan')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inventories');
+        Schema::dropIfExists('mortality_logs');
     }
 };

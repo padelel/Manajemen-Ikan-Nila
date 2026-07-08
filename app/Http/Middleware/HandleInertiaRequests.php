@@ -37,7 +37,12 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'role' => $request->user()->role,
-            ] : null,
+                ] : null,
+            ],
+            // Tambahan untuk menangkap Flash Message (Success / Warning)
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'warning' => fn () => $request->session()->get('warning'),
             ],
         ];
     }

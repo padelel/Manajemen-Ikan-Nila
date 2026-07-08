@@ -1,39 +1,44 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Kolam;
+use App\Models\User;
 use Carbon\Carbon;
 
 class KolamSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('kolams')->insert([
-            [
-                'nama_kolam' => 'Kolam A1', 
-                'lokasi' => 'Blok Utara',
-                'bentuk_kolam' => 'Bundar',
-                'status_kolam' => 'Aktif',
-                'panjang_m' => 4, // Jika bundar, panjang = diameter
-                'lebar_m' => 4,
-                'kedalaman_m' => 1.2,
-                'tanggal_tebar' => Carbon::now()->subDays(30)->toDateString(),
-                'jumlah_ikan' => 1000, 
-                'berat_rata_gram' => 150
-            ],
-            [
-                'nama_kolam' => 'Kolam B1', 
-                'lokasi' => 'Blok Selatan',
-                'bentuk_kolam' => 'Persegi',
-                'status_kolam' => 'Aktif',
-                'panjang_m' => 5,
-                'lebar_m' => 10,
-                'kedalaman_m' => 1.5,
-                'tanggal_tebar' => Carbon::now()->subDays(60)->toDateString(),
-                'jumlah_ikan' => 1100, 
-                'berat_rata_gram' => 210
-            ],
+        // 1. Buat Data Master Kolam
+        $kolam1 = Kolam::create([
+            'nama_kolam' => 'Kolam Bioflok Alpha',
+            'lokasi' => 'Sektor Timur',
+            'panjang_m' => 4.0,
+            'lebar_m' => 4.0,
+            'kedalaman_m' => 1.5,
+            'status_kolam' => 'aktif',
         ]);
+
+        $kolam2 = Kolam::create([
+            'nama_kolam' => 'Kolam Bioflok Beta',
+            'lokasi' => 'Sektor Barat',
+            'panjang_m' => 5.0,
+            'lebar_m' => 5.0,
+            'kedalaman_m' => 1.2,
+            'status_kolam' => 'aktif',
+        ]);
+
+        // 2. Ambil data operator yang baru dibuat dari UserSeeder
+        $operator = User::where('role', 'operator')->first();
+
+        // 3. Masukkan data ke tabel pivot (operator_kolam)
+        if ($operator) {
+            $operator->kolams()->attach([
+                $kolam1->id => ['tanggal_penugasan' => Carbon::now()->toDateString()],
+                $kolam2->id => ['tanggal_penugasan' => Carbon::now()->toDateString()]
+            ]);
+        }
     }
 }

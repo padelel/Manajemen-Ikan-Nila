@@ -2,25 +2,56 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Kolam extends Model
 {
     use HasFactory;
 
-    // Izinkan kolom-kolom ini diisi melalui form
     protected $fillable = [
-    'nama_kolam', 'lokasi', 'bentuk_kolam', 'status_kolam', 
-    'panjang_m', 'lebar_m', 'kedalaman_m', 
-    'tanggal_tebar', 'jumlah_ikan', 'berat_rata_gram'
+        'nama_kolam', 'lokasi', 'panjang_m', 'lebar_m', 'kedalaman_m', 'status_kolam'
     ];
-    
-    public function riwayatSiklus() {
+
+    public function operators()
+    {
+        return $this->belongsToMany(User::class, 'operator_kolam', 'kolam_id', 'user_id')
+                    ->withPivot('tanggal_penugasan')
+                    ->withTimestamps();
+    }
+
+    public function siklusBudidayas()
+    {
         return $this->hasMany(SiklusBudidaya::class);
     }
 
-    public function siklusAktif() {
-        return $this->hasOne(SiklusBudidaya::class)->where('status_aktif', 'Aktif');
+    public function tebarLogs()
+    {
+        return $this->hasMany(TebarLog::class);
+    }
+
+    public function mortalityLogs()
+    {
+        return $this->hasMany(MortalityLog::class);
+    }
+
+    public function harvestLogs()
+    {
+        return $this->hasMany(HarvestLog::class);
+    }
+
+    public function parameterHarians()
+    {
+        return $this->hasMany(ParameterHarian::class);
+    }
+
+    public function inferensiLogs()
+    {
+        return $this->hasMany(InferensiLog::class);
+    }
+
+    public function tikets()
+    {
+        return $this->hasMany(Tiket::class);
     }
 }
