@@ -1,11 +1,40 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import moment from 'moment';
+import { ref, watch } from 'vue';
 
-defineProps({
+const props = defineProps({
     tikets: Array,
+    filters: Object,
+    kolams: Array,
 });
+
+const formFilter = ref({
+    kolam_id: props.filters?.kolam_id || '',
+});
+
+const applyFilter = () => {
+    router.get(route('tiket.index'), formFilter.value, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
+
+watch(
+    formFilter,
+    () => {
+        applyFilter();
+    },
+    { deep: true },
+);
+
+const resetFilter = () => {
+    formFilter.value = {
+        kolam_id: '',
+    };
+};
 
 // Fungsi untuk format tanggal
 const formatTime = (date) => moment(date).format('DD MMM YYYY HH:mm');
@@ -42,6 +71,36 @@ const getStatusText = (status) => {
                 </div>
                 <div v-if="$page.props.flash?.warning" class="mb-4 bg-yellow-100 text-yellow-800 p-4 rounded shadow-sm">
                     {{ $page.props.flash.warning }}
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 transition-colors duration-300">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Filter Kolam</label>
+                            <select
+                                v-model="formFilter.kolam_id"
+                                class="w-full border border-slate-200 rounded-2xl text-sm focus:ring-blue-500 focus:border-blue-500 bg-slate-50 text-slate-900 transition-colors duration-300 px-4 py-3"
+                            >
+                                <option value="">Semua Kolam</option>
+                                <option
+                                    v-for="kolam in kolams || []"
+                                    :key="kolam.id"
+                                    :value="kolam.id"
+                                >
+                                    {{ kolam.nama_kolam }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="md:w-1/3">
+                            <button
+                                @click="resetFilter"
+                                type="button"
+                                class="w-full px-5 py-3 bg-slate-900 text-white font-bold text-sm rounded-2xl hover:bg-slate-700 transition-colors border border-slate-800"
+                            >
+                                Reset Filter
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

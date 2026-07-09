@@ -143,17 +143,6 @@ class DatabaseSeeder extends Seeder
             'status_aktif' => 'berjalan',
         ]);
 
-        HarvestLog::create([
-            'kolam_id' => $kolamC->id,
-            'siklus_budidaya_id' => $siklusC->id,
-            'user_id' => $supervisor->id,
-            'jenis_panen' => 'total',
-            'tanggal_panen' => Carbon::today()->subDays(7),
-            'jumlah_ikan_panen' => 60,
-            'berat_total_kg' => 14.7,
-            'catatan' => 'Panen sortir ikan ukuran besar',
-        ]);
-
         // =========================================================================
         // 6. GENERASI PARAMETER AIR & TRIGGER FORWARD CHAINING AI (7 Hari Terakhir)
         // =========================================================================

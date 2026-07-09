@@ -19,7 +19,7 @@ const formatDate = (dateString) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-bold text-xl text-slate-800 leading-tight">Laporan & Analisis Tambak</h2>
+            <h2 class="font-bold text-xl text-slate-800 leading-tight">Laporan & Analisis Kolam</h2>
         </template>
 
         <div class="py-12">

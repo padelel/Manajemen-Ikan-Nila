@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kolam;
 use App\Models\Tiket;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -9,23 +10,32 @@ use Carbon\Carbon;
 
 class TiketController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         
-        // Jika Operator, hanya lihat tiket berdasarkan penugasan kolamnya.
         if ($user->role === 'operator') {
-            $assignedKolamIds = $user->kolams()->pluck('kolams.id');
-            $tikets = Tiket::with(['kolam', 'inferensiLog'])
-                ->whereIn('kolam_id', $assignedKolamIds)
-                ->latest()
-                ->get();
+            $assignedKolamIds = $user->kolams->pluck('id');
+            $query = Tiket::with(['kolam', 'inferensiLog'])
+                ->whereIn('kolam_id', $assignedKolamIds);
+            $kolams = Kolam::whereIn('id', $assignedKolamIds)->get();
         } else {
-            $tikets = Tiket::with(['kolam', 'inferensiLog', 'operator'])->latest()->get();
+            $query = Tiket::with(['kolam', 'inferensiLog', 'operator']);
+            $kolams = Kolam::all();
         }
 
+        if ($request->filled('kolam_id')) {
+            $query->where('kolam_id', $request->kolam_id);
+        }
+
+        $tikets = $query->latest()->get();
+
         return Inertia::render('Tiket/Index', [
-            'tikets' => $tikets
+            'tikets' => $tikets,
+            'filters' => [
+                'kolam_id' => $request->kolam_id,
+            ],
+            'kolams' => $kolams,
         ]);
     }
 
