@@ -18,19 +18,46 @@ class ParameterHarianController extends Controller
         $this->fcService = $fcService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // Tampilkan riwayat parameter air beserta hasil inferensinya
-        $riwayat = ParameterHarian::with(['kolam', 'inferensiLog'])->latest()->get();
+        $query = ParameterHarian::with(['kolam', 'inferensiLog']);
+
+        $query->when($request->query('kolam_id'), function ($query, $kolamId) {
+            $query->where('kolam_id', $kolamId);
+        });
+
+        $query->when($request->query('start_date'), function ($query, $startDate) {
+            $query->whereDate('tanggal_cek', '>=', $startDate);
+        });
+
+        $query->when($request->query('end_date'), function ($query, $endDate) {
+            $query->whereDate('tanggal_cek', '<=', $endDate);
+        });
+
+        $riwayat = $query->latest()->get();
+        $kolams = Kolam::where('status_kolam', 'aktif')->get();
+
         return Inertia::render('Parameter/Index', [
-            'riwayat' => $riwayat
+            'riwayat' => $riwayat,
+            'kolams' => $kolams,
+            'filters' => [
+                'kolam_id' => $request->query('kolam_id', ''),
+                'start_date' => $request->query('start_date', ''),
+                'end_date' => $request->query('end_date', ''),
+            ],
         ]);
     }
 
     public function create()
     {
-        // Hanya tampilkan kolam yang berstatus aktif
-        $kolams = Kolam::where('status_kolam', 'aktif')->get();
+        $user = auth()->user();
+
+        if ($user->role === 'operator') {
+            $kolams = $user->kolams()->where('status_kolam', 'aktif')->get();
+        } else {
+            $kolams = Kolam::where('status_kolam', 'aktif')->get();
+        }
+
         return Inertia::render('Parameter/Create', [
             'kolams' => $kolams
         ]);
@@ -49,6 +76,13 @@ class ParameterHarianController extends Controller
             'flok_ml'      => 'required|numeric',
             'kecerahan_cm' => 'required|numeric',
         ]);
+
+        if (auth()->user()->role === 'operator') {
+            $isAssigned = auth()->user()->kolams()->where('kolam_id', $validated['kolam_id'])->exists();
+            if (! $isAssigned) {
+                return back()->withErrors(['kolam_id' => 'Anda tidak ditugaskan ke kolam ini.'])->withInput();
+            }
+        }
 
         $validated['user_id'] = auth()->id();
 

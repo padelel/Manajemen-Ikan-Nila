@@ -1,10 +1,120 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
-defineProps({
+const props = defineProps({
     riwayat: Array,
+    kolams: Array,
+    filters: Object,
 });
+
+const filterForm = ref({
+    kolam_id: props.filters?.kolam_id || '',
+    start_date: props.filters?.start_date || '',
+    end_date: props.filters?.end_date || '',
+});
+
+watch(filterForm, (value) => {
+    router.get(route('parameter.index'), value, {
+        preserveState: true,
+        replace: true,
+    });
+}, { deep: true });
+
+const resetFilter = () => {
+    filterForm.value.kolam_id = '';
+    filterForm.value.start_date = '';
+    filterForm.value.end_date = '';
+};
+
+const getParameterStatus = (key, value) => {
+    const numberValue = Number(value);
+
+    if (Number.isNaN(numberValue)) {
+        return { label: 'Tidak tersedia', severity: 'neutral' };
+    }
+
+    switch (key) {
+        case 'suhu':
+            if (numberValue < 20.0) {
+                return { label: 'Terlalu dingin', severity: 'danger' };
+            }
+            if (numberValue < 25.0) {
+                return { label: 'Agak rendah', severity: 'warning' };
+            }
+            if (numberValue <= 30.0) {
+                return { label: 'Normal', severity: 'normal' };
+            }
+            if (numberValue <= 33.0) {
+                return { label: 'Agak tinggi', severity: 'warning' };
+            }
+            return { label: 'Terlalu panas', severity: 'danger' };
+        case 'ph':
+            if (numberValue < 6.0) {
+                return { label: 'Terlalu rendah', severity: 'danger' };
+            }
+            if (numberValue < 6.5) {
+                return { label: 'Agak rendah', severity: 'warning' };
+            }
+            if (numberValue <= 8.5) {
+                return { label: 'Normal', severity: 'normal' };
+            }
+            if (numberValue <= 9.0) {
+                return { label: 'Agak tinggi', severity: 'warning' };
+            }
+            return { label: 'Terlalu tinggi', severity: 'danger' };
+        case 'do_mgl':
+            if (numberValue < 3.0) {
+                return { label: 'Sangat rendah', severity: 'danger' };
+            }
+            if (numberValue < 5.0) {
+                return { label: 'Rendah', severity: 'warning' };
+            }
+            return { label: 'Normal', severity: 'normal' };
+        case 'amonia_mgl':
+            if (numberValue <= 0.0) {
+                return { label: 'Normal', severity: 'normal' };
+            }
+            if (numberValue <= 0.05) {
+                return { label: 'Sedikit tinggi', severity: 'warning' };
+            }
+            return { label: 'Terlalu tinggi', severity: 'danger' };
+        case 'flok_ml':
+            if (numberValue < 15.0) {
+                return { label: 'Terlalu rendah', severity: 'danger' };
+            }
+            if (numberValue <= 30.0) {
+                return { label: 'Normal', severity: 'normal' };
+            }
+            return { label: 'Terlalu tinggi', severity: 'warning' };
+        case 'kecerahan_cm':
+            if (numberValue < 30.0) {
+                return { label: 'Terlalu keruh', severity: 'danger' };
+            }
+            if (numberValue <= 40.0) {
+                return { label: 'Normal', severity: 'normal' };
+            }
+            return { label: 'Terlalu tinggi', severity: 'warning' };
+        default:
+            return { label: 'Tidak diketahui', severity: 'neutral' };
+    }
+};
+
+const statusBadgeClasses = (status) => {
+    const base = 'ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold';
+
+    switch (status.severity) {
+        case 'normal':
+            return `${base} bg-green-100 text-green-800 border border-green-200`;
+        case 'warning':
+            return `${base} bg-yellow-100 text-yellow-800 border border-yellow-200`;
+        case 'danger':
+            return `${base} bg-red-100 text-red-800 border border-red-200`;
+        default:
+            return `${base} bg-gray-100 text-gray-700 border border-gray-200`;
+    }
+};
 </script>
 
 <template>
@@ -24,6 +134,32 @@ defineProps({
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 
+                <!-- Filter Kolam dan Tanggal -->
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 mb-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Filter Kolam</label>
+                            <select v-model="filterForm.kolam_id" class="w-full border border-slate-200 rounded-2xl text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 text-slate-900 px-4 py-3">
+                                <option value="">-- Semua Kolam --</option>
+                                <option v-for="k in kolams" :key="k.id" :value="k.id">{{ k.nama_kolam }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Dari Tanggal</label>
+                            <input type="date" v-model="filterForm.start_date" class="w-full border border-slate-200 rounded-2xl text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 text-slate-900 px-4 py-3" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sampai Tanggal</label>
+                            <input type="date" v-model="filterForm.end_date" class="w-full border border-slate-200 rounded-2xl text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 text-slate-900 px-4 py-3" />
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" @click="resetFilter" class="w-full px-5 py-3 bg-slate-100 text-slate-600 font-bold text-sm rounded-2xl hover:bg-slate-200 transition-colors border border-slate-200">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Notifikasi Flash Message (Akan muncul jika ada return -> with() dari Controller) -->
                 <div v-if="$page.props.flash?.success" class="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm" role="alert">
                     <p class="font-bold">Berhasil</p>
@@ -55,12 +191,48 @@ defineProps({
                                     </td>
                                     <td class="px-6 py-4">
                                         <ul class="list-disc pl-4 space-y-1 text-gray-700">
-                                            <li><span class="font-semibold">Suhu:</span> {{ item.suhu }} °C</li>
-                                            <li><span class="font-semibold">pH:</span> {{ item.ph }}</li>
-                                            <li><span class="font-semibold">DO:</span> {{ item.do_mgl }} mg/L</li>
-                                            <li><span class="font-semibold">Amonia:</span> {{ item.amonia_mgl }} mg/L</li>
-                                            <li><span class="font-semibold">Flok:</span> {{ item.flok_ml }} ml/L</li>
-                                            <li><span class="font-semibold">Kecerahan:</span> {{ item.kecerahan_cm }} cm</li>
+                                            <li>
+                                                <span class="font-semibold">Suhu:</span>
+                                                {{ item.suhu }} °C
+                                                <span :class="statusBadgeClasses(getParameterStatus('suhu', item.suhu))">
+                                                    {{ getParameterStatus('suhu', item.suhu).label }}
+                                                </span>
+                                            </li>
+                                            <li>
+                                                <span class="font-semibold">pH:</span>
+                                                {{ item.ph }}
+                                                <span :class="statusBadgeClasses(getParameterStatus('ph', item.ph))">
+                                                    {{ getParameterStatus('ph', item.ph).label }}
+                                                </span>
+                                            </li>
+                                            <li>
+                                                <span class="font-semibold">DO:</span>
+                                                {{ item.do_mgl }} mg/L
+                                                <span :class="statusBadgeClasses(getParameterStatus('do_mgl', item.do_mgl))">
+                                                    {{ getParameterStatus('do_mgl', item.do_mgl).label }}
+                                                </span>
+                                            </li>
+                                            <li>
+                                                <span class="font-semibold">Amonia:</span>
+                                                {{ item.amonia_mgl }} mg/L
+                                                <span :class="statusBadgeClasses(getParameterStatus('amonia_mgl', item.amonia_mgl))">
+                                                    {{ getParameterStatus('amonia_mgl', item.amonia_mgl).label }}
+                                                </span>
+                                            </li>
+                                            <li>
+                                                <span class="font-semibold">Flok:</span>
+                                                {{ item.flok_ml }} ml/L
+                                                <span :class="statusBadgeClasses(getParameterStatus('flok_ml', item.flok_ml))">
+                                                    {{ getParameterStatus('flok_ml', item.flok_ml).label }}
+                                                </span>
+                                            </li>
+                                            <li>
+                                                <span class="font-semibold">Kecerahan:</span>
+                                                {{ item.kecerahan_cm }} cm
+                                                <span :class="statusBadgeClasses(getParameterStatus('kecerahan_cm', item.kecerahan_cm))">
+                                                    {{ getParameterStatus('kecerahan_cm', item.kecerahan_cm).label }}
+                                                </span>
+                                            </li>
                                         </ul>
                                     </td>
                                     <td class="px-6 py-4">

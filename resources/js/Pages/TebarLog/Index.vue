@@ -29,11 +29,11 @@ const getRoleInitial = (user) => {
         <template #header>
             <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight transition-colors duration-300">Riwayat Tebar Benih</h2>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">Catatan penambahan populasi benih baru ke dalam kolam.</p>
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight transition-colors duration-300">Riwayat Tebar Benih</h2>
+                    <p class="text-sm text-slate-500 mt-1 transition-colors duration-300">Catatan penambahan populasi benih baru ke dalam kolam.</p>
                 </div>
                 
-                <Link v-if="$page.props.auth.user.role === 'operator'" :href="route('tebar.create')" class="bg-indigo-600 dark:bg-indigo-500 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-none hover:bg-indigo-700 dark:hover:bg-indigo-400 text-sm font-bold transition-all flex-shrink-0">
+                <Link v-if="$page.props.auth.user.role === 'operator'" :href="route('tebar.create')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 text-sm font-bold transition-all flex-shrink-0">
                     + Tebar Benih Baru
                 </Link>
             </div>
@@ -41,25 +41,25 @@ const getRoleInitial = (user) => {
 
         <div class="py-8">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] sm:rounded-3xl border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                <div class="bg-white overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-slate-100 transition-colors duration-300">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50/50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                            <thead class="bg-slate-50/50 border-b border-slate-100 transition-colors duration-300">
                                 <tr>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest w-40 transition-colors">Tanggal Tebar</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest transition-colors">Tujuan Kolam</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center transition-colors">Jumlah Benih</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest transition-colors">Detail Benih</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest transition-colors">Dicatat Oleh</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-40 transition-colors">Tanggal Tebar</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Tujuan Kolam</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center transition-colors">Jumlah Benih</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Detail Benih</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Dicatat Oleh</th>
                                 </tr>
                             </thead>
                             
                             <tbody class="text-sm">
-                                <tr v-for="log in logs" :key="log.id" class="border-b border-slate-50 dark:border-slate-700/50 hover:bg-indigo-50/20 dark:hover:bg-indigo-500/5 transition duration-200 group">
+                                <tr v-for="log in logs" :key="log.id" class="border-b border-slate-50 hover:bg-indigo-50/20 transition duration-200 group">
                                     
-                                    <td class="px-6 py-5 font-medium text-slate-500 dark:text-slate-400 transition-colors">
+                                    <td class="px-6 py-5 font-medium text-slate-500 transition-colors">
                                         <div class="flex items-center gap-2">
-                                            <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                             {{ formatDate(log.tanggal_tebar) }}
@@ -68,24 +68,24 @@ const getRoleInitial = (user) => {
                                     
                                     <td class="px-6 py-5">
                                         <div class="flex items-center gap-3">
-                                            <div class="h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-500/20 transition-colors">
+                                            <div class="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 border border-indigo-100/50 transition-colors">
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p class="font-bold text-slate-900 dark:text-slate-100 text-base transition-colors">{{ log.kolam?.nama_kolam }}</p>
-                                                <p class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mt-0.5 transition-colors">Penambahan Baru</p>
+                                                <p class="font-bold text-slate-900 text-base transition-colors">{{ log.kolam?.nama_kolam }}</p>
+                                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mt-0.5 transition-colors">Penambahan Baru</p>
                                             </div>
                                         </div>
                                     </td>
 
                                     <td class="px-6 py-5 text-center">
                                         <div class="inline-flex flex-col items-center justify-center">
-                                            <p class="font-black text-indigo-600 dark:text-indigo-400 text-xl tracking-tight transition-colors">
+                                            <p class="font-black text-indigo-600 text-xl tracking-tight transition-colors">
                                                 +{{ log.jumlah_ikan.toLocaleString('id-ID') }}
                                             </p>
-                                            <span class="text-[10px] text-indigo-400 dark:text-indigo-300 font-bold uppercase tracking-widest bg-indigo-50 dark:bg-indigo-500/20 px-2 py-0.5 rounded-md mt-1 border border-indigo-100/50 dark:border-indigo-500/30 transition-colors">
+                                            <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-md mt-1 border border-indigo-100/50 transition-colors">
                                                 Ekor
                                             </span>
                                         </div>
@@ -95,13 +95,13 @@ const getRoleInitial = (user) => {
                                         <div class="flex flex-col gap-2">
                                             <div class="inline-flex items-center gap-1.5">
                                                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider transition-colors">Sumber:</span>
-                                                <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-600 transition-colors">
+                                                <span class="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60 transition-colors">
                                                     {{ log.sumber_benih || 'Sumber Lokal' }}
                                                 </span>
                                             </div>
                                             <div class="inline-flex items-center gap-1.5">
                                                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider transition-colors">Rata-rata:</span>
-                                                <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-100/50 dark:border-emerald-500/20 transition-colors">
+                                                <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100/50 transition-colors">
                                                     {{ log.berat_rata_gram }} gr / ekor
                                                 </span>
                                             </div>
@@ -110,15 +110,15 @@ const getRoleInitial = (user) => {
 
                                     <td class="px-6 py-5">
                                         <div class="flex items-center gap-3">
-                                            <div class="rounded-full w-9 h-9 flex items-center justify-center font-bold text-xs uppercase border shadow-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 transition-colors">
+                                            <div class="rounded-full w-9 h-9 flex items-center justify-center font-bold text-xs uppercase border shadow-sm bg-white text-slate-700 border-slate-200 transition-colors">
                                                 {{ getRoleInitial(log.user) }}
                                             </div>
                                             <div class="flex flex-col">
-                                                <span class="font-bold text-slate-900 dark:text-slate-100 text-sm transition-colors">
+                                                <span class="font-bold text-slate-900 text-sm transition-colors">
                                                     {{ log.user ? log.user.name : 'Sistem' }}
                                                 </span>
                                                 <span class="text-[10px] font-bold uppercase tracking-wider transition-colors" 
-                                                      :class="getRoleName(log.user) === 'Pengelola Utama' ? 'text-indigo-500 dark:text-indigo-400' : 'text-teal-500 dark:text-teal-400'">
+                                                      :class="getRoleName(log.user) === 'Pengelola Utama' ? 'text-indigo-500' : 'text-teal-500'">
                                                     {{ getRoleName(log.user) }}
                                                 </span>
                                             </div>
@@ -130,12 +130,12 @@ const getRoleInitial = (user) => {
                                 <tr v-if="logs.length === 0">
                                     <td colspan="5" class="px-6 py-16 text-center">
                                         <div class="flex flex-col items-center justify-center">
-                                            <div class="h-16 w-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-600 transition-colors duration-300">
-                                                <svg class="w-8 h-8 text-slate-300 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100 transition-colors duration-300">
+                                                <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                                 </svg>
                                             </div>
-                                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm transition-colors">Belum ada riwayat tebar benih yang tercatat.</p>
+                                            <p class="text-slate-500 font-medium text-sm transition-colors">Belum ada riwayat tebar benih yang tercatat.</p>
                                         </div>
                                     </td>
                                 </tr>

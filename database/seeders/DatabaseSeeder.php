@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\HarvestLog;
 use App\Models\Kolam;
+use App\Models\MortalityLog;
+use App\Models\ParameterHarian;
 use App\Models\SiklusBudidaya;
 use App\Models\TebarLog;
-use App\Models\MortalityLog;
-use App\Models\HarvestLog;
-use App\Models\ParameterHarian;
+use App\Models\User;
 use App\Services\ForwardChainingService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // Instansiasi Mesin Inferensi (AI) untuk digunakan di seeder
-        $fcService = new ForwardChainingService();
+        $fcService = new ForwardChainingService;
 
         // =========================================================================
         // 2. PENGGUNA (SUPERVISOR & OPERATOR)
@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
             'lokasi' => 'Blok Utara',
             'panjang_m' => 4.0,
             'lebar_m' => 4.0,
-            'kedalaman_m' => 1.2,
+            'kedalaman_m' => 1.1,
             'status_kolam' => 'aktif',
         ]);
         $operator->kolams()->attach($kolamA->id, ['tanggal_penugasan' => Carbon::today()->subDays(40)]);
@@ -103,7 +103,7 @@ class DatabaseSeeder extends Seeder
             'lokasi' => 'Blok Selatan',
             'panjang_m' => 10.0,
             'lebar_m' => 5.0,
-            'kedalaman_m' => 1.5,
+            'kedalaman_m' => 1.1,
             'status_kolam' => 'aktif',
         ]);
         $operator->kolams()->attach($kolamB->id, ['tanggal_penugasan' => Carbon::today()->subDays(72)]);
@@ -131,7 +131,7 @@ class DatabaseSeeder extends Seeder
             'lokasi' => 'Blok Timur',
             'panjang_m' => 20.0,
             'lebar_m' => 10.0,
-            'kedalaman_m' => 1.8,
+            'kedalaman_m' => 1.1,
             'status_kolam' => 'aktif',
         ]);
         $operator->kolams()->attach($kolamC->id, ['tanggal_penugasan' => Carbon::today()->subDays(105)]);
@@ -147,7 +147,7 @@ class DatabaseSeeder extends Seeder
             'kolam_id' => $kolamC->id,
             'siklus_budidaya_id' => $siklusC->id,
             'user_id' => $supervisor->id,
-            'jenis_panen' => 'parsial',
+            'jenis_panen' => 'total',
             'tanggal_panen' => Carbon::today()->subDays(7),
             'jumlah_ikan_panen' => 60,
             'berat_total_kg' => 14.7,

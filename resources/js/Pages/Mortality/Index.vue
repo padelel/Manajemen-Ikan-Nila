@@ -51,19 +51,19 @@ const getRoleInitial = (user) => {
         <template #header>
             <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight transition-colors duration-300">Riwayat Mortalitas</h2>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">Catatan harian kematian ikan dan indikasi penyebabnya.</p>
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight transition-colors duration-300">Riwayat Mortalitas</h2>
+                    <p class="text-sm text-slate-500 mt-1 transition-colors duration-300">Catatan harian kematian ikan dan indikasi penyebabnya.</p>
                 </div>
                 
                 <div class="flex flex-wrap gap-3">
-                    <a href="/laporan/cetak" target="_blank" class="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-xl shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 text-sm font-bold transition-all duration-300">
-                        <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <a href="/laporan/cetak" target="_blank" class="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl shadow-sm hover:bg-slate-50 hover:text-slate-900 text-sm font-bold transition-all duration-300">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
                         Cetak Laporan
                     </a>
                     
-                    <Link v-if="$page.props.auth.user.role === 'operator'" href="/kematian/create" class="bg-rose-600 dark:bg-rose-500 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-rose-500/30 dark:shadow-none hover:bg-rose-700 dark:hover:bg-rose-400 text-sm font-bold transition-all flex-shrink-0">
+                    <Link v-if="$page.props.auth.user.role === 'operator'" href="/kematian/create" class="bg-rose-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-rose-500/30 hover:bg-rose-700 text-sm font-bold transition-all flex-shrink-0">
                         + Lapor Kematian
                     </Link>
                 </div>
@@ -73,48 +73,48 @@ const getRoleInitial = (user) => {
         <div class="py-8">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] dark:shadow-[0_2px_15px_rgb(0,0,0,0.2)] border border-slate-100 dark:border-slate-700 flex flex-col md:flex-row gap-4 items-end transition-colors duration-300">
+                <div class="bg-white p-5 rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-slate-100 flex flex-col md:flex-row gap-4 items-end transition-colors duration-300">
                     <div class="w-full md:w-1/3">
-                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 transition-colors duration-300">Filter Kolam</label>
-                        <select v-model="filterForm.kolam_id" class="w-full border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:ring-rose-500 dark:focus:ring-rose-400 focus:border-rose-500 dark:focus:border-rose-400 bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Filter Kolam</label>
+                        <select v-model="filterForm.kolam_id" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900 transition-colors duration-300">
                             <option value="">-- Semua Kolam --</option>
                             <option v-for="k in kolams" :key="k.id" :value="k.id">{{ k.nama_kolam }}</option>
                         </select>
                     </div>
                     <div class="w-full md:w-1/4">
-                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 transition-colors duration-300">Dari Tanggal</label>
-                        <input type="date" v-model="filterForm.start_date" class="w-full border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:ring-rose-500 dark:focus:ring-rose-400 focus:border-rose-500 dark:focus:border-rose-400 bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Dari Tanggal</label>
+                        <input type="date" v-model="filterForm.start_date" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900 transition-colors duration-300">
                     </div>
                     <div class="w-full md:w-1/4">
-                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 transition-colors duration-300">Sampai Tanggal</label>
-                        <input type="date" v-model="filterForm.end_date" class="w-full border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:ring-rose-500 dark:focus:ring-rose-400 focus:border-rose-500 dark:focus:border-rose-400 bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Sampai Tanggal</label>
+                        <input type="date" v-model="filterForm.end_date" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900 transition-colors duration-300">
                     </div>
                     <div class="w-full md:w-auto">
-                        <button @click="resetFilter" class="w-full md:w-auto px-5 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-200 dark:border-slate-600">
+                        <button @click="resetFilter" class="w-full md:w-auto px-5 py-2.5 bg-slate-100 text-slate-600 font-bold text-sm rounded-xl hover:bg-slate-200 transition-colors border border-slate-200">
                             Reset
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                <div class="bg-white overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-slate-100 transition-colors duration-300">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50/50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                            <thead class="bg-slate-50/50 border-b border-slate-100 transition-colors duration-300">
                                 <tr>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest w-40 transition-colors">Tanggal</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest transition-colors">Kolam</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest text-center transition-colors">Jumlah Mati</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest transition-colors">Catatan / Penyebab</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest transition-colors">Pelapor</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-40 transition-colors">Tanggal</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Kolam</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center transition-colors">Jumlah Mati</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Catatan / Penyebab</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Pelapor</th>
                                 </tr>
                             </thead>
                             
                             <tbody class="text-sm">
-                                <tr v-for="log in logs.data" :key="log.id" class="border-b border-slate-50 dark:border-slate-700/50 hover:bg-rose-50/20 dark:hover:bg-rose-500/5 transition duration-200 group">
+                                <tr v-for="log in logs.data" :key="log.id" class="border-b border-slate-50 hover:bg-rose-50/20 transition duration-200 group">
                                     
                                     <td class="px-6 py-5">
-                                        <div class="flex items-center gap-2 font-medium text-slate-500 dark:text-slate-400 transition-colors">
-                                            <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <div class="flex items-center gap-2 font-medium text-slate-500 transition-colors">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                             {{ formatDate(log.tanggal || log.tanggal_kematian) }}
@@ -123,32 +123,32 @@ const getRoleInitial = (user) => {
                                     
                                     <td class="px-6 py-5">
                                         <div class="flex items-center gap-3">
-                                            <div class="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-600 transition-colors">
+                                            <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200/60 transition-colors">
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p class="font-bold text-slate-900 dark:text-slate-100 text-base transition-colors">{{ log.kolam?.nama_kolam }}</p>
-                                                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 transition-colors">{{ log.kolam?.lokasi || '-' }}</p>
+                                                <p class="font-bold text-slate-900 text-base transition-colors">{{ log.kolam?.nama_kolam }}</p>
+                                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 transition-colors">{{ log.kolam?.lokasi || '-' }}</p>
                                             </div>
                                         </div>
                                     </td>
 
                                     <td class="px-6 py-5 text-center">
                                         <div class="inline-flex flex-col items-center justify-center">
-                                            <p class="font-black text-rose-600 dark:text-rose-400 text-xl tracking-tight transition-colors">
+                                            <p class="font-black text-rose-600 text-xl tracking-tight transition-colors">
                                                 {{ log.jumlah_mati || log.jumlah }}
                                             </p>
-                                            <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold uppercase tracking-widest bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded-md mt-1 border border-rose-100 dark:border-rose-500/20 transition-colors">
+                                            <span class="text-[10px] text-rose-500 font-bold uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-md mt-1 border border-rose-100 transition-colors">
                                                 Ekor
                                             </span>
                                         </div>
                                     </td>
 
                                     <td class="px-6 py-5">
-                                        <div class="bg-slate-50/50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-100 dark:border-slate-600 transition-colors">
-                                            <p class="text-slate-600 dark:text-slate-300 font-medium text-sm leading-relaxed transition-colors">
+                                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 transition-colors">
+                                            <p class="text-slate-600 font-medium text-sm leading-relaxed transition-colors">
                                                 {{ log.catatan || 'Tidak ada catatan khusus.' }}
                                             </p>
                                         </div>
@@ -156,14 +156,14 @@ const getRoleInitial = (user) => {
 
                                     <td class="px-6 py-5">
                                         <div class="flex items-center gap-3">
-                                            <div class="rounded-full w-9 h-9 flex items-center justify-center font-bold text-xs uppercase shadow-sm border bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 transition-colors">
+                                            <div class="rounded-full w-9 h-9 flex items-center justify-center font-bold text-xs uppercase shadow-sm border bg-white text-slate-700 border-slate-200 transition-colors">
                                                 {{ getRoleInitial(log.user) }}
                                             </div>
                                             <div class="flex flex-col">
-                                                <span class="font-bold text-slate-900 dark:text-slate-100 text-sm transition-colors">
+                                                <span class="font-bold text-slate-900 text-sm transition-colors">
                                                     {{ log.user ? log.user.name : 'Sistem' }}
                                                 </span>
-                                                <span class="text-[10px] font-bold uppercase tracking-wider transition-colors" :class="getRoleName(log.user) === 'Pengelola Utama' ? 'text-indigo-500 dark:text-indigo-400' : 'text-teal-500 dark:text-teal-400'">
+                                                <span class="text-[10px] font-bold uppercase tracking-wider transition-colors" :class="getRoleName(log.user) === 'Pengelola Utama' ? 'text-indigo-500' : 'text-teal-500'">
                                                     {{ getRoleName(log.user) }}
                                                 </span>
                                             </div>
@@ -174,14 +174,14 @@ const getRoleInitial = (user) => {
                                 <tr v-if="logs.data.length === 0">
                                     <td colspan="5" class="px-6 py-16 text-center">
                                         <div class="flex flex-col items-center justify-center">
-                                            <div class="h-16 w-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-600 transition-colors duration-300">
-                                                <svg class="w-8 h-8 text-slate-300 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100 transition-colors duration-300">
+                                                <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
-                                            <p class="text-slate-700 dark:text-slate-200 font-bold text-base mb-1 transition-colors">Tidak Ada Data</p>
-                                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm mb-3 transition-colors">Tidak ada catatan kematian ikan sesuai filter.</p>
-                                            <button @click="resetFilter" v-if="filterForm.kolam_id || filterForm.start_date || filterForm.end_date" class="text-rose-600 dark:text-rose-400 font-bold hover:underline text-sm transition-colors">
+                                            <p class="text-slate-700 font-bold text-base mb-1 transition-colors">Tidak Ada Data</p>
+                                            <p class="text-slate-500 font-medium text-sm mb-3 transition-colors">Tidak ada catatan kematian ikan sesuai filter.</p>
+                                            <button @click="resetFilter" v-if="filterForm.kolam_id || filterForm.start_date || filterForm.end_date" class="text-rose-600 font-bold hover:underline text-sm transition-colors">
                                                 Hapus Filter
                                             </button>
                                         </div>
@@ -191,9 +191,9 @@ const getRoleInitial = (user) => {
                         </table>
                     </div>
 
-                    <div class="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 p-4 flex items-center justify-between transition-colors duration-300" v-if="logs.links && logs.links.length > 3">
-                        <div class="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">
-                            Menampilkan <span class="font-bold text-slate-800 dark:text-slate-200">{{ logs.from }}</span> - <span class="font-bold text-slate-800 dark:text-slate-200">{{ logs.to }}</span> dari total <span class="font-bold text-slate-800 dark:text-slate-200">{{ logs.total }}</span> data.
+                    <div class="bg-slate-50 border-t border-slate-100 p-4 flex items-center justify-between transition-colors duration-300" v-if="logs.links && logs.links.length > 3">
+                        <div class="text-sm text-slate-500 font-medium transition-colors">
+                            Menampilkan <span class="font-bold text-slate-800">{{ logs.from }}</span> - <span class="font-bold text-slate-800">{{ logs.to }}</span> dari total <span class="font-bold text-slate-800">{{ logs.total }}</span> data.
                         </div>
                         <div class="flex gap-1">
                             <template v-for="(link, index) in logs.links" :key="index">
@@ -202,12 +202,12 @@ const getRoleInitial = (user) => {
                                     :href="link.url" 
                                     v-html="link.label"
                                     class="px-3.5 py-2 rounded-lg text-sm font-bold transition-all border"
-                                    :class="link.active ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-200 dark:shadow-none' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                                    :class="link.active ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-200' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'"
                                 />
                                 <span 
                                     v-else 
                                     v-html="link.label" 
-                                    class="px-3.5 py-2 rounded-lg text-sm font-semibold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 cursor-not-allowed transition-colors">
+                                    class="px-3.5 py-2 rounded-lg text-sm font-semibold text-slate-400 bg-slate-50 border border-slate-100 cursor-not-allowed transition-colors">
                                 </span>
                             </template>
                         </div>

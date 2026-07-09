@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kolam;
 use App\Models\HarvestLog;
 use App\Models\MortalityLog;
+use App\Models\SiklusBudidaya;
 use App\Models\Tiket;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Inertia\Inertia;
 
 class ReportController extends Controller
@@ -16,21 +16,50 @@ class ReportController extends Controller
         // 1. Data Agregat Global
         $totalPanenKg = HarvestLog::sum('berat_total_kg');
         $totalKematian = MortalityLog::sum('jumlah_mati');
-        
-        // 2. Data Rasio Tiket Mitigasi (Selesai vs Belum)
         $tiketSelesai = Tiket::where('status', 'selesai')->count();
-        $tiketAktif = Tiket::whereIn('status', ['open', 'in_progress', 'menunggu_verifikasi'])->count();
+        $tiketAktif = Tiket::whereNotIn('status', ['selesai'])->count();
 
-        // 3. Data Performa per Kolam
-        $performaKolam = Kolam::with(['harvestLogs', 'tikets', 'mortalityLogs'])
+        // 2. Data Performa per Siklus Budidaya
+        $performaSiklus = SiklusBudidaya::with(['kolam'])
+            ->orderBy('tanggal_mulai', 'desc')
             ->get()
-            ->map(function ($kolam) {
+            ->map(function ($siklus) {
+                // Tentukan batas waktu penghitungan log untuk siklus ini
+                $waktuMulai = $siklus->tanggal_mulai;
+                $waktuSelesai = $siklus->status_aktif === 'selesai' ? $siklus->updated_at : Carbon::now();
+
+                // Hitung total kematian dalam rentang waktu siklus
+                $kematian = MortalityLog::where('kolam_id', $siklus->kolam_id)
+                    ->whereBetween('tanggal_kematian', [$waktuMulai, $waktuSelesai])
+                    ->sum('jumlah_mati');
+
+                // Hitung total panen dalam rentang waktu siklus
+                $panenKg = HarvestLog::where('kolam_id', $siklus->kolam_id)
+                    ->whereBetween('tanggal_panen', [$waktuMulai, $waktuSelesai])
+                    ->sum('berat_total_kg');
+
+                // Hitung Survival Rate (SR)
+                $sisaIkan = $siklus->jumlah_tebar_awal - $kematian;
+                $sr = $siklus->jumlah_tebar_awal > 0
+                    ? round(($sisaIkan / $siklus->jumlah_tebar_awal) * 100, 2)
+                    : 0;
+
+                // Hitung Rasio Penyelesaian Tiket Mitigasi AI
+                $tikets = Tiket::where('kolam_id', $siklus->kolam_id)
+                    ->whereBetween('created_at', [$waktuMulai, $waktuSelesai])
+                    ->get();
+
                 return [
-                    'id' => $kolam->id,
-                    'nama_kolam' => $kolam->nama_kolam,
-                    'total_panen_kg' => $kolam->harvestLogs->sum('berat_total_kg'),
-                    'total_kematian' => $kolam->mortalityLogs->sum('jumlah_mati'),
-                    'jumlah_masalah_air' => $kolam->tikets->count(),
+                    'id' => $siklus->id,
+                    'nama_kolam' => $siklus->kolam ? $siklus->kolam->nama_kolam : 'Kolam Dihapus',
+                    'status_siklus' => $siklus->status_aktif,
+                    'tanggal_mulai' => $siklus->tanggal_mulai,
+                    'tebar_awal' => $siklus->jumlah_tebar_awal,
+                    'total_kematian' => (int) $kematian,
+                    'survival_rate' => $sr,
+                    'total_panen_kg' => (float) $panenKg,
+                    'total_tiket' => $tikets->count(),
+                    'tiket_selesai' => $tikets->where('status', 'selesai')->count(),
                 ];
             });
 
@@ -41,7 +70,7 @@ class ReportController extends Controller
                 'tiket_selesai' => $tiketSelesai,
                 'tiket_aktif' => $tiketAktif,
             ],
-            'performa_kolam' => $performaKolam
+            'performa_siklus' => $performaSiklus,
         ]);
     }
 }

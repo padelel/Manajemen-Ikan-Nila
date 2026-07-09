@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Kolam;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class KolamSeeder extends Seeder
 {
@@ -17,7 +17,7 @@ class KolamSeeder extends Seeder
             'lokasi' => 'Sektor Timur',
             'panjang_m' => 4.0,
             'lebar_m' => 4.0,
-            'kedalaman_m' => 1.5,
+            'kedalaman_m' => 1.1,
             'status_kolam' => 'aktif',
         ]);
 
@@ -26,7 +26,7 @@ class KolamSeeder extends Seeder
             'lokasi' => 'Sektor Barat',
             'panjang_m' => 5.0,
             'lebar_m' => 5.0,
-            'kedalaman_m' => 1.2,
+            'kedalaman_m' => 1.1,
             'status_kolam' => 'aktif',
         ]);
 
@@ -37,7 +37,7 @@ class KolamSeeder extends Seeder
         if ($operator) {
             $operator->kolams()->attach([
                 $kolam1->id => ['tanggal_penugasan' => Carbon::now()->toDateString()],
-                $kolam2->id => ['tanggal_penugasan' => Carbon::now()->toDateString()]
+                $kolam2->id => ['tanggal_penugasan' => Carbon::now()->toDateString()],
             ]);
         }
     }

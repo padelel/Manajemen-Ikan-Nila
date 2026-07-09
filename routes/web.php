@@ -1,14 +1,14 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\KolamController;
-use App\Http\Controllers\ParameterHarianController;
-use App\Http\Controllers\TiketController;
-use App\Http\Controllers\TebarLogController;
-use App\Http\Controllers\MortalityLogController;
 use App\Http\Controllers\HarvestLogController;
+use App\Http\Controllers\KolamController;
+use App\Http\Controllers\MortalityLogController;
+use App\Http\Controllers\ParameterHarianController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TebarLogController;
+use App\Http\Controllers\TiketController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +17,7 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->group(function () {
+
     // ================================================================
     // 1. RUTE BERSAMA (BISA DIAKSES SUPERVISOR & OPERATOR)
     // ================================================================
@@ -26,28 +27,34 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Tiket Mitigasi (Melihat daftar tiket dan detailnya)
+    // Tiket Mitigasi (melihat daftar & detail)
     Route::get('/tiket', [TiketController::class, 'index'])->name('tiket.index');
     Route::get('/tiket/{tiket}', [TiketController::class, 'show'])->name('tiket.show');
 
-    // Parameter Harian (Melihat riwayat)
+    // Parameter Harian (melihat riwayat)
     Route::get('/parameter', [ParameterHarianController::class, 'index'])->name('parameter.index');
 
-    // Log Aktivitas (Melihat riwayat)
+    // Log Aktivitas (melihat riwayat)
     Route::get('/tebar', [TebarLogController::class, 'index'])->name('tebar.index');
     Route::get('/kematian', [MortalityLogController::class, 'index'])->name('kematian.index');
     Route::get('/panen', [HarvestLogController::class, 'index'])->name('panen.index');
-    Route::get('/panen/{panen}', [HarvestLogController::class, 'show'])->name('panen.show');
+
+    // Detail panen — constraint [0-9]+ agar tidak menabrak route /panen/create
+    Route::get('/panen/{panen}', [HarvestLogController::class, 'show'])
+        ->name('panen.show')
+        ->where('panen', '[0-9]+');
 
     // ================================================================
-    // 2. KHUSUS SUPERVISOR
+    // 2. KHUSUS SUPERVISOR (PENGELOLA UTAMA)
     // ================================================================
     Route::middleware('role:supervisor')->group(function () {
+
         // Manajemen Pengguna
         Route::resource('users', UserController::class);
 
-        // Manajemen Kolam (Master Data)
+        // Manajemen Kolam (Master Data) + penugasan operator
         Route::resource('kolam', KolamController::class);
+        Route::post('/kolam/{kolam}/assign', [KolamController::class, 'assignOperators'])->name('kolam.assign');
 
         // Analisis & Laporan
         Route::get('/analisis', [ReportController::class, 'index'])->name('analisis.index');
@@ -57,14 +64,15 @@ Route::middleware('auth')->group(function () {
     });
 
     // ================================================================
-    // 3. KHUSUS OPERATOR
+    // 3. KHUSUS OPERATOR LAPANGAN (TUGAS INPUT DATA)
     // ================================================================
     Route::middleware('role:operator')->group(function () {
-        // Input Parameter Air (Memicu mesin inferensi Forward Chaining)
+
+        // Input Parameter Air Harian
         Route::get('/parameter/create', [ParameterHarianController::class, 'create'])->name('parameter.create');
         Route::post('/parameter', [ParameterHarianController::class, 'store'])->name('parameter.store');
 
-        // Selesaikan Tiket Mitigasi (Upload Bukti)
+        // Selesaikan Tiket Mitigasi
         Route::post('/tiket/{tiket}/selesaikan', [TiketController::class, 'selesaikan'])->name('tiket.selesaikan');
 
         // Pencatatan Log Aktivitas

@@ -13,9 +13,13 @@ class TiketController extends Controller
     {
         $user = auth()->user();
         
-        // Jika Operator, hanya lihat tiket miliknya. Jika Supervisor, lihat semua tiket.
+        // Jika Operator, hanya lihat tiket berdasarkan penugasan kolamnya.
         if ($user->role === 'operator') {
-            $tikets = Tiket::with(['kolam', 'inferensiLog'])->where('operator_id', $user->id)->latest()->get();
+            $assignedKolamIds = $user->kolams()->pluck('kolams.id');
+            $tikets = Tiket::with(['kolam', 'inferensiLog'])
+                ->whereIn('kolam_id', $assignedKolamIds)
+                ->latest()
+                ->get();
         } else {
             $tikets = Tiket::with(['kolam', 'inferensiLog', 'operator'])->latest()->get();
         }

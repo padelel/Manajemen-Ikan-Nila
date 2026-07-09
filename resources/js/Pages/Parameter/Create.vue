@@ -10,6 +10,8 @@ const props = defineProps({
     kolams: Array
 });
 
+const hasAssignedKolam = props.kolams.length > 0;
+
 const form = useForm({
     kolam_id: '',
     tanggal_cek: new Date().toISOString().split('T')[0],
@@ -23,6 +25,12 @@ const form = useForm({
 
 const submit = () => {
     form.post(route('parameter.store'));
+};
+
+const cegahKarakterIlegal = (event) => {
+    if (['e', 'E', '-', '+'].includes(event.key)) {
+        event.preventDefault();
+    }
 };
 </script>
 
@@ -41,7 +49,7 @@ const submit = () => {
                         
                         <div>
                             <InputLabel for="kolam_id" value="Pilih Kolam" />
-                            <select id="kolam_id" v-model="form.kolam_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                            <select id="kolam_id" v-model="form.kolam_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" :disabled="!hasAssignedKolam" required>
                                 <option value="" disabled>-- Pilih Kolam Aktif --</option>
                                 <option v-for="kolam in kolams" :key="kolam.id" :value="kolam.id">
                                     {{ kolam.nama_kolam }}
@@ -59,40 +67,43 @@ const submit = () => {
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <InputLabel for="suhu" value="Suhu (°C)" />
-                                <TextInput id="suhu" type="number" step="0.1" class="mt-1 block w-full" v-model="form.suhu" placeholder="Misal: 28.5" required />
+                                <TextInput id="suhu" type="number" step="0.1" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.suhu" placeholder="Misal: 28.5" required />
                                 <InputError class="mt-2" :message="form.errors.suhu" />
                             </div>
                             <div>
                                 <InputLabel for="ph" value="Tingkat pH" />
-                                <TextInput id="ph" type="number" step="0.1" class="mt-1 block w-full" v-model="form.ph" placeholder="Misal: 7.2" required />
+                                <TextInput id="ph" type="number" step="0.1" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.ph" placeholder="Misal: 7.2" required />
                                 <InputError class="mt-2" :message="form.errors.ph" />
                             </div>
                             <div>
                                 <InputLabel for="do_mgl" value="DO (mg/L)" />
-                                <TextInput id="do_mgl" type="number" step="0.1" class="mt-1 block w-full" v-model="form.do_mgl" placeholder="Misal: 5.5" required />
+                                <TextInput id="do_mgl" type="number" step="0.1" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.do_mgl" placeholder="Misal: 5.5" required />
                                 <InputError class="mt-2" :message="form.errors.do_mgl" />
                             </div>
                             <div>
                                 <InputLabel for="amonia_mgl" value="Amonia (mg/L)" />
-                                <TextInput id="amonia_mgl" type="number" step="0.01" class="mt-1 block w-full" v-model="form.amonia_mgl" placeholder="Misal: 0.02" required />
+                                <TextInput id="amonia_mgl" type="number" step="0.01" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.amonia_mgl" placeholder="Misal: 0.02" required />
                                 <InputError class="mt-2" :message="form.errors.amonia_mgl" />
                             </div>
                             <div>
                                 <InputLabel for="flok_ml" value="Volume Flok (ml/L)" />
-                                <TextInput id="flok_ml" type="number" step="0.1" class="mt-1 block w-full" v-model="form.flok_ml" placeholder="Misal: 20" required />
+                                <TextInput id="flok_ml" type="number" step="0.1" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.flok_ml" placeholder="Misal: 20" required />
                                 <InputError class="mt-2" :message="form.errors.flok_ml" />
                             </div>
                             <div>
                                 <InputLabel for="kecerahan_cm" value="Kecerahan (cm)" />
-                                <TextInput id="kecerahan_cm" type="number" step="0.1" class="mt-1 block w-full" v-model="form.kecerahan_cm" placeholder="Misal: 35" required />
+                                <TextInput id="kecerahan_cm" type="number" step="0.1" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.kecerahan_cm" placeholder="Misal: 35" required />
                                 <InputError class="mt-2" :message="form.errors.kecerahan_cm" />
                             </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6 border-t pt-4">
-                            <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                            <PrimaryButton :class="{ 'opacity-25': form.processing || !hasAssignedKolam }" :disabled="form.processing || !hasAssignedKolam">
                                 Simpan & Analisis AI
                             </PrimaryButton>
+                        </div>
+                        <div v-if="!hasAssignedKolam" class="mt-4 rounded-xl bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
+                            Anda belum ditugaskan ke kolam mana pun. Hubungi supervisor untuk mendapatkan penugasan sebelum mengisi data kualitas air.
                         </div>
                     </form>
                 </div>
