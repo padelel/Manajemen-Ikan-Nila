@@ -100,10 +100,10 @@ const getRoleInitial = (user) => {
                                                 </span>
                                             </div>
                                             <div class="inline-flex items-center gap-1.5">
-                                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider transition-colors">Rata-rata:</span>
+                                                <!-- <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider transition-colors">Rata-rata:</span>
                                                 <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100/50 transition-colors">
                                                     {{ log.berat_rata_gram }} gr / ekor
-                                                </span>
+                                                </span> -->
                                             </div>
                                         </div>
                                     </td>
