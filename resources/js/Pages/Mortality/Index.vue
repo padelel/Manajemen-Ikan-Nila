@@ -11,9 +11,19 @@ const props = defineProps({
 
 const filterForm = ref({
     kolam_id: props.filters?.kolam_id || '',
+    kategori: props.filters?.kategori || '',
     start_date: props.filters?.start_date || '',
     end_date: props.filters?.end_date || '',
 });
+
+const kategoriOptions = [
+    { value: '', label: '-- Semua Kategori --' },
+    { value: 'penyakit', label: 'Penyakit' },
+    { value: 'kanibalisme', label: 'Kanibalisme' },
+    { value: 'stres_lingkungan', label: 'Stres Lingkungan' },
+    { value: 'predator', label: 'Predator' },
+    { value: 'lainnya', label: 'Lainnya' },
+];
 
 watch(filterForm, (value) => {
     router.get('/kematian', value, {
@@ -24,6 +34,7 @@ watch(filterForm, (value) => {
 
 const resetFilter = () => {
     filterForm.value.kolam_id = '';
+    filterForm.value.kategori = '';
     filterForm.value.start_date = '';
     filterForm.value.end_date = '';
 };
@@ -31,6 +42,22 @@ const resetFilter = () => {
 const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('id-ID', options);
+};
+
+const kategoriLabels = {
+    penyakit: 'Penyakit',
+    kanibalisme: 'Kanibalisme',
+    stres_lingkungan: 'Stres Lingkungan',
+    predator: 'Predator',
+    lainnya: 'Lainnya',
+};
+
+const kategoriColors = {
+    penyakit: 'bg-rose-50 text-rose-600 border-rose-200',
+    kanibalisme: 'bg-orange-50 text-orange-600 border-orange-200',
+    stres_lingkungan: 'bg-amber-50 text-amber-600 border-amber-200',
+    predator: 'bg-violet-50 text-violet-600 border-violet-200',
+    lainnya: 'bg-slate-50 text-slate-500 border-slate-200',
 };
 
 const getRoleName = (user) => {
@@ -74,20 +101,26 @@ const getRoleInitial = (user) => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 
                 <div class="bg-white p-5 rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-slate-100 flex flex-col md:flex-row gap-4 items-end transition-colors duration-300">
-                    <div class="w-full md:w-1/3">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Filter Kolam</label>
-                        <select v-model="filterForm.kolam_id" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900 transition-colors duration-300">
+                    <div class="w-full md:w-1/4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Filter Kolam</label>
+                        <select v-model="filterForm.kolam_id" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900">
                             <option value="">-- Semua Kolam --</option>
                             <option v-for="k in kolams" :key="k.id" :value="k.id">{{ k.nama_kolam }}</option>
                         </select>
                     </div>
                     <div class="w-full md:w-1/4">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Dari Tanggal</label>
-                        <input type="date" v-model="filterForm.start_date" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900 transition-colors duration-300">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori</label>
+                        <select v-model="filterForm.kategori" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900">
+                            <option v-for="opt in kategoriOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                        </select>
                     </div>
-                    <div class="w-full md:w-1/4">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Sampai Tanggal</label>
-                        <input type="date" v-model="filterForm.end_date" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900 transition-colors duration-300">
+                    <div class="w-full md:w-1/5">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Dari Tanggal</label>
+                        <input type="date" v-model="filterForm.start_date" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900">
+                    </div>
+                    <div class="w-full md:w-1/5">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sampai Tanggal</label>
+                        <input type="date" v-model="filterForm.end_date" class="w-full border border-slate-200 rounded-xl text-sm focus:ring-rose-500 focus:border-rose-500 bg-slate-50 text-slate-900">
                     </div>
                     <div class="w-full md:w-auto">
                         <button @click="resetFilter" class="w-full md:w-auto px-5 py-2.5 bg-slate-100 text-slate-600 font-bold text-sm rounded-xl hover:bg-slate-200 transition-colors border border-slate-200">
@@ -99,13 +132,14 @@ const getRoleInitial = (user) => {
                 <div class="bg-white overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-slate-100 transition-colors duration-300">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50/50 border-b border-slate-100 transition-colors duration-300">
+                            <thead class="bg-slate-50/50 border-b border-slate-100">
                                 <tr>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-40 transition-colors">Tanggal</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Kolam</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center transition-colors">Jumlah Mati</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Catatan / Penyebab</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Pelapor</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-36">Tanggal</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kolam</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Jumlah</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kategori</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Catatan / Penyebab</th>
+                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pelapor</th>
                                 </tr>
                             </thead>
                             
@@ -137,13 +171,23 @@ const getRoleInitial = (user) => {
 
                                     <td class="px-6 py-5 text-center">
                                         <div class="inline-flex flex-col items-center justify-center">
-                                            <p class="font-black text-rose-600 text-xl tracking-tight transition-colors">
+                                            <p class="font-black text-rose-600 text-xl tracking-tight">
                                                 {{ log.jumlah_mati || log.jumlah }}
                                             </p>
-                                            <span class="text-[10px] text-rose-500 font-bold uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-md mt-1 border border-rose-100 transition-colors">
+                                            <span class="text-[10px] text-rose-500 font-bold uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-md mt-1 border border-rose-100">
                                                 Ekor
                                             </span>
                                         </div>
+                                    </td>
+
+                                    <td class="px-6 py-5">
+                                        <span v-if="log.kategori_kematian" 
+                                            class="inline-block px-2.5 py-1 text-[10px] font-bold rounded-lg border"
+                                            :class="kategoriColors[log.kategori_kematian] || 'bg-slate-50 text-slate-500 border-slate-200'"
+                                        >
+                                            {{ kategoriLabels[log.kategori_kematian] || log.kategori_kematian }}
+                                        </span>
+                                        <span v-else class="text-slate-300 text-xs">-</span>
                                     </td>
 
                                     <td class="px-6 py-5">
@@ -172,7 +216,7 @@ const getRoleInitial = (user) => {
                                 </tr>
 
                                 <tr v-if="logs.data.length === 0">
-                                    <td colspan="5" class="px-6 py-16 text-center">
+                                    <td colspan="6" class="px-6 py-16 text-center">
                                         <div class="flex flex-col items-center justify-center">
                                             <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100 transition-colors duration-300">
                                                 <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

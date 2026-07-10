@@ -320,7 +320,7 @@ const mortalityBarWidth = computed(() => {
  }}
  </p>
  <p
- class="text-[10px] text-slate-400 text-slate-500 mt-2 font-medium transition-colors duration-300"
+ class="text-[10px] text-slate-500 mt-2 font-medium transition-colors duration-300"
  >
  dari
  {{ formatNumber(statistik?.total_ekor_panen) }} ekor

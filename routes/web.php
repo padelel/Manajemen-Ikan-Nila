@@ -37,12 +37,13 @@ Route::middleware('auth')->group(function () {
     // Log Aktivitas (melihat riwayat)
     Route::get('/tebar', [TebarLogController::class, 'index'])->name('tebar.index');
     Route::get('/kematian', [MortalityLogController::class, 'index'])->name('kematian.index');
+
+    // Rute Index Panen (Bersama)
     Route::get('/panen', [HarvestLogController::class, 'index'])->name('panen.index');
 
-    // Detail panen — constraint [0-9]+ agar tidak menabrak route /panen/create
-    Route::get('/panen/{panen}', [HarvestLogController::class, 'show'])
-        ->name('panen.show')
-        ->where('panen', '[0-9]+');
+    // Analisis & Laporan (DIPINDAHKAN KE SINI AGAR OPERATOR BISA LIHAT)
+    Route::get('/analisis', [ReportController::class, 'index'])->name('analisis.index');
+    Route::get('/analisis/{id}', [ReportController::class, 'show'])->name('analisis.show');
 
     // ================================================================
     // 2. KHUSUS SUPERVISOR (PENGELOLA UTAMA)
@@ -56,11 +57,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('kolam', KolamController::class);
         Route::post('/kolam/{kolam}/assign', [KolamController::class, 'assignOperators'])->name('kolam.assign');
 
-        // Analisis & Laporan
-        Route::get('/analisis', [ReportController::class, 'index'])->name('analisis.index');
-
         // Verifikasi Tiket Mitigasi
         Route::post('/tiket/{tiket}/verifikasi', [TiketController::class, 'verifikasi'])->name('tiket.verifikasi');
+
+        // Detail Diagnosa Kualitas Air (Forward Chaining)
+        Route::get('/parameter/{parameter}', [ParameterHarianController::class, 'show'])->name('parameter.show');
     });
 
     // ================================================================
@@ -78,7 +79,10 @@ Route::middleware('auth')->group(function () {
         // Pencatatan Log Aktivitas
         Route::resource('tebar', TebarLogController::class)->only(['create', 'store']);
         Route::resource('kematian', MortalityLogController::class)->only(['create', 'store']);
-        Route::resource('panen', HarvestLogController::class)->only(['create', 'store']);
+
+        // Pencatatan Panen (Berbasis Siklus)
+        Route::get('/panen/{siklus_id}/create', [HarvestLogController::class, 'create'])->name('panen.create');
+        Route::post('/panen/{siklus_id}', [HarvestLogController::class, 'store'])->name('panen.store');
     });
 });
 

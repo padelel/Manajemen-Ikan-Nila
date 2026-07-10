@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Kolam;
+use App\Models\ParameterHarian;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -11,20 +12,31 @@ class TebarLogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_store_tebar_updates_kolam_average_weight(): void
+    public function test_store_tebar_updates_kolam_population(): void
     {
         $user = User::factory()->create(['role' => 'operator']);
 
         $kolam = Kolam::create([
             'nama_kolam' => 'Kolam A',
             'lokasi' => 'Sungai',
-            'bentuk_kolam' => 'Persegi',
-            'status_kolam' => 'Aktif',
+            'status_kolam' => 'tidak aktif',
             'panjang_m' => 10,
             'lebar_m' => 5,
             'kedalaman_m' => 1.2,
             'jumlah_ikan' => 0,
-            'berat_rata_gram' => 0,
+        ]);
+
+        // Prasyarat: pengecekan air dalam 24 jam terakhir
+        ParameterHarian::create([
+            'kolam_id' => $kolam->id,
+            'user_id' => $user->id,
+            'tanggal_cek' => now()->toDateString(),
+            'suhu' => 28,
+            'ph' => 7.0,
+            'do_mgl' => 5.0,
+            'amonia_mgl' => 0.01,
+            'flok_ml' => 20,
+            'kecerahan_cm' => 35,
         ]);
 
         $response = $this
@@ -33,9 +45,7 @@ class TebarLogTest extends TestCase
                 'kolam_id' => $kolam->id,
                 'tanggal_tebar' => now()->toDateString(),
                 'jumlah_ikan' => 1200,
-                'berat_rata_gram' => 15.5,
                 'sumber_benih' => 'Supplier X',
-                'catatan' => 'Tebar awal',
             ]);
 
         $response->assertRedirect('/tebar');
@@ -43,7 +53,6 @@ class TebarLogTest extends TestCase
         $this->assertDatabaseHas('kolams', [
             'id' => $kolam->id,
             'jumlah_ikan' => 1200,
-            'berat_rata_gram' => 15.5,
         ]);
     }
 }

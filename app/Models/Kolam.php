@@ -10,14 +10,15 @@ class Kolam extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nama_kolam', 'lokasi', 'panjang_m', 'lebar_m', 'kedalaman_m', 'status_kolam'
+        'nama_kolam', 'lokasi', 'panjang_m', 'lebar_m', 'kedalaman_m',
+        'jumlah_ikan', 'berat_rata_gram', 'status_kolam',
     ];
 
     public function operators()
     {
         return $this->belongsToMany(User::class, 'operator_kolam', 'kolam_id', 'user_id')
-                    ->withPivot('tanggal_penugasan')
-                    ->withTimestamps();
+            ->withPivot('tanggal_penugasan')
+            ->withTimestamps();
     }
 
     public function siklusBudidayas()

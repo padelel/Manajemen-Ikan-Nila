@@ -90,7 +90,6 @@ class TebarLogController extends Controller
             'kolam_id' => 'required|exists:kolams,id',
             'tanggal_tebar' => 'required|date|before_or_equal:today',
             'jumlah_ikan' => 'required|integer|min:1',
-            'berat_rata_gram' => 'required|numeric|min:0.1',
             'sumber_benih' => 'nullable|string|max:255',
         ]);
 
@@ -117,7 +116,7 @@ class TebarLogController extends Controller
                 'user_id' => auth()->id(),
                 'tanggal_tebar' => $request->tanggal_tebar,
                 'jumlah_ikan' => $request->jumlah_ikan,
-                'berat_rata_gram' => $request->berat_rata_gram,
+                'berat_rata_gram' => 0,
                 'sumber_benih' => $request->sumber_benih ?? 'Internal',
             ]);
 
@@ -129,8 +128,11 @@ class TebarLogController extends Controller
                 'status_aktif' => 'berjalan',
             ]);
 
-            // 3. Update Status Kolam
-            Kolam::where('id', $request->kolam_id)->update(['status_kolam' => 'aktif']);
+            // 3. Update Status Kolam dan populasi
+            Kolam::where('id', $request->kolam_id)->update([
+                'status_kolam' => 'aktif',
+                'jumlah_ikan' => $request->jumlah_ikan,
+            ]);
         });
 
         return redirect()->route('tebar.index')->with('success', 'Tebar benih berhasil dicatat dan siklus baru otomatis dimulai.');

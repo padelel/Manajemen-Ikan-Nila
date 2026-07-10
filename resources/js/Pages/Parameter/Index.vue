@@ -179,6 +179,7 @@ const statusBadgeClasses = (status) => {
                                     <th scope="col" class="px-6 py-4">Nama Kolam</th>
                                     <th scope="col" class="px-6 py-4">Data Parameter Air</th>
                                     <th scope="col" class="px-6 py-4">Hasil Diagnosa AI</th>
+                                    <th v-if="$page.props.auth.user.role === 'supervisor'" scope="col" class="px-6 py-4 text-center">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -260,9 +261,15 @@ const statusBadgeClasses = (status) => {
                                             <span class="text-gray-400 italic">Data belum dianalisis</span>
                                         </div>
                                     </td>
+                                    <td v-if="$page.props.auth.user.role === 'supervisor'" class="px-6 py-4 text-center">
+                                        <Link :href="route('parameter.show', item.id)" class="text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded shadow-sm text-xs font-bold transition inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            Detail
+                                        </Link>
+                                    </td>
                                 </tr>
                                 <tr v-if="riwayat.length === 0">
-                                    <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                    <td :colspan="$page.props.auth.user.role === 'supervisor' ? 5 : 4" class="px-6 py-8 text-center text-gray-500">
                                         <p class="text-lg font-medium">Belum ada data pengecekan kualitas air.</p>
                                         <p class="text-sm mt-1">Operator lapangan belum melakukan input parameter harian.</p>
                                     </td>

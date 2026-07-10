@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ParameterHarian;
 use App\Models\Kolam;
+use App\Models\ParameterHarian;
 use App\Services\ForwardChainingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -48,6 +48,19 @@ class ParameterHarianController extends Controller
         ]);
     }
 
+    public function show($id)
+    {
+        $parameter = ParameterHarian::with([
+            'kolam',
+            'user',
+            'inferensiLog.tiket',
+        ])->findOrFail($id);
+
+        return Inertia::render('Parameter/Show', [
+            'parameter' => $parameter,
+        ]);
+    }
+
     public function create()
     {
         $user = auth()->user();
@@ -59,7 +72,7 @@ class ParameterHarianController extends Controller
         }
 
         return Inertia::render('Parameter/Create', [
-            'kolams' => $kolams
+            'kolams' => $kolams,
         ]);
     }
 
@@ -67,13 +80,13 @@ class ParameterHarianController extends Controller
     {
         // 1. Validasi Input dari Operator
         $validated = $request->validate([
-            'kolam_id'     => 'required|exists:kolams,id',
-            'tanggal_cek'  => 'required|date',
-            'suhu'         => 'required|numeric',
-            'ph'           => 'required|numeric',
-            'do_mgl'       => 'required|numeric',
-            'amonia_mgl'   => 'required|numeric',
-            'flok_ml'      => 'required|numeric',
+            'kolam_id' => 'required|exists:kolams,id',
+            'tanggal_cek' => 'required|date',
+            'suhu' => 'required|numeric',
+            'ph' => 'required|numeric',
+            'do_mgl' => 'required|numeric',
+            'amonia_mgl' => 'required|numeric',
+            'flok_ml' => 'required|numeric',
             'kecerahan_cm' => 'required|numeric',
         ]);
 
@@ -95,7 +108,7 @@ class ParameterHarianController extends Controller
 
         // 4. Redirect kembali dengan membawa pesan hasil diagnosa
         if ($logInferensi->kode_diagnosa !== 'D-NORMAL') {
-            return redirect()->route('parameter.index')->with('warning', 'Peringatan: ' . $logInferensi->label_diagnosa . '. Tiket mitigasi telah diterbitkan!');
+            return redirect()->route('parameter.index')->with('warning', 'Peringatan: '.$logInferensi->label_diagnosa.'. Tiket mitigasi telah diterbitkan!');
         }
 
         return redirect()->route('parameter.index')->with('success', 'Kualitas air normal. Data berhasil disimpan.');

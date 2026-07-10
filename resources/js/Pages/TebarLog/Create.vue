@@ -9,9 +9,8 @@ const props = defineProps({
 
 const form = useForm({
     kolam_id: '',
-    tanggal_tebar: new Date().toISOString().split('T')[0], // Set default hari ini
+    tanggal_tebar: new Date().toISOString().split('T')[0],
     jumlah_ikan: '',
-    berat_rata_gram: '',
     sumber_benih: '',
 });
 
@@ -94,12 +93,6 @@ const submit = () => {
                                 <label class="block text-sm font-bold text-slate-700 mb-2">Jumlah Ikan (Ekor)</label>
                                 <input type="number" v-model="form.jumlah_ikan" placeholder="Misal: 1000" class="w-full border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500" />
                                 <div v-if="form.errors.jumlah_ikan" class="text-red-500 text-xs mt-1">{{ form.errors.jumlah_ikan }}</div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Berat Rata-rata Awal (Gram)</label>
-                                <input type="number" step="0.1" v-model="form.berat_rata_gram" placeholder="Misal: 85" class="w-full border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500" />
-                                <div v-if="form.errors.berat_rata_gram" class="text-red-500 text-xs mt-1">{{ form.errors.berat_rata_gram }}</div>
                             </div>
 
                         </div>
