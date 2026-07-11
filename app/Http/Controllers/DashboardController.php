@@ -70,7 +70,7 @@ class DashboardController extends Controller
 
                 $kematianPerHari = DB::table('mortality_logs')
                     ->where('kolam_id', $kolam->id)
-                    ->whereDate('tanggal_kematian', '>=', $siklus->tanggal_mulai)
+                    ->where('siklus_budidaya_id', $siklus->id)
                     ->select(
                         DB::raw('DATE(tanggal_kematian) as tanggal'),
                         DB::raw('SUM(jumlah_mati) as total_mati')
@@ -87,9 +87,7 @@ class DashboardController extends Controller
             }
 
             $totalMati = $siklus
-                ? MortalityLog::where('kolam_id', $kolam->id)
-                    ->whereDate('tanggal_kematian', '>=', $siklus->tanggal_mulai)
-                    ->sum('jumlah_mati')
+                ? MortalityLog::where('siklus_budidaya_id', $siklus->id)->sum('jumlah_mati')
                 : 0;
 
             $populasiTerkini = $siklus
@@ -101,7 +99,6 @@ class DashboardController extends Controller
                     'id' => $kolam->id,
                     'nama_kolam' => $kolam->nama_kolam,
                     'lokasi' => $kolam->lokasi,
-                    'status_kolam' => $kolam->status_kolam,
                 ],
                 'siklus' => $siklus ? [
                     'tanggal_mulai' => Carbon::parse($siklus->tanggal_mulai)->format('d M Y'),

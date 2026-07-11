@@ -194,14 +194,6 @@ onMounted(() => {
                     <div class="flex flex-wrap items-center gap-3">
                         <h3 class="text-base font-bold text-slateate-800">{{ item.kolam.nama_kolam }}</h3>
                         <span class="text-sm text-gray-400">{{ item.kolam.lokasi }}</span>
-                        <span
-                            v-if="item.kolam.status_kolam === 'aktif'"
-                            class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700"
-                        >Aktif</span>
-                        <span
-                            v-else
-                            class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-500"
-                        >{{ item.kolam.status_kolam }}</span>
                     </div>
                     <div v-if="item.siklus" class="text-sm text-slate-500">
                         Populasi: <span class="font-semibold text-slate-700">{{ item.siklus.populasi_terkini?.toLocaleString('id-ID') }} ekor</span>

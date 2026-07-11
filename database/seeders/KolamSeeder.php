@@ -18,7 +18,6 @@ class KolamSeeder extends Seeder
             'panjang_m' => 4.0,
             'lebar_m' => 4.0,
             'kedalaman_m' => 1.1,
-            'status_kolam' => 'aktif',
         ]);
 
         $kolam2 = Kolam::create([
@@ -27,7 +26,6 @@ class KolamSeeder extends Seeder
             'panjang_m' => 5.0,
             'lebar_m' => 5.0,
             'kedalaman_m' => 1.1,
-            'status_kolam' => 'aktif',
         ]);
 
         // 2. Ambil data operator yang baru dibuat dari UserSeeder

@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Models\Kolam;
-use App\Models\Inventory;
-use App\Models\Rule;
-use App\Models\User;
-use App\Models\MortalityLog;
 use App\Models\DailyParameter;
 use App\Models\FeedLog;
+use App\Models\Inventory;
 use App\Models\InventoryLog;
+use App\Models\Kolam;
+use App\Models\MortalityLog;
+use App\Models\Rule;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -25,7 +25,6 @@ class DailyOperationStoreTest extends TestCase
             'nama_kolam' => 'Kolam A',
             'lokasi' => 'Sungai',
             'bentuk_kolam' => 'Persegi',
-            'status_kolam' => 'Aktif',
             'panjang_m' => 10,
             'lebar_m' => 5,
             'kedalaman_m' => 1.2,
@@ -134,7 +133,6 @@ class DailyOperationStoreTest extends TestCase
             'nama_kolam' => 'Kolam B',
             'lokasi' => 'Sungai',
             'bentuk_kolam' => 'Persegi',
-            'status_kolam' => 'Aktif',
             'panjang_m' => 10,
             'lebar_m' => 5,
             'kedalaman_m' => 1.2,

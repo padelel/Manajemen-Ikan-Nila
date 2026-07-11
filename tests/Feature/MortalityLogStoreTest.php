@@ -27,7 +27,6 @@ class MortalityLogStoreTest extends TestCase
         $this->kolam = Kolam::create([
             'nama_kolam' => 'Kolam A',
             'lokasi' => 'Sawah',
-            'status_kolam' => 'aktif',
             'panjang_m' => 10,
             'lebar_m' => 5,
             'kedalaman_m' => 1.2,
@@ -166,7 +165,6 @@ class MortalityLogStoreTest extends TestCase
         $otherKolam = Kolam::create([
             'nama_kolam' => 'Kolam B',
             'lokasi' => 'Gedung',
-            'status_kolam' => 'aktif',
             'panjang_m' => 8,
             'lebar_m' => 4,
             'kedalaman_m' => 1.0,
@@ -197,7 +195,6 @@ class MortalityLogStoreTest extends TestCase
         $kolamTanpaSiklus = Kolam::create([
             'nama_kolam' => 'Kolam Tanpa Siklus',
             'lokasi' => 'Gudang',
-            'status_kolam' => 'tidak aktif',
             'panjang_m' => 10,
             'lebar_m' => 5,
             'kedalaman_m' => 1.0,

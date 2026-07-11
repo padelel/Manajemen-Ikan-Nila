@@ -128,9 +128,8 @@ class TebarLogController extends Controller
                 'status_aktif' => 'berjalan',
             ]);
 
-            // 3. Update Status Kolam dan populasi
+            // 3. Update populasi kolam
             Kolam::where('id', $request->kolam_id)->update([
-                'status_kolam' => 'aktif',
                 'jumlah_ikan' => $request->jumlah_ikan,
             ]);
         });

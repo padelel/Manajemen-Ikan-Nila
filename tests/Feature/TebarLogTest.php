@@ -19,7 +19,6 @@ class TebarLogTest extends TestCase
         $kolam = Kolam::create([
             'nama_kolam' => 'Kolam A',
             'lokasi' => 'Sungai',
-            'status_kolam' => 'tidak aktif',
             'panjang_m' => 10,
             'lebar_m' => 5,
             'kedalaman_m' => 1.2,

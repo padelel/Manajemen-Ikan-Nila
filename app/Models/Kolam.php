@@ -11,7 +11,7 @@ class Kolam extends Model
 
     protected $fillable = [
         'nama_kolam', 'lokasi', 'panjang_m', 'lebar_m', 'kedalaman_m',
-        'jumlah_ikan', 'berat_rata_gram', 'status_kolam',
+        'jumlah_ikan', 'berat_rata_gram',
     ];
 
     public function operators()

@@ -37,7 +37,6 @@ class KolamController extends Controller
             'panjang_m' => 'required|numeric|min:1',
             'lebar_m' => 'required|numeric|min:1',
             'kedalaman_m' => 'required|numeric|min:0.5',
-            'status_kolam' => 'required|in:aktif,tidak aktif,maintenance',
         ]);
 
         Kolam::create($validated);
@@ -60,7 +59,6 @@ class KolamController extends Controller
             'panjang_m' => 'required|numeric|min:1',
             'lebar_m' => 'required|numeric|min:1',
             'kedalaman_m' => 'required|numeric|min:0.5',
-            'status_kolam' => 'required|in:aktif,tidak aktif,maintenance',
         ]);
 
         $kolam->update($validated);

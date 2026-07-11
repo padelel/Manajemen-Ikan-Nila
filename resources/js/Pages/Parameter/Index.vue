@@ -238,24 +238,45 @@ const statusBadgeClasses = (status) => {
                                     </td>
                                     <td class="px-6 py-4">
                                         <div v-if="item.inferensi_log">
-                                            <!-- Badge Status (Hijau jika normal, Merah jika bahaya) -->
-                                            <span 
-                                                class="px-3 py-1 text-xs font-bold rounded-full border"
-                                                :class="item.inferensi_log.kode_diagnosa === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'"
-                                            >
-                                                {{ item.inferensi_log.kode_diagnosa }} - {{ item.inferensi_log.label_diagnosa }}
-                                            </span>
-                                            
-                                            <!-- Menampilkan Peringatan dan Tiket Jika Air Tidak Normal -->
-                                            <div v-if="item.inferensi_log.kode_diagnosa !== 'D-NORMAL'" class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
-                                                <p class="text-xs text-gray-800">
-                                                    <span class="font-bold text-red-600">Alert:</span> {{ item.inferensi_log.peringatan }}
-                                                </p>
-                                                <div class="mt-2 flex items-center text-xs text-indigo-600 font-bold">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                                                    Tiket Mitigasi Diterbitkan!
-                                                </div>
+                                            <div class="flex flex-wrap gap-1">
+                                                <template v-if="Array.isArray(item.inferensi_log.kode_diagnosa)">
+                                                    <span v-for="(kd, idx) in item.inferensi_log.kode_diagnosa" :key="idx"
+                                                        class="inline-block px-3 py-1 text-xs font-bold rounded-full border"
+                                                        :class="kd === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'"
+                                                    >
+                                                        {{ kd }} - {{ item.inferensi_log.label_diagnosa?.[idx] || '' }}
+                                                    </span>
+                                                </template>
+                                                <span v-else
+                                                    class="inline-block px-3 py-1 text-xs font-bold rounded-full border"
+                                                    :class="item.inferensi_log.kode_diagnosa === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'"
+                                                >
+                                                    {{ item.inferensi_log.kode_diagnosa }} - {{ item.inferensi_log.label_diagnosa }}
+                                                </span>
                                             </div>
+                                            
+                                            <template v-if="Array.isArray(item.inferensi_log.kode_diagnosa)">
+                                                <div v-if="!item.inferensi_log.kode_diagnosa.includes('D-NORMAL')" class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+                                                    <div v-for="(p, idx) in (Array.isArray(item.inferensi_log.peringatan) ? item.inferensi_log.peringatan : [item.inferensi_log.peringatan])" :key="idx" class="text-xs text-gray-800">
+                                                        <span class="font-bold text-red-600">Alert {{ idx + 1 }}:</span> {{ p }}
+                                                    </div>
+                                                    <div class="mt-2 flex items-center text-xs text-indigo-600 font-bold">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                                        Tiket Mitigasi Diterbitkan!
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template v-else>
+                                                <div v-if="item.inferensi_log.kode_diagnosa !== 'D-NORMAL'" class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+                                                    <p class="text-xs text-gray-800">
+                                                        <span class="font-bold text-red-600">Alert:</span> {{ item.inferensi_log.peringatan }}
+                                                    </p>
+                                                    <div class="mt-2 flex items-center text-xs text-indigo-600 font-bold">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                                        Tiket Mitigasi Diterbitkan!
+                                                    </div>
+                                                </div>
+                                            </template>
                                         </div>
                                         <div v-else>
                                             <span class="text-gray-400 italic">Data belum dianalisis</span>

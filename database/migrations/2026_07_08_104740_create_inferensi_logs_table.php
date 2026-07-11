@@ -19,11 +19,11 @@ return new class extends Migration
             $table->json('fakta_input');
             $table->json('fakta_baru');
             $table->json('rule_terpicu');
-            $table->string('kode_diagnosa', 10)->nullable();
-            $table->string('label_diagnosa', 100)->nullable();
-            $table->string('kode_kesimpulan', 10)->nullable();
-            $table->text('tindakan_mitigasi')->nullable();
-            $table->text('peringatan')->nullable();
+            $table->json('kode_diagnosa')->nullable();
+            $table->json('label_diagnosa')->nullable();
+            $table->json('kode_kesimpulan')->nullable();
+            $table->json('tindakan_mitigasi')->nullable();
+            $table->json('peringatan')->nullable();
             $table->timestamps();
         });
     }

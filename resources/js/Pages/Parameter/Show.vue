@@ -73,20 +73,23 @@ const severityBorder = (severity) => {
 };
 
 const faktaLabelMap = {
-    F16: 'Suhu Normal (25–30°C)', F17: 'Suhu Sub-optimal', F18: 'Suhu Kritis',
-    F19: 'pH Normal (6.5–8.5)', F20: 'pH Terganggu', F21: 'pH Ekstrem',
-    F22: 'DO Cukup (≥5 mg/L)', F23: 'DO Rendah (3–5 mg/L)', F24: 'DO Kritis (<3 mg/L)',
-    F25: 'Amonia Normal (0 mg/L)', F26: 'Amonia Terdeteksi', F27: 'Amonia Tinggi',
-    F28: 'Flok Normal (15–30 ml/L)', F29: 'Flok Rendah', F30: 'Flok Berlebih',
-    F31: 'Kecerahan Normal (30–40 cm)', F32: 'Kecerahan Rendah', F33: 'Kecerahan Tinggi',
+    F19: 'Suhu Optimal (25–30°C)', F20: 'Suhu Tidak Ideal', F21: 'Suhu Kritis',
+    F22: 'pH Optimal (6.5–8.5)', F23: 'pH Tidak Ideal', F24: 'pH Kritis',
+    F25: 'DO Cukup (≥5 mg/L)', F26: 'DO Rendah (3–4.99 mg/L)', F27: 'DO Kritis (<3 mg/L)',
+    F28: 'Amonia Aman (<0.01 mg/L)', F29: 'Amonia Waspada (0.01–0.05 mg/L)', F30: 'Amonia Berbahaya (>0.05 mg/L)',
+    F31: 'Flok Optimal (15–30 ml/L)', F32: 'Flok Terlalu Rendah (<15 ml/L)', F33: 'Flok Terlalu Tinggi (>30 ml/L)',
+    F34: 'Kecerahan Optimal (30–40 cm)', F35: 'Kecerahan Rendah/Pekat (<30 cm)', F36: 'Kecerahan Tinggi/Bening (>40 cm)',
 };
 
 const ruleLabelMap = {
-    'R01': 'Stres suhu ringan', 'R02': 'Stres suhu kritis', 'R03': 'Gangguan pH',
-    'R04': 'pH ekstrem kritis', 'R05': 'Aerasi kurang', 'R06': 'Overfeeding',
-    'R07': 'Akumulasi limbah berlebih', 'R08': 'Kolaps bioflok', 'R09': 'Flok belum terbentuk',
-    'R10': 'Flok berlebih', 'R11': 'Flok kolaps akibat amonia', 'R12': 'Blooming fitoplankton',
-    'R-DEFAULT': 'Normal',
+    'D01': 'Stres Suhu Ringan', 'D02': 'Stres Suhu Kritis',
+    'D03': 'Gangguan pH', 'D04': 'pH Ekstrem Kritis',
+    'D05': 'Aerasi Kurang', 'D06': 'Overfeeding',
+    'D07': 'Akumulasi Limbah Berlebih', 'D08': 'Kolaps Bioflok',
+    'D09': 'Flok Belum Terbentuk / Bakteri Rendah', 'D10': 'Flok Berlebih — Menguras Oksigen',
+    'D11': 'Flok Kolaps Akibat Amonia Tinggi', 'D12': 'Blooming Fitoplankton Berlebih',
+    'D-NORMAL': 'Kondisi Air Optimal (Normal)',
+    'D-UNKNOWN': 'Anomali Tidak Teridentifikasi',
 };
 
 const formatDate = (dateString) => {
@@ -155,24 +158,44 @@ const formatDate = (dateString) => {
                 <div v-if="log" class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
                     <h3 class="text-lg font-bold text-slate-800 mb-4">Hasil Diagnosa AI (Forward Chaining)</h3>
 
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="px-4 py-2 text-sm font-bold rounded-full border"
-                              :class="log.kode_diagnosa === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
-                            {{ log.kode_diagnosa }} — {{ log.label_diagnosa }}
-                        </span>
-                        <span class="px-3 py-1 text-xs font-bold rounded-full border bg-blue-100 text-blue-800 border-blue-300">
-                            {{ log.kode_kesimpulan }}
-                        </span>
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <template v-if="Array.isArray(log.kode_diagnosa)">
+                            <span v-for="(kd, idx) in log.kode_diagnosa" :key="idx"
+                                  class="px-4 py-2 text-sm font-bold rounded-full border"
+                                  :class="kd === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
+                                {{ kd }} — {{ log.label_diagnosa?.[idx] || 'Unknown' }}
+                            </span>
+                        </template>
+                        <template v-else>
+                            <span class="px-4 py-2 text-sm font-bold rounded-full border"
+                                  :class="log.kode_diagnosa === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
+                                {{ log.kode_diagnosa }} — {{ log.label_diagnosa }}
+                            </span>
+                        </template>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Peringatan</p>
-                            <p class="text-sm text-slate-800 font-medium leading-relaxed">{{ log.peringatan }}</p>
+                            <div v-if="Array.isArray(log.peringatan)">
+                                <p v-for="(p, idx) in log.peringatan" :key="idx"
+                                   class="text-sm text-slate-800 font-medium leading-relaxed"
+                                   :class="{'mt-2': idx > 0}">
+                                    {{ idx + 1 }}. {{ p }}
+                                </p>
+                            </div>
+                            <p v-else class="text-sm text-slate-800 font-medium leading-relaxed">{{ log.peringatan }}</p>
                         </div>
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Tindakan Mitigasi</p>
-                            <p class="text-sm text-slate-800 font-medium leading-relaxed">{{ log.tindakan_mitigasi }}</p>
+                            <div v-if="Array.isArray(log.tindakan_mitigasi)">
+                                <p v-for="(t, idx) in log.tindakan_mitigasi" :key="idx"
+                                   class="text-sm text-slate-800 font-medium leading-relaxed"
+                                   :class="{'mt-2': idx > 0}">
+                                    {{ idx + 1 }}. {{ t }}
+                                </p>
+                            </div>
+                            <p v-else class="text-sm text-slate-800 font-medium leading-relaxed">{{ log.tindakan_mitigasi }}</p>
                         </div>
                     </div>
 

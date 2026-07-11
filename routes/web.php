@@ -59,9 +59,6 @@ Route::middleware('auth')->group(function () {
 
         // Verifikasi Tiket Mitigasi
         Route::post('/tiket/{tiket}/verifikasi', [TiketController::class, 'verifikasi'])->name('tiket.verifikasi');
-
-        // Detail Diagnosa Kualitas Air (Forward Chaining)
-        Route::get('/parameter/{parameter}', [ParameterHarianController::class, 'show'])->name('parameter.show');
     });
 
     // ================================================================
@@ -83,6 +80,11 @@ Route::middleware('auth')->group(function () {
         // Pencatatan Panen (Berbasis Siklus)
         Route::get('/panen/{siklus_id}/create', [HarvestLogController::class, 'create'])->name('panen.create');
         Route::post('/panen/{siklus_id}', [HarvestLogController::class, 'store'])->name('panen.store');
+    });
+
+    // Detail Diagnosa Kualitas Air (ditempatkan setelah rute operator agar tidak menimpa /parameter/create)
+    Route::middleware('role:supervisor')->group(function () {
+        Route::get('/parameter/{parameter}', [ParameterHarianController::class, 'show'])->name('parameter.show');
     });
 });
 

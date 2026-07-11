@@ -12,7 +12,6 @@ const form = useForm({
     panjang_m: '',
     lebar_m: '',
     kedalaman_m: '',
-    status_kolam: 'aktif',
 });
 
 const submit = () => {
@@ -61,16 +60,6 @@ const submit = () => {
                                 <TextInput id="kedalaman_m" type="number" step="0.1" class="mt-1 block w-full" v-model="form.kedalaman_m" required />
                                 <InputError class="mt-2" :message="form.errors.kedalaman_m" />
                             </div>
-                        </div>
-
-                        <div>
-                            <InputLabel for="status_kolam" value="Status Operasional" />
-                            <select id="status_kolam" v-model="form.status_kolam" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="aktif">Aktif</option>
-                                <option value="tidak aktif">Tidak Aktif</option>
-                                <option value="maintenance">Dalam Perbaikan (Maintenance)</option>
-                            </select>
-                            <InputError class="mt-2" :message="form.errors.status_kolam" />
                         </div>
 
                         <div class="flex items-center justify-end mt-6 border-t pt-4 space-x-3">

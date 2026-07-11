@@ -39,6 +39,11 @@ const kategoriOptions = [
     { value: 'lainnya', label: 'Lainnya' },
 ];
 
+const minTanggal = computed(() => {
+    const k = selectedKolam.value;
+    return k?.siklus_mulai || '';
+});
+
 const onKolamChange = () => {
     const k = selectedKolam.value;
     form.siklus_budidaya_id = k?.siklus_id || '';
@@ -109,7 +114,7 @@ const submit = () => { form.post(route('kematian.store')); };
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Ditemukan <span class="text-rose-500">*</span></label>
-                                <input v-model="form.tanggal_kematian" type="date" class="w-full bg-white border-slate-200 text-slate-900 rounded-xl focus:border-rose-500 focus:ring-rose-500 text-sm" required>
+                                <input v-model="form.tanggal_kematian" type="date" :min="minTanggal" class="w-full bg-white border-slate-200 text-slate-900 rounded-xl focus:border-rose-500 focus:ring-rose-500 text-sm" required>
                             </div>
                         </div>
 

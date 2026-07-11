@@ -35,7 +35,7 @@ class ParameterHarianController extends Controller
         });
 
         $riwayat = $query->latest()->get();
-        $kolams = Kolam::where('status_kolam', 'aktif')->get();
+        $kolams = Kolam::all();
 
         return Inertia::render('Parameter/Index', [
             'riwayat' => $riwayat,
@@ -66,9 +66,9 @@ class ParameterHarianController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'operator') {
-            $kolams = $user->kolams()->where('status_kolam', 'aktif')->get();
+            $kolams = $user->kolams;
         } else {
-            $kolams = Kolam::where('status_kolam', 'aktif')->get();
+            $kolams = Kolam::all();
         }
 
         return Inertia::render('Parameter/Create', [
@@ -107,8 +107,10 @@ class ParameterHarianController extends Controller
         $logInferensi = $this->fcService->prosesInferensi($parameter);
 
         // 4. Redirect kembali dengan membawa pesan hasil diagnosa
-        if ($logInferensi->kode_diagnosa !== 'D-NORMAL') {
-            return redirect()->route('parameter.index')->with('warning', 'Peringatan: '.$logInferensi->label_diagnosa.'. Tiket mitigasi telah diterbitkan!');
+        if (! in_array('D-NORMAL', $logInferensi->kode_diagnosa ?? ['D-NORMAL'])) {
+            $labelText = implode('; ', $logInferensi->label_diagnosa ?? ['Unknown']);
+
+            return redirect()->route('parameter.index')->with('warning', 'Peringatan: '.$labelText.'. Tiket mitigasi telah diterbitkan!');
         }
 
         return redirect()->route('parameter.index')->with('success', 'Kualitas air normal. Data berhasil disimpan.');

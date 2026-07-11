@@ -63,7 +63,6 @@ const submitAssignment = () => {
                             <thead class="bg-slate-50/50 border-b border-slate-100">
                                 <tr>
                                     <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Kolam</th>
-                                    <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Status</th>
                                     <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Spesifikasi</th>
                                     <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Operator Bertugas</th>
                                     <th class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
@@ -75,12 +74,6 @@ const submitAssignment = () => {
                                     <td class="px-6 py-5">
                                         <p class="font-bold text-slate-900 text-base">{{ kolam.nama_kolam }}</p>
                                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{{ kolam.lokasi }}</p>
-                                    </td>
-
-                                    <td class="px-6 py-5 text-center">
-                                        <span :class="kolam.status_kolam === 'aktif' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'" class="px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border shadow-sm inline-block">
-                                            {{ kolam.status_kolam }}
-                                        </span>
                                     </td>
 
                                     <td class="px-6 py-5 text-center text-slate-500 font-medium">
@@ -111,7 +104,7 @@ const submitAssignment = () => {
 
                                 </tr>
                                 <tr v-if="kolams.length === 0">
-                                    <td colspan="5" class="px-6 py-12 text-center text-slate-400 font-medium">Belum ada data kolam.</td>
+                                    <td colspan="4" class="px-6 py-12 text-center text-slate-400 font-medium">Belum ada data kolam.</td>
                                 </tr>
                             </tbody>
                         </table>

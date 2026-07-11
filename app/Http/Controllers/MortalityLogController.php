@@ -110,6 +110,11 @@ class MortalityLogController extends Controller
             return back()->withErrors(['siklus_budidaya_id' => 'Siklus tidak valid atau sudah selesai.'])->withInput();
         }
 
+        // Validasi tanggal kematian tidak boleh sebelum tebar awal
+        if ($validated['tanggal_kematian'] < $siklus->tanggal_mulai) {
+            return back()->withErrors(['tanggal_kematian' => 'Tanggal kematian tidak boleh sebelum tanggal tebar awal siklus.'])->withInput();
+        }
+
         // Validasi jumlah mati tidak melebihi populasi terkini
         $totalMatiSebelumnya = MortalityLog::where('siklus_budidaya_id', $siklus->id)->sum('jumlah_mati');
         $populasiTerkini = $siklus->jumlah_tebar_awal - $totalMatiSebelumnya;

@@ -88,7 +88,7 @@ class ReportController extends Controller
                 'status' => $siklus->status_aktif,
                 'tanggal_mulai' => $waktuMulai,
                 'tanggal_panen' => $tanggalPanen,
-                'durasi_hari' => $durasi,
+                'durasi_hari' => (int) $durasi,
                 'sumber_benih' => $siklus->catatan ?? 'Tidak dicatat',
                 'tebar_awal' => $siklus->jumlah_tebar_awal,
                 'jumlah_ikan_panen' => (int) $jumlahIkanPanen,

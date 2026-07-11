@@ -16,7 +16,7 @@ class HarvestLogRouteTest extends TestCase
     public function test_operator_can_store_full_harvest_with_sr_calculation(): void
     {
         $user = User::factory()->create(['role' => 'operator']);
-        $kolam = Kolam::create(['nama_kolam' => 'Kolam A', 'lokasi' => 'Desa', 'panjang_m' => 10, 'lebar_m' => 5, 'kedalaman_m' => 1.5, 'status_kolam' => 'aktif', 'jumlah_ikan' => 950]);
+        $kolam = Kolam::create(['nama_kolam' => 'Kolam A', 'lokasi' => 'Desa', 'panjang_m' => 10, 'lebar_m' => 5, 'kedalaman_m' => 1.5, 'jumlah_ikan' => 950]);
         $siklus = SiklusBudidaya::create([
             'kolam_id' => $kolam->id,
             'tanggal_mulai' => now()->subWeeks(4)->toDateString(),
@@ -55,7 +55,7 @@ class HarvestLogRouteTest extends TestCase
     public function test_harvest_create_shows_population_and_sr(): void
     {
         $user = User::factory()->create(['role' => 'operator']);
-        $kolam = Kolam::create(['nama_kolam' => 'Kolam A', 'lokasi' => 'Desa', 'panjang_m' => 10, 'lebar_m' => 5, 'kedalaman_m' => 1.5, 'status_kolam' => 'aktif', 'jumlah_ikan' => 900]);
+        $kolam = Kolam::create(['nama_kolam' => 'Kolam A', 'lokasi' => 'Desa', 'panjang_m' => 10, 'lebar_m' => 5, 'kedalaman_m' => 1.5, 'jumlah_ikan' => 900]);
         $siklus = SiklusBudidaya::create([
             'kolam_id' => $kolam->id,
             'tanggal_mulai' => now()->subWeeks(4)->toDateString(),
