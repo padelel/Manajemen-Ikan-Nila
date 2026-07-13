@@ -242,9 +242,7 @@ class ReportController extends Controller
                 ? ($siklus->tanggal_selesai ?? $siklus->updated_at)
                 : Carbon::now();
 
-            $panen = HarvestLog::where('kolam_id', $kolam->id)
-                ->whereBetween('tanggal_panen', [$waktuMulai, $waktuSelesai])
-                ->first();
+            $panen = HarvestLog::where('siklus_budidaya_id', $siklus->id)->first();
 
             $tanggalPanen = $panen?->tanggal_panen;
             $jumlahIkanPanen = $panen?->jumlah_ikan_panen ?? 0;
@@ -256,8 +254,7 @@ class ReportController extends Controller
                 $durasi = Carbon::parse($waktuMulai)->diffInDays($waktuSelesai);
             }
 
-            $mortality = MortalityLog::where('kolam_id', $kolam->id)
-                ->whereBetween('tanggal_kematian', [$waktuMulai, $waktuSelesai])
+            $mortality = MortalityLog::where('siklus_budidaya_id', $siklus->id)
                 ->select(DB::raw('DATE(tanggal_kematian) as tanggal'), DB::raw('SUM(jumlah_mati) as total_mati'))
                 ->groupBy('tanggal')
                 ->orderBy('tanggal', 'asc')
