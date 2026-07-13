@@ -82,7 +82,7 @@ const cegahKarakterIlegal = (event) => {
                             </div>
                             <div>
                                 <InputLabel for="amonia_mgl" value="Amonia (mg/L)" />
-                                <TextInput id="amonia_mgl" type="number" step="0.01" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.amonia_mgl" placeholder="Misal: 0.02" required />
+                                <TextInput id="amonia_mgl" type="number" step="0.001" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.amonia_mgl" placeholder="Misal: 0.005" required />
                                 <InputError class="mt-2" :message="form.errors.amonia_mgl" />
                             </div>
                             <div>
