@@ -23,8 +23,8 @@ const formatDate = (dateString) => {
                 
                 <div class="bg-white overflow-hidden shadow-sm rounded-3xl border border-slate-100">
                     <div class="p-6 border-b border-slate-100">
-                        <h3 class="text-lg font-bold text-slate-800">Daftar Siklus Budidaya</h3>
-                        <p class="text-sm text-slate-500 mt-1">Pilih siklus yang sedang berjalan untuk melakukan pencatatan panen total dan menutup siklus.</p>
+                        <h3 class="text-lg font-bold text-slate-800">Siklus Aktif</h3>
+                        <p class="text-sm text-slate-500 mt-1">Pilih siklus yang sedang berjalan untuk melakukan pencatatan panen total dan menutup siklus. Riwayat siklus yang sudah selesai dapat dilihat di halaman <Link :href="route('analisis.index')" class="text-blue-600 hover:underline font-semibold">Laporan & Analisis</Link>.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left border-collapse">

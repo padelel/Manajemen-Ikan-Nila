@@ -15,7 +15,10 @@ class HarvestLogController extends Controller
 {
     public function index()
     {
-        $sikluses = SiklusBudidaya::with('kolam')->orderBy('created_at', 'desc')->get();
+        $sikluses = SiklusBudidaya::with('kolam')
+            ->where('status_aktif', 'berjalan')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $dataSiklus = $sikluses->map(function ($siklus) {
             $waktuMulai = $siklus->tanggal_mulai;
