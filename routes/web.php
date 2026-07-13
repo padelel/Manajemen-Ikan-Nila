@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
     // Analisis & Laporan (DIPINDAHKAN KE SINI AGAR OPERATOR BISA LIHAT)
     Route::get('/analisis', [ReportController::class, 'index'])->name('analisis.index');
     Route::get('/analisis/{id}', [ReportController::class, 'show'])->name('analisis.show');
+    Route::get('/analisis/{id}/export/pdf', [ReportController::class, 'exportPdf'])->name('analisis.export.pdf');
+    Route::get('/analisis/{id}/export/excel', [ReportController::class, 'exportExcel'])->name('analisis.export.excel');
 
     // ================================================================
     // 2. KHUSUS SUPERVISOR (PENGELOLA UTAMA)
