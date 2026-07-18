@@ -19,10 +19,10 @@ const log = props.tiket.inferensi_log;
 const paramLabels = {
     suhu: { label: 'Suhu', unit: '°C' },
     ph: { label: 'pH', unit: '' },
-    do_mgl: { label: 'DO', unit: 'mg/L' },
-    amonia_mgl: { label: 'Amonia', unit: 'mg/L' },
-    flok_ml: { label: 'Flok', unit: 'ml/L' },
-    kecerahan_cm: { label: 'Kecerahan', unit: 'cm' },
+    do: { label: 'DO', unit: 'mg/L' },
+    amonia: { label: 'Amonia', unit: 'mg/L' },
+    flok: { label: 'Flok', unit: 'ml/L' },
+    kecerahan: { label: 'Kecerahan', unit: 'cm' },
 };
 
 const faktaLabelMap = {
