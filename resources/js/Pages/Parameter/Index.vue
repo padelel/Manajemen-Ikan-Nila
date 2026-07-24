@@ -37,65 +37,39 @@ const getParameterStatus = (key, value) => {
 
     switch (key) {
         case 'suhu':
-            if (numberValue < 20.0) {
-                return { label: 'Terlalu dingin', severity: 'danger' };
+            if (numberValue < 27.0) {
+                return { label: 'Rendah', severity: 'warning' };
             }
-            if (numberValue < 25.0) {
-                return { label: 'Agak rendah', severity: 'warning' };
-            }
-            if (numberValue <= 30.0) {
+            if (numberValue <= 32.0) {
                 return { label: 'Normal', severity: 'normal' };
             }
-            if (numberValue <= 33.0) {
-                return { label: 'Agak tinggi', severity: 'warning' };
-            }
-            return { label: 'Terlalu panas', severity: 'danger' };
+            return { label: 'Tinggi', severity: 'warning' };
         case 'ph':
-            if (numberValue < 6.0) {
-                return { label: 'Terlalu rendah', severity: 'danger' };
-            }
-            if (numberValue < 6.5) {
-                return { label: 'Agak rendah', severity: 'warning' };
+            if (numberValue < 5.5) {
+                return { label: 'Rendah', severity: 'danger' };
             }
             if (numberValue <= 8.5) {
                 return { label: 'Normal', severity: 'normal' };
             }
-            if (numberValue <= 9.0) {
-                return { label: 'Agak tinggi', severity: 'warning' };
-            }
-            return { label: 'Terlalu tinggi', severity: 'danger' };
+            return { label: 'Tinggi', severity: 'danger' };
         case 'do_mgl':
-            if (numberValue < 3.0) {
-                return { label: 'Sangat rendah', severity: 'danger' };
-            }
             if (numberValue < 5.0) {
                 return { label: 'Rendah', severity: 'warning' };
             }
             return { label: 'Normal', severity: 'normal' };
         case 'amonia_mgl':
-            if (numberValue <= 0.0) {
+            if (numberValue < 0.01) {
                 return { label: 'Normal', severity: 'normal' };
             }
-            if (numberValue <= 0.05) {
-                return { label: 'Sedikit tinggi', severity: 'warning' };
-            }
-            return { label: 'Terlalu tinggi', severity: 'danger' };
+            return { label: 'Tinggi', severity: 'warning' };
         case 'flok_ml':
             if (numberValue < 15.0) {
-                return { label: 'Terlalu rendah', severity: 'danger' };
-            }
-            if (numberValue <= 30.0) {
-                return { label: 'Normal', severity: 'normal' };
-            }
-            return { label: 'Terlalu tinggi', severity: 'warning' };
-        case 'kecerahan_cm':
-            if (numberValue < 30.0) {
-                return { label: 'Terlalu keruh', severity: 'danger' };
+                return { label: 'Rendah', severity: 'warning' };
             }
             if (numberValue <= 40.0) {
                 return { label: 'Normal', severity: 'normal' };
             }
-            return { label: 'Terlalu tinggi', severity: 'warning' };
+            return { label: 'Tinggi', severity: 'warning' };
         default:
             return { label: 'Tidak diketahui', severity: 'neutral' };
     }
@@ -227,13 +201,6 @@ const statusBadgeClasses = (status) => {
                                                     {{ getParameterStatus('flok_ml', item.flok_ml).label }}
                                                 </span>
                                             </li>
-                                            <li>
-                                                <span class="font-semibold">Kecerahan:</span>
-                                                {{ item.kecerahan_cm }} cm
-                                                <span :class="statusBadgeClasses(getParameterStatus('kecerahan_cm', item.kecerahan_cm))">
-                                                    {{ getParameterStatus('kecerahan_cm', item.kecerahan_cm).label }}
-                                                </span>
-                                            </li>
                                         </ul>
                                     </td>
                                     <td class="px-6 py-4">
@@ -242,21 +209,21 @@ const statusBadgeClasses = (status) => {
                                                 <template v-if="Array.isArray(item.inferensi_log.kode_diagnosa)">
                                                     <span v-for="(kd, idx) in item.inferensi_log.kode_diagnosa" :key="idx"
                                                         class="inline-block px-3 py-1 text-xs font-bold rounded-full border"
-                                                        :class="kd === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'"
+                                                        :class="kd === 'DN' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'"
                                                     >
                                                         {{ kd }} - {{ item.inferensi_log.label_diagnosa?.[idx] || '' }}
                                                     </span>
                                                 </template>
                                                 <span v-else
                                                     class="inline-block px-3 py-1 text-xs font-bold rounded-full border"
-                                                    :class="item.inferensi_log.kode_diagnosa === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'"
+                                                    :class="item.inferensi_log.kode_diagnosa === 'DN' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'"
                                                 >
                                                     {{ item.inferensi_log.kode_diagnosa }} - {{ item.inferensi_log.label_diagnosa }}
                                                 </span>
                                             </div>
                                             
                                             <template v-if="Array.isArray(item.inferensi_log.kode_diagnosa)">
-                                                <div v-if="!item.inferensi_log.kode_diagnosa.includes('D-NORMAL')" class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+                                                <div v-if="!item.inferensi_log.kode_diagnosa.includes('DN')" class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
                                                     <div v-for="(p, idx) in (Array.isArray(item.inferensi_log.peringatan) ? item.inferensi_log.peringatan : [item.inferensi_log.peringatan])" :key="idx" class="text-xs text-gray-800">
                                                         <span class="font-bold text-red-600">Alert {{ idx + 1 }}:</span> {{ p }}
                                                     </div>
@@ -267,7 +234,7 @@ const statusBadgeClasses = (status) => {
                                                 </div>
                                             </template>
                                             <template v-else>
-                                                <div v-if="item.inferensi_log.kode_diagnosa !== 'D-NORMAL'" class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+                                                <div v-if="item.inferensi_log.kode_diagnosa !== 'DN'" class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
                                                     <p class="text-xs text-gray-800">
                                                         <span class="font-bold text-red-600">Alert:</span> {{ item.inferensi_log.peringatan }}
                                                     </p>

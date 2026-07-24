@@ -14,7 +14,6 @@ const paramLabels = {
     do_mgl: { label: 'DO', unit: 'mg/L' },
     amonia_mgl: { label: 'Amonia', unit: 'mg/L' },
     flok_ml: { label: 'Flok', unit: 'ml/L' },
-    kecerahan_cm: { label: 'Kecerahan', unit: 'cm' },
 };
 
 const getParameterStatus = (key, value) => {
@@ -22,33 +21,23 @@ const getParameterStatus = (key, value) => {
     if (Number.isNaN(numberValue)) return { label: 'Tidak tersedia', severity: 'neutral' };
     switch (key) {
         case 'suhu':
-            if (numberValue < 20.0) return { label: 'Terlalu dingin', severity: 'danger' };
-            if (numberValue < 25.0) return { label: 'Agak rendah', severity: 'warning' };
-            if (numberValue <= 30.0) return { label: 'Normal', severity: 'normal' };
-            if (numberValue <= 33.0) return { label: 'Agak tinggi', severity: 'warning' };
-            return { label: 'Terlalu panas', severity: 'danger' };
+            if (numberValue < 27.0) return { label: 'Rendah', severity: 'warning' };
+            if (numberValue <= 32.0) return { label: 'Normal', severity: 'normal' };
+            return { label: 'Tinggi', severity: 'warning' };
         case 'ph':
-            if (numberValue < 6.0) return { label: 'Terlalu rendah', severity: 'danger' };
-            if (numberValue < 6.5) return { label: 'Agak rendah', severity: 'warning' };
+            if (numberValue < 5.5) return { label: 'Rendah', severity: 'danger' };
             if (numberValue <= 8.5) return { label: 'Normal', severity: 'normal' };
-            if (numberValue <= 9.0) return { label: 'Agak tinggi', severity: 'warning' };
-            return { label: 'Terlalu tinggi', severity: 'danger' };
+            return { label: 'Tinggi', severity: 'danger' };
         case 'do_mgl':
-            if (numberValue < 3.0) return { label: 'Sangat rendah', severity: 'danger' };
             if (numberValue < 5.0) return { label: 'Rendah', severity: 'warning' };
             return { label: 'Normal', severity: 'normal' };
         case 'amonia_mgl':
-            if (numberValue <= 0.0) return { label: 'Normal', severity: 'normal' };
-            if (numberValue <= 0.05) return { label: 'Sedikit tinggi', severity: 'warning' };
-            return { label: 'Terlalu tinggi', severity: 'danger' };
+            if (numberValue < 0.01) return { label: 'Normal', severity: 'normal' };
+            return { label: 'Tinggi', severity: 'warning' };
         case 'flok_ml':
-            if (numberValue < 15.0) return { label: 'Terlalu rendah', severity: 'danger' };
-            if (numberValue <= 30.0) return { label: 'Normal', severity: 'normal' };
-            return { label: 'Terlalu tinggi', severity: 'warning' };
-        case 'kecerahan_cm':
-            if (numberValue < 30.0) return { label: 'Terlalu keruh', severity: 'danger' };
+            if (numberValue < 15.0) return { label: 'Rendah', severity: 'warning' };
             if (numberValue <= 40.0) return { label: 'Normal', severity: 'normal' };
-            return { label: 'Terlalu tinggi', severity: 'warning' };
+            return { label: 'Tinggi', severity: 'warning' };
         default:
             return { label: 'Tidak diketahui', severity: 'neutral' };
     }
@@ -73,23 +62,28 @@ const severityBorder = (severity) => {
 };
 
 const faktaLabelMap = {
-    F19: 'Suhu Optimal (25–30°C)', F20: 'Suhu Tidak Ideal', F21: 'Suhu Kritis',
-    F22: 'pH Optimal (6.5–8.5)', F23: 'pH Tidak Ideal', F24: 'pH Kritis',
-    F25: 'DO Cukup (≥5 mg/L)', F26: 'DO Rendah (3–4.99 mg/L)', F27: 'DO Kritis (<3 mg/L)',
-    F28: 'Amonia Aman (<0.01 mg/L)', F29: 'Amonia Waspada (0.01–0.05 mg/L)', F30: 'Amonia Berbahaya (>0.05 mg/L)',
-    F31: 'Flok Optimal (15–30 ml/L)', F32: 'Flok Terlalu Rendah (<15 ml/L)', F33: 'Flok Terlalu Tinggi (>30 ml/L)',
-    F34: 'Kecerahan Optimal (30–40 cm)', F35: 'Kecerahan Rendah/Pekat (<30 cm)', F36: 'Kecerahan Tinggi/Bening (>40 cm)',
+    F01: 'Suhu Rendah (<27°C)', F02: 'Suhu Normal (27–32°C)', F03: 'Suhu Tinggi (>32°C)',
+    F04: 'pH Rendah (<5.5)', F05: 'pH Normal (5.5–8.5)', F06: 'pH Tinggi (>8.5)',
+    F07: 'DO Rendah (<5 mg/L)', F08: 'DO Normal (≥5 mg/L)',
+    F09: 'Amonia Normal (<0.01 mg/L)', F10: 'Amonia Tinggi (≥0.01 mg/L)',
+    F11: 'Flok Rendah (<15 ml/L)', F12: 'Flok Normal (15–40 ml/L)', F13: 'Flok Tinggi (>40 ml/L)',
 };
 
 const ruleLabelMap = {
-    'D01': 'Stres Suhu Ringan', 'D02': 'Stres Suhu Kritis',
-    'D03': 'Gangguan pH', 'D04': 'pH Ekstrem Kritis',
-    'D05': 'Aerasi Kurang', 'D06': 'Overfeeding',
-    'D07': 'Akumulasi Limbah Berlebih', 'D08': 'Kolaps Bioflok',
-    'D09': 'Flok Belum Terbentuk / Bakteri Rendah', 'D10': 'Flok Berlebih — Menguras Oksigen',
-    'D11': 'Flok Kolaps Akibat Amonia Tinggi', 'D12': 'Blooming Fitoplankton Berlebih',
-    'D-NORMAL': 'Kondisi Air Optimal (Normal)',
-    'D-UNKNOWN': 'Anomali Tidak Teridentifikasi',
+    'D01': 'Gangguan Metabolisme & Imunitas Menurun (Stres Suhu Rendah)',
+    'D02': 'Stres Panas & Peningkatan Kebutuhan Oksigen (Stres Suhu Tinggi)',
+    'D03': 'Iritasi Kulit & Produksi Lendir Berlebih (Stres Air Asam)',
+    'D04': 'Kerusakan Jaringan Insang (Stres Air Basa)',
+    'D05': 'Hipoksia — Sesak Napas Akut',
+    'D06': 'Keracunan Amonia Akut (Toksisitas NH3 Diperparah pH Basa)',
+    'D07': 'Keracunan Amonia Kronis',
+    'D08': 'Pertumbuhan Terhambat Akibat Sistem Bioflok Belum Matang',
+    'D09': 'Penurunan Oksigen Akibat Respirasi Bakteri Flok Berlebih',
+    'D10': 'Motile Aeromonas Septicemia (MAS) — Infeksi Bakteri Aeromonas',
+    'D11': 'Stres Metabolik Akut & Risiko Kematian Mendadak',
+    'D12': 'Saprolegniasis — Infeksi Jamur pada Kulit/Sirip',
+    'D13': 'Streptococcosis — Infeksi Bakteri Streptococcus (Ikan Imun Rendah)',
+    'DN': 'Kondisi Kolam Optimal — Risiko Penyakit Rendah',
 };
 
 const formatDate = (dateString) => {
@@ -162,13 +156,13 @@ const formatDate = (dateString) => {
                         <template v-if="Array.isArray(log.kode_diagnosa)">
                             <span v-for="(kd, idx) in log.kode_diagnosa" :key="idx"
                                   class="px-4 py-2 text-sm font-bold rounded-full border"
-                                  :class="kd === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
+                                  :class="kd === 'DN' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
                                 {{ kd }} — {{ log.label_diagnosa?.[idx] || 'Unknown' }}
                             </span>
                         </template>
                         <template v-else>
                             <span class="px-4 py-2 text-sm font-bold rounded-full border"
-                                  :class="log.kode_diagnosa === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
+                                  :class="log.kode_diagnosa === 'DN' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
                                 {{ log.kode_diagnosa }} — {{ log.label_diagnosa }}
                             </span>
                         </template>

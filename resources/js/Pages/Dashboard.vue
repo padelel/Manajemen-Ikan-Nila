@@ -69,15 +69,6 @@ onMounted(() => {
                         borderWidth: 2,
                         pointRadius: 3,
                     },
-                    {
-                        label: 'Kecerahan (cm)',
-                        data: item.kualitasAir.kecerahan_cm,
-                        borderColor: '#eab308',
-                        backgroundColor: '#eab308',
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 3,
-                    },
                 ],
                 },
                 options: {

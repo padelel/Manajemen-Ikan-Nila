@@ -87,7 +87,7 @@ class ParameterHarianController extends Controller
             'do_mgl' => 'required|numeric',
             'amonia_mgl' => 'required|numeric',
             'flok_ml' => 'required|numeric',
-            'kecerahan_cm' => 'required|numeric',
+
         ]);
 
         if (auth()->user()->role === 'operator') {
@@ -107,7 +107,7 @@ class ParameterHarianController extends Controller
         $logInferensi = $this->fcService->prosesInferensi($parameter);
 
         // 4. Redirect kembali dengan membawa pesan hasil diagnosa
-        if (! in_array('D-NORMAL', $logInferensi->kode_diagnosa ?? ['D-NORMAL'])) {
+        if (! in_array('DN', $logInferensi->kode_diagnosa ?? ['DN'])) {
             $labelText = implode('; ', $logInferensi->label_diagnosa ?? ['Unknown']);
 
             return redirect()->route('parameter.index')->with('warning', 'Peringatan: '.$labelText.'. Tiket mitigasi telah diterbitkan!');

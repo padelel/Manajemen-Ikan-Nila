@@ -42,7 +42,7 @@ class DashboardController extends Controller
                 ->first();
 
             // ── Kualitas Air 7 hari terakhir ─────────────────────────
-            $dataAir = ['suhu' => [], 'ph' => [], 'do_mgl' => [], 'amonia_mgl' => [], 'flok_ml' => [], 'kecerahan_cm' => []];
+            $dataAir = ['suhu' => [], 'ph' => [], 'do_mgl' => [], 'amonia_mgl' => [], 'flok_ml' => []];
 
             for ($i = 6; $i >= 0; $i--) {
                 $date = Carbon::today()->subDays($i)->format('Y-m-d');
@@ -56,7 +56,6 @@ class DashboardController extends Controller
                 $dataAir['do_mgl'][] = $param?->do_mgl;
                 $dataAir['amonia_mgl'][] = $param?->amonia_mgl;
                 $dataAir['flok_ml'][] = $param?->flok_ml;
-                $dataAir['kecerahan_cm'][] = $param?->kecerahan_cm;
             }
 
             // ── Populasi sejak awal siklus ───────────────────────────
@@ -112,7 +111,7 @@ class DashboardController extends Controller
                     'do_mgl' => $dataAir['do_mgl'],
                     'amonia_mgl' => $dataAir['amonia_mgl'],
                     'flok_ml' => $dataAir['flok_ml'],
-                    'kecerahan_cm' => $dataAir['kecerahan_cm'],
+
                 ],
                 'populasi' => $siklus ? [
                     'labels' => $popLabels,

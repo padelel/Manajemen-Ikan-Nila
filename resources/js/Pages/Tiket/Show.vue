@@ -22,16 +22,14 @@ const paramLabels = {
     do: { label: 'DO', unit: 'mg/L' },
     amonia: { label: 'Amonia', unit: 'mg/L' },
     flok: { label: 'Flok', unit: 'ml/L' },
-    kecerahan: { label: 'Kecerahan', unit: 'cm' },
 };
 
 const faktaLabelMap = {
-    F19: 'Suhu Optimal (25–30°C)', F20: 'Suhu Tidak Ideal', F21: 'Suhu Kritis',
-    F22: 'pH Optimal (6.5–8.5)', F23: 'pH Tidak Ideal', F24: 'pH Kritis',
-    F25: 'DO Cukup (≥5 mg/L)', F26: 'DO Rendah (3–4.99 mg/L)', F27: 'DO Kritis (<3 mg/L)',
-    F28: 'Amonia Aman (<0.01 mg/L)', F29: 'Amonia Waspada (0.01–0.05 mg/L)', F30: 'Amonia Berbahaya (>0.05 mg/L)',
-    F31: 'Flok Optimal (15–30 ml/L)', F32: 'Flok Terlalu Rendah (<15 ml/L)', F33: 'Flok Terlalu Tinggi (>30 ml/L)',
-    F34: 'Kecerahan Optimal (30–40 cm)', F35: 'Kecerahan Rendah/Pekat (<30 cm)', F36: 'Kecerahan Tinggi/Bening (>40 cm)',
+    F01: 'Suhu Rendah (<27°C)', F02: 'Suhu Normal (27–32°C)', F03: 'Suhu Tinggi (>32°C)',
+    F04: 'pH Rendah (<5.5)', F05: 'pH Normal (5.5–8.5)', F06: 'pH Tinggi (>8.5)',
+    F07: 'DO Rendah (<5 mg/L)', F08: 'DO Normal (≥5 mg/L)',
+    F09: 'Amonia Normal (<0.01 mg/L)', F10: 'Amonia Tinggi (≥0.01 mg/L)',
+    F11: 'Flok Rendah (<15 ml/L)', F12: 'Flok Normal (15–40 ml/L)', F13: 'Flok Tinggi (>40 ml/L)',
 };
 
 const statusBadge = (status) => {
@@ -156,11 +154,11 @@ const submitVerifikasi = (keputusan) => {
                     <div class="space-y-4">
                         <div v-for="(kd, idx) in (Array.isArray(log.kode_diagnosa) ? log.kode_diagnosa : [log.kode_diagnosa])" :key="idx"
                              class="rounded-2xl border p-4"
-                             :class="kd === 'D-NORMAL' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'">
+                             :class="kd === 'DN' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'">
 
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="px-3 py-1 text-xs font-bold rounded-full border"
-                                      :class="kd === 'D-NORMAL' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
+                                      :class="kd === 'DN' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'">
                                     {{ kd }}
                                 </span>
                                 <span class="text-sm font-bold text-slate-800">

@@ -17,14 +17,13 @@ class ForwardChainingService
             'do' => (float) $parameter->do_mgl,
             'amonia' => (float) $parameter->amonia_mgl,
             'flok' => (float) $parameter->flok_ml,
-            'kecerahan' => (float) $parameter->kecerahan_cm,
         ];
 
         $faktaBaru = $this->evaluasiFakta($faktaInput);
 
         $hasilDiagnosa = $this->cocokkanRule($faktaBaru);
 
-        $isNormal = in_array('D-NORMAL', $hasilDiagnosa['kode_diagnosa']);
+        $isNormal = in_array('DN', $hasilDiagnosa['kode_diagnosa']);
 
         $log = InferensiLog::create([
             'kolam_id' => $parameter->kolam_id,
@@ -41,7 +40,7 @@ class ForwardChainingService
         ]);
 
         if (! $isNormal) {
-            $labelText = implode('; ', $hasilDiagnosa['label_diagnosa']);
+            $labelText = mb_substr(implode('; ', $hasilDiagnosa['label_diagnosa']), 0, 480);
             $tindakanText = implode("\n", $hasilDiagnosa['tindakan_mitigasi']);
 
             Tiket::create([
@@ -62,52 +61,40 @@ class ForwardChainingService
     {
         $fakta = [];
 
-        if ($input['suhu'] >= 25.0 && $input['suhu'] <= 30.0) {
-            $fakta[] = 'F19';
-        } elseif (($input['suhu'] >= 20.0 && $input['suhu'] <= 24.99) || ($input['suhu'] >= 30.01 && $input['suhu'] <= 34.0)) {
-            $fakta[] = 'F20';
-        } elseif ($input['suhu'] < 20.0 || $input['suhu'] > 34.0) {
-            $fakta[] = 'F21';
+        if ($input['suhu'] < 27.0) {
+            $fakta[] = 'F01';
+        } elseif ($input['suhu'] <= 32.0) {
+            $fakta[] = 'F02';
+        } else {
+            $fakta[] = 'F03';
         }
 
-        if ($input['ph'] >= 6.5 && $input['ph'] <= 8.5) {
-            $fakta[] = 'F22';
-        } elseif (($input['ph'] >= 6.0 && $input['ph'] <= 6.49) || ($input['ph'] >= 8.51 && $input['ph'] <= 9.0)) {
-            $fakta[] = 'F23';
-        } elseif ($input['ph'] < 6.0 || $input['ph'] > 9.0) {
-            $fakta[] = 'F24';
+        if ($input['ph'] < 5.5) {
+            $fakta[] = 'F04';
+        } elseif ($input['ph'] <= 8.5) {
+            $fakta[] = 'F05';
+        } else {
+            $fakta[] = 'F06';
         }
 
-        if ($input['do'] >= 5.0) {
-            $fakta[] = 'F25';
-        } elseif ($input['do'] >= 3.0 && $input['do'] <= 4.99) {
-            $fakta[] = 'F26';
-        } elseif ($input['do'] < 3.0) {
-            $fakta[] = 'F27';
+        if ($input['do'] < 5.0) {
+            $fakta[] = 'F07';
+        } else {
+            $fakta[] = 'F08';
         }
 
         if ($input['amonia'] < 0.01) {
-            $fakta[] = 'F28';
-        } elseif ($input['amonia'] >= 0.01 && $input['amonia'] <= 0.05) {
-            $fakta[] = 'F29';
-        } elseif ($input['amonia'] > 0.05) {
-            $fakta[] = 'F30';
+            $fakta[] = 'F09';
+        } else {
+            $fakta[] = 'F10';
         }
 
-        if ($input['flok'] >= 15.0 && $input['flok'] <= 30.0) {
-            $fakta[] = 'F31';
-        } elseif ($input['flok'] < 15.0) {
-            $fakta[] = 'F32';
-        } elseif ($input['flok'] > 30.0) {
-            $fakta[] = 'F33';
-        }
-
-        if ($input['kecerahan'] >= 30.0 && $input['kecerahan'] <= 40.0) {
-            $fakta[] = 'F34';
-        } elseif ($input['kecerahan'] < 30.0) {
-            $fakta[] = 'F35';
-        } elseif ($input['kecerahan'] > 40.0) {
-            $fakta[] = 'F36';
+        if ($input['flok'] < 15.0) {
+            $fakta[] = 'F11';
+        } elseif ($input['flok'] <= 40.0) {
+            $fakta[] = 'F12';
+        } else {
+            $fakta[] = 'F13';
         }
 
         return $fakta;
@@ -116,145 +103,146 @@ class ForwardChainingService
     private function cocokkanRule(array $fakta): array
     {
         $cekFakta = function ($syarat) use ($fakta) {
-            return count(array_intersect($syarat, $fakta)) === count($syarat);
+            foreach ($syarat as $s) {
+                if (is_array($s)) {
+                    if (count(array_intersect($s, $fakta)) === 0) {
+                        return false;
+                    }
+                } elseif (! in_array($s, $fakta)) {
+                    return false;
+                }
+            }
+
+            return true;
         };
 
-        $diagnosa = [];
+        $tindakanMap = [
+            'K01' => 'Stabilkan suhu ke rentang normal (tutup kolam/heater jika dingin; naungan/naikkan air jika panas)',
+            'K02' => 'Stabilkan pH ke rentang normal (tambah kapur dolomit jika asam; kurangi kapur/ganti air jika basa)',
+            'K03' => 'Tambah aerasi (nyalakan/tambah kincir, periksa sistem aerasi)',
+            'K04' => 'Lakukan pergantian air parsial (20–30%)',
+            'K05' => 'Hentikan atau kurangi pemberian pakan sementara',
+            'K06' => 'Sesuaikan dosis sumber karbon/molase (tambah jika flok kurang, kurangi jika flok/kekeruhan berlebih)',
+            'K07' => 'Siphon/buang endapan flok dan sisa pakan dari dasar kolam',
+            'K08' => 'Periksa kondisi fisik ikan (luka, bercak putih, lendir berlebih, perilaku tidak normal)',
+            'K09' => 'Pisahkan ikan yang menunjukkan gejala sakit ke kolam karantina',
+            'K10' => 'Kurangi kepadatan tebar jika kondisi kritis berulang',
+        ];
+
         $ruleCodes = [];
         $kodeD = [];
         $labelD = [];
         $kodeK = [];
         $tindakan = [];
         $peringatan = [];
+        $seenK = [];
 
-        if ($cekFakta(['F21'])) {
-            $diagnosa[] = 'D02';
-            $ruleCodes[] = 'D02';
-            $kodeD[] = 'D02';
-            $labelD[] = 'Stres Suhu Kritis';
-            $kodeK[] = 'K02';
-            $tindakan[] = 'Hentikan pakan sementara; ganti air parsial 20–30% dengan air bersuhu sesuai';
-            $peringatan[] = 'PERINGATAN: Suhu kritis. Risiko kematian ikan jika tidak segera ditangani.';
+        $rules = [
+            'D01' => [
+                'fakta' => ['F01'],
+                'label' => 'Gangguan Metabolisme & Imunitas Menurun (Stres Suhu Rendah)',
+                'tindakan_kode' => ['K01'],
+                'peringatan' => 'Suhu di bawah rentang optimal. Imunitas ikan menurun, pantau kembali dalam 2 jam.',
+            ],
+            'D02' => [
+                'fakta' => ['F03'],
+                'label' => 'Stres Panas & Peningkatan Kebutuhan Oksigen (Stres Suhu Tinggi)',
+                'tindakan_kode' => ['K01', 'K03'],
+                'peringatan' => 'Suhu di atas rentang optimal. Kebutuhan oksigen ikan meningkat, pantau kembali dalam 2 jam.',
+            ],
+            'D03' => [
+                'fakta' => ['F04'],
+                'label' => 'Iritasi Kulit & Produksi Lendir Berlebih (Stres Air Asam)',
+                'tindakan_kode' => ['K02', 'K08'],
+                'peringatan' => 'pH terlalu asam. Berisiko mengiritasi kulit ikan, lakukan koreksi bertahap dan pantau ulang dalam 3 jam.',
+            ],
+            'D04' => [
+                'fakta' => ['F06'],
+                'label' => 'Kerusakan Jaringan Insang (Stres Air Basa)',
+                'tindakan_kode' => ['K02', 'K04'],
+                'peringatan' => 'pH terlalu basa. Berisiko merusak jaringan insang, lakukan koreksi bertahap dan pantau ulang dalam 3 jam.',
+            ],
+            'D05' => [
+                'fakta' => ['F07'],
+                'label' => 'Hipoksia — Sesak Napas Akut',
+                'tindakan_kode' => ['K03', 'K05'],
+                'peringatan' => 'Oksigen rendah, ikan berisiko sesak napas akut. Tindakan segera diperlukan.',
+            ],
+            'D06' => [
+                'fakta' => ['F10', 'F06'],
+                'label' => 'Keracunan Amonia Akut (Toksisitas NH3 Diperparah pH Basa)',
+                'tindakan_kode' => ['K04', 'K05', 'K03'],
+                'peringatan' => 'Risiko keracunan amonia akut. Toksisitas NH3 meningkat pada pH basa, tindakan segera diperlukan.',
+            ],
+            'D07' => [
+                'fakta' => ['F10', ['F05', 'F04']],
+                'label' => 'Keracunan Amonia Kronis',
+                'tindakan_kode' => ['K04', 'K05'],
+                'peringatan' => 'Risiko keracunan amonia kronis jika berlangsung lama. Cegah akumulasi lebih lanjut.',
+            ],
+            'D08' => [
+                'fakta' => ['F11'],
+                'label' => 'Pertumbuhan Terhambat Akibat Sistem Bioflok Belum Matang',
+                'tindakan_kode' => ['K06'],
+                'peringatan' => 'Kepadatan flok di bawah optimal. Berisiko menghambat pertumbuhan ikan jangka panjang.',
+            ],
+            'D09' => [
+                'fakta' => ['F13'],
+                'label' => 'Penurunan Oksigen Akibat Respirasi Bakteri Flok Berlebih',
+                'tindakan_kode' => ['K06', 'K07', 'K03'],
+                'peringatan' => 'Kepadatan flok berlebih. Respirasi bakteri flok berisiko menurunkan oksigen terlarut, terutama malam hari.',
+            ],
+            'D10' => [
+                'fakta' => ['F07', 'F10'],
+                'label' => 'Motile Aeromonas Septicemia (MAS) — Infeksi Bakteri Aeromonas',
+                'tindakan_kode' => ['K04', 'K03', 'K05', 'K08'],
+                'peringatan' => 'Risiko infeksi bakteri Aeromonas (MAS). Kombinasi DO rendah dan amonia tinggi melemahkan imunitas ikan.',
+            ],
+            'D11' => [
+                'fakta' => ['F03', 'F07'],
+                'label' => 'Stres Metabolik Akut & Risiko Kematian Mendadak',
+                'tindakan_kode' => ['K01', 'K03', 'K10'],
+                'peringatan' => 'Risiko kematian mendadak. Suhu tinggi meningkatkan kebutuhan oksigen saat pasokan justru menurun.',
+            ],
+            'D12' => [
+                'fakta' => ['F01'],
+                'label' => 'Saprolegniasis — Infeksi Jamur pada Kulit/Sirip',
+                'tindakan_kode' => ['K01', 'K08', 'K09'],
+                'peringatan' => 'Risiko infeksi jamur (Saprolegniasis). Suhu rendah menekan imun ikan.',
+            ],
+            'D13' => [
+                'fakta' => ['F10', 'F03'],
+                'label' => 'Streptococcosis — Infeksi Bakteri Streptococcus (Ikan Imun Rendah)',
+                'tindakan_kode' => ['K01', 'K04', 'K08'],
+                'peringatan' => 'Risiko infeksi bakteri Streptococcus. Amonia tinggi dan suhu tinggi bersamaan melemahkan imunitas ikan secara signifikan.',
+            ],
+        ];
+
+        foreach ($rules as $kode => $rule) {
+            if ($cekFakta($rule['fakta'])) {
+                $ruleCodes[] = $kode;
+                $kodeD[] = $kode;
+                $labelD[] = $rule['label'];
+                $peringatan[] = $rule['peringatan'];
+
+                foreach ($rule['tindakan_kode'] as $k) {
+                    if (! in_array($k, $seenK)) {
+                        $seenK[] = $k;
+                        $kodeK[] = $k;
+                        $tindakan[] = $tindakanMap[$k];
+                    }
+                }
+            }
         }
 
-        if ($cekFakta(['F35', 'F24', 'F31'])) {
-            $diagnosa[] = 'D12';
-            $ruleCodes[] = 'D12';
-            $kodeD[] = 'D12';
-            $labelD[] = 'Blooming Fitoplankton Berlebih';
-            $kodeK[] = 'K12';
-            $tindakan[] = 'Hentikan pemupukan; ganti air permukaan 20%; kurangi intensitas cahaya matahari langsung dengan paranet';
-            $peringatan[] = 'PERINGATAN: Blooming fitoplankton berlebih. Kecerahan air menurun drastis.';
-        }
-
-        if ($cekFakta(['F24'])) {
-            $diagnosa[] = 'D04';
-            $ruleCodes[] = 'D04';
-            $kodeD[] = 'D04';
-            $labelD[] = 'pH Ekstrem Kritis';
-            $kodeK[] = 'K04';
-            $tindakan[] = 'Hentikan pakan; ganti air masif 40–50%; tambahkan buffer pH';
-            $peringatan[] = 'DARURAT: pH kritis. Hentikan pakan dan lakukan koreksi air sekarang.';
-        }
-
-        if ($cekFakta(['F27', 'F30'])) {
-            $diagnosa[] = 'D08';
-            $ruleCodes[] = 'D08';
-            $kodeD[] = 'D08';
-            $labelD[] = 'Kolaps Bioflok';
-            $kodeK[] = 'K08';
-            $tindakan[] = 'Hentikan pakan segera; ganti air 50%; aktifkan aerasi penuh; tambah probiotik dan molase';
-            $peringatan[] = 'DARURAT: Kolaps bioflok. DO kritis dan amonia sangat tinggi. Tindakan darurat diperlukan.';
-        }
-
-        if ($cekFakta(['F32', 'F30'])) {
-            $diagnosa[] = 'D11';
-            $ruleCodes[] = 'D11';
-            $kodeD[] = 'D11';
-            $labelD[] = 'Flok Kolaps Akibat Amonia Tinggi';
-            $kodeK[] = 'K11';
-            $tindakan[] = 'Hentikan pakan segera; ganti air 40–50%; tambah probiotik dan molase untuk bangun ulang flok';
-            $peringatan[] = 'DARURAT: Flok kolaps akibat amonia tinggi. Sistem bioflok tidak berfungsi.';
-        }
-
-        if ($cekFakta(['F30', 'F26', 'F19', 'F35'])) {
-            $diagnosa[] = 'D07';
-            $ruleCodes[] = 'D07';
-            $kodeD[] = 'D07';
-            $labelD[] = 'Akumulasi Limbah Berlebih';
-            $kodeK[] = 'K07';
-            $tindakan[] = 'Ganti air 30–40%; siphon dasar kolam; tambah probiotik; kurangi dosis pakan 25%';
-            $peringatan[] = 'PERINGATAN: Akumulasi limbah tinggi. Lakukan pergantian air dan pembersihan segera.';
-        }
-
-        if ($cekFakta(['F33', 'F26', 'F35'])) {
-            $diagnosa[] = 'D10';
-            $ruleCodes[] = 'D10';
-            $kodeD[] = 'D10';
-            $labelD[] = 'Flok Berlebih — Menguras Oksigen';
-            $kodeK[] = 'K10';
-            $tindakan[] = 'Siphon endapan flok dari dasar kolam; kurangi pakan; ganti air parsial 20–30%';
-            $peringatan[] = 'PERINGATAN: Flok berlebih menyebabkan DO turun. Lakukan pengelolaan flok segera.';
-        }
-
-        if ($cekFakta(['F20', 'F22', 'F25', 'F28', 'F34'])) {
-            $diagnosa[] = 'D01';
-            $ruleCodes[] = 'D01';
-            $kodeD[] = 'D01';
-            $labelD[] = 'Stres Suhu Ringan';
-            $kodeK[] = 'K01';
-            $tindakan[] = 'Tutupi kolam dengan paranet jika suhu panas; tambah aerasi untuk pendinginan';
-            $peringatan[] = 'Suhu tidak ideal. Pantau setiap 2 jam.';
-        }
-
-        if ($cekFakta(['F23', 'F19', 'F25', 'F28', 'F34'])) {
-            $diagnosa[] = 'D03';
-            $ruleCodes[] = 'D03';
-            $kodeD[] = 'D03';
-            $labelD[] = 'Gangguan pH';
-            $kodeK[] = 'K03';
-            $tindakan[] = 'Tambahkan kapur (pH rendah) atau ganti air parsial 10–20% (pH tinggi)';
-            $peringatan[] = 'pH tidak ideal. Lakukan koreksi dan pantau ulang dalam 3 jam.';
-        }
-
-        if ($cekFakta(['F26', 'F19', 'F28', 'F31', 'F34'])) {
-            $diagnosa[] = 'D05';
-            $ruleCodes[] = 'D05';
-            $kodeD[] = 'D05';
-            $labelD[] = 'Aerasi Kurang';
-            $kodeK[] = 'K05';
-            $tindakan[] = 'Periksa dan perbaiki pompa udara/kincir; tambah titik aerasi';
-            $peringatan[] = 'DO rendah karena aerasi kurang. Periksa sistem aerasi segera.';
-        }
-
-        if ($cekFakta(['F29', 'F19', 'F25', 'F31', 'F34'])) {
-            $diagnosa[] = 'D06';
-            $ruleCodes[] = 'D06';
-            $kodeD[] = 'D06';
-            $labelD[] = 'Overfeeding';
-            $kodeK[] = 'K06';
-            $tindakan[] = 'Hentikan pakan 1–2 hari; siphon sisa pakan di dasar kolam; ganti air 20–30%';
-            $peringatan[] = 'Amonia meningkat akibat sisa pakan berlebih. Hentikan pakan dan bersihkan kolam.';
-        }
-
-        if ($cekFakta(['F32', 'F28', 'F25', 'F36'])) {
-            $diagnosa[] = 'D09';
-            $ruleCodes[] = 'D09';
-            $kodeD[] = 'D09';
-            $labelD[] = 'Flok Belum Terbentuk / Bakteri Rendah';
-            $kodeK[] = 'K09';
-            $tindakan[] = 'Tambahkan molase/sumber karbon untuk memacu bakteri; tambah probiotik starter bioflok';
-            $peringatan[] = 'Flok terlalu rendah. Sistem bioflok belum optimal. Tambahkan sumber karbon segera.';
-        }
-
-        if (count($diagnosa) === 0) {
+        if (count($kodeD) === 0) {
             return [
-                'rule_terpicu' => ['D-NORMAL'],
-                'kode_diagnosa' => ['D-NORMAL'],
-                'label_diagnosa' => ['Kondisi Air Optimal (Normal)'],
-                'kode_kesimpulan' => ['K-NORMAL'],
-                'tindakan_mitigasi' => ['Lanjutkan SOP pemeliharaan dan pemberian pakan seperti biasa. Tidak ada tindakan darurat.'],
-                'peringatan' => ['Aman. Kualitas air terkendali.'],
+                'rule_terpicu' => ['DN'],
+                'kode_diagnosa' => ['DN'],
+                'label_diagnosa' => ['Kondisi Kolam Optimal — Risiko Penyakit Rendah'],
+                'kode_kesimpulan' => ['KN'],
+                'tindakan_mitigasi' => ['Tidak ada tindakan; lanjutkan monitoring rutin sesuai jadwal'],
+                'peringatan' => ['Kondisi kolam optimal, risiko penyakit rendah.'],
             ];
         }
 

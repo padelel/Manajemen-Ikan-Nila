@@ -139,7 +139,6 @@
                         <th class="text-right">Suhu (°C)</th>
                         <th class="text-right">pH</th>
                         <th class="text-right">DO (mg/L)</th>
-                        <th class="text-right">Kecerahan (cm)</th>
                         <th class="text-right">Flok (ml)</th>
                         <th class="text-right">Amonia (mg/L)</th>
                     </tr>
@@ -151,7 +150,6 @@
                             <td class="text-right">{{ $siklus['grafik_air']['suhu'][$i] ?? '-' }}</td>
                             <td class="text-right">{{ $siklus['grafik_air']['ph'][$i] ?? '-' }}</td>
                             <td class="text-right">{{ $siklus['grafik_air']['do'][$i] ?? '-' }}</td>
-                            <td class="text-right">{{ $siklus['grafik_air']['kecerahan'][$i] ?? '-' }}</td>
                             <td class="text-right">{{ $siklus['grafik_air']['flok'][$i] ?? '-' }}</td>
                             <td class="text-right">{{ $siklus['grafik_air']['amonia'][$i] ?? '-' }}</td>
                         </tr>

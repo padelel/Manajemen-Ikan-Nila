@@ -20,7 +20,6 @@ const form = useForm({
     do_mgl: '',
     amonia_mgl: '',
     flok_ml: '',
-    kecerahan_cm: ''
 });
 
 const submit = () => {
@@ -89,11 +88,6 @@ const cegahKarakterIlegal = (event) => {
                                 <InputLabel for="flok_ml" value="Volume Flok (ml/L)" />
                                 <TextInput id="flok_ml" type="number" step="0.1" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.flok_ml" placeholder="Misal: 20" required />
                                 <InputError class="mt-2" :message="form.errors.flok_ml" />
-                            </div>
-                            <div>
-                                <InputLabel for="kecerahan_cm" value="Kecerahan (cm)" />
-                                <TextInput id="kecerahan_cm" type="number" step="0.1" min="0" @keydown="cegahKarakterIlegal" class="mt-1 block w-full" v-model="form.kecerahan_cm" placeholder="Misal: 35" required />
-                                <InputError class="mt-2" :message="form.errors.kecerahan_cm" />
                             </div>
                         </div>
 

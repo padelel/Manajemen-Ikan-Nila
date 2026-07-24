@@ -43,7 +43,6 @@ class ParameterFilterTest extends TestCase
             'do_mgl' => 5.5,
             'amonia_mgl' => 0.01,
             'flok_ml' => 25.0,
-            'kecerahan_cm' => 35.0,
         ]);
 
         ParameterHarian::create([
@@ -55,7 +54,6 @@ class ParameterFilterTest extends TestCase
             'do_mgl' => 6.0,
             'amonia_mgl' => 0.00,
             'flok_ml' => 28.0,
-            'kecerahan_cm' => 38.0,
         ]);
 
         $response = $this

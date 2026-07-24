@@ -35,7 +35,7 @@ class TebarLogTest extends TestCase
             'do_mgl' => 5.0,
             'amonia_mgl' => 0.01,
             'flok_ml' => 20,
-            'kecerahan_cm' => 35,
+
         ]);
 
         $response = $this

@@ -71,7 +71,7 @@ class ReportController extends Controller
 
         // Title
         $sheet->setCellValue('A'.$row, 'Evaluasi Panen: '.$kolam->nama_kolam);
-        $sheet->mergeCells('A'.$row.':G'.$row);
+        $sheet->mergeCells('A'.$row.':F'.$row);
         $sheet->getStyle('A'.$row)->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $row += 2;
@@ -90,7 +90,7 @@ class ReportController extends Controller
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],
             ];
             $sheet->setCellValue('A'.$row, $siklus['nama_siklus'].' - '.ucfirst($siklus['status']));
-            $sheet->mergeCells('A'.$row.':G'.$row);
+            $sheet->mergeCells('A'.$row.':F'.$row);
             $sheet->getStyle('A'.$row)->applyFromArray($styleHeader);
             $row++;
 
@@ -148,7 +148,7 @@ class ReportController extends Controller
             // Riwayat Kematian
             if (count($siklus['riwayat_kematian']['labels']) > 0) {
                 $sheet->setCellValue('A'.$row, 'Riwayat Kematian');
-                $sheet->mergeCells('A'.$row.':G'.$row);
+                $sheet->mergeCells('A'.$row.':F'.$row);
                 $sheet->getStyle('A'.$row)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'DC2626']],
@@ -174,20 +174,20 @@ class ReportController extends Controller
             // Parameter Air
             if (count($siklus['grafik_air']['labels']) > 0) {
                 $sheet->setCellValue('A'.$row, 'Parameter Kualitas Air');
-                $sheet->mergeCells('A'.$row.':G'.$row);
+                $sheet->mergeCells('A'.$row.':F'.$row);
                 $sheet->getStyle('A'.$row)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0EA5E9']],
                 ]);
                 $row++;
 
-                $airHeaders = ['Tanggal', 'Suhu (°C)', 'pH', 'DO (mg/L)', 'Kecerahan (cm)', 'Flok (ml)', 'Amonia (mg/L)'];
+                $airHeaders = ['Tanggal', 'Suhu (°C)', 'pH', 'DO (mg/L)', 'Flok (ml)', 'Amonia (mg/L)'];
                 $col = 'A';
                 foreach ($airHeaders as $header) {
                     $sheet->setCellValue($col.$row, $header);
                     $col++;
                 }
-                $sheet->getStyle('A'.$row.':G'.$row)->applyFromArray([
+                $sheet->getStyle('A'.$row.':F'.$row)->applyFromArray([
                     'font' => ['bold' => true],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E0F2FE']],
                 ]);
@@ -198,9 +198,8 @@ class ReportController extends Controller
                     $sheet->setCellValue('B'.$row, $siklus['grafik_air']['suhu'][$i] ?? '-');
                     $sheet->setCellValue('C'.$row, $siklus['grafik_air']['ph'][$i] ?? '-');
                     $sheet->setCellValue('D'.$row, $siklus['grafik_air']['do'][$i] ?? '-');
-                    $sheet->setCellValue('E'.$row, $siklus['grafik_air']['kecerahan'][$i] ?? '-');
-                    $sheet->setCellValue('F'.$row, $siklus['grafik_air']['flok'][$i] ?? '-');
-                    $sheet->setCellValue('G'.$row, $siklus['grafik_air']['amonia'][$i] ?? '-');
+                    $sheet->setCellValue('E'.$row, $siklus['grafik_air']['flok'][$i] ?? '-');
+                    $sheet->setCellValue('F'.$row, $siklus['grafik_air']['amonia'][$i] ?? '-');
                     $row++;
                 }
                 $row++;
@@ -299,7 +298,7 @@ class ReportController extends Controller
                     'suhu' => $parameterAir->pluck('suhu')->toArray(),
                     'ph' => $parameterAir->pluck('ph')->toArray(),
                     'do' => $parameterAir->pluck('do_mgl')->toArray(),
-                    'kecerahan' => $parameterAir->pluck('kecerahan_cm')->toArray(),
+
                     'flok' => $parameterAir->pluck('flok_ml')->toArray(),
                     'amonia' => $parameterAir->pluck('amonia_mgl')->toArray(),
                 ],

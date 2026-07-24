@@ -50,7 +50,6 @@ const renderCharts = () => {
                     { label: 'Suhu (°C)', data: currentData.grafik_air.suhu, borderColor: '#f43f5e', tension: 0.3 },
                     { label: 'pH', data: currentData.grafik_air.ph, borderColor: '#10b981', tension: 0.3 },
                     { label: 'DO (mg/L)', data: currentData.grafik_air.do, borderColor: '#3b82f6', tension: 0.3 },
-                    { label: 'Kecerahan (cm)', data: currentData.grafik_air.kecerahan, borderColor: '#eab308', tension: 0.3 },
                     { label: 'Flok (ml)', data: currentData.grafik_air.flok, borderColor: '#a855f7', tension: 0.3 },
                     { label: 'Amonia (mg/L)', data: currentData.grafik_air.amonia, borderColor: '#f97316', tension: 0.3 },
                 ]
