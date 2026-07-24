@@ -210,12 +210,6 @@ class ForwardChainingService
                 'tindakan_kode' => ['K01', 'K08', 'K09'],
                 'peringatan' => 'Risiko infeksi jamur (Saprolegniasis). Suhu rendah menekan imun ikan.',
             ],
-            'D13' => [
-                'fakta' => ['F10', 'F03'],
-                'label' => 'Streptococcosis — Infeksi Bakteri Streptococcus (Ikan Imun Rendah)',
-                'tindakan_kode' => ['K01', 'K04', 'K08'],
-                'peringatan' => 'Risiko infeksi bakteri Streptococcus. Amonia tinggi dan suhu tinggi bersamaan melemahkan imunitas ikan secara signifikan.',
-            ],
         ];
 
         foreach ($rules as $kode => $rule) {

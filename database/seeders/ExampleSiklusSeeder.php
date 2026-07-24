@@ -192,7 +192,7 @@ class ExampleSiklusSeeder extends Seeder
             22 => ['suhu' => 28.0, 'ph' => 7.0, 'do' => 2.5, 'amonia' => 0.12, 'flok' => 25.0], // F07+F10 → D05+D10
             23 => ['suhu' => 29.0, 'ph' => 7.2, 'do' => 5.5, 'amonia' => 0.005, 'flok' => 24.0],
             24 => ['suhu' => 28.0, 'ph' => 7.0, 'do' => 6.0, 'amonia' => 0.005, 'flok' => 10.0], // F11 → D08 flok rendah
-            25 => ['suhu' => 33.0, 'ph' => 7.0, 'do' => 6.0, 'amonia' => 0.02, 'flok' => 22.0], // F03+F10 → D02+D13
+            25 => ['suhu' => 33.0, 'ph' => 7.0, 'do' => 6.0, 'amonia' => 0.02, 'flok' => 22.0], // F03+F10 → D02
             26 => ['suhu' => 26.0, 'ph' => 7.2, 'do' => 6.0, 'amonia' => 0.005, 'flok' => 22.0], // F01 → D01+D12 suhu rendah
             27 => ['suhu' => 28.0, 'ph' => 8.8, 'do' => 6.0, 'amonia' => 0.02, 'flok' => 24.0], // F06+F10 → D04+D06
             28 => ['suhu' => 33.0, 'ph' => 7.0, 'do' => 4.0, 'amonia' => 0.005, 'flok' => 22.0], // F03+F07 → D02+D11
@@ -378,12 +378,6 @@ class ExampleSiklusSeeder extends Seeder
                 'label' => 'Saprolegniasis — Infeksi Jamur pada Kulit/Sirip',
                 'tindakan_kode' => ['K01', 'K08', 'K09'],
                 'peringatan' => 'Risiko infeksi jamur (Saprolegniasis). Suhu rendah menekan imun ikan.',
-            ],
-            'D13' => [
-                'fakta' => ['F10', 'F03'],
-                'label' => 'Streptococcosis — Infeksi Bakteri Streptococcus (Ikan Imun Rendah)',
-                'tindakan_kode' => ['K01', 'K04', 'K08'],
-                'peringatan' => 'Risiko infeksi bakteri Streptococcus. Amonia tinggi dan suhu tinggi bersamaan melemahkan imunitas ikan secara signifikan.',
             ],
         ];
 

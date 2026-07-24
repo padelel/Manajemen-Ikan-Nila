@@ -82,7 +82,6 @@ const ruleLabelMap = {
     'D10': 'Motile Aeromonas Septicemia (MAS) — Infeksi Bakteri Aeromonas',
     'D11': 'Stres Metabolik Akut & Risiko Kematian Mendadak',
     'D12': 'Saprolegniasis — Infeksi Jamur pada Kulit/Sirip',
-    'D13': 'Streptococcosis — Infeksi Bakteri Streptococcus (Ikan Imun Rendah)',
     'DN': 'Kondisi Kolam Optimal — Risiko Penyakit Rendah',
 };
 
